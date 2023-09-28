@@ -1,0 +1,26 @@
+/* Estilos generales */
+body {
+    font-family: 'Helvetica', sans-serif;
+    /* Fondo oscuro */
+    color: #979797;
+    /* Texto claro */
+}
+
+h1 {
+    color: #800080;
+    /* Título morado */
+}
+
+.btn-dark,
+.btn-primary,
+.btn-success {
+    background-color: #000000;
+    /* Botones oscuros */
+    color: #ffffffd8;
+    /* Texto claro */
+}
+
+.btn-dark:hover {
+    background-color: #800080;
+    /* Botones morados al pasar el mouse */
+}
