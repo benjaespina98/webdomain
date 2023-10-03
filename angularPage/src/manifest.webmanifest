@@ -38,6 +38,12 @@
       "purpose": "maskable any"
     },
     {
+      "src": "assets/icons/B_180x180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
       "src": "assets/icons/B_192x192.png",
       "sizes": "192x192",
       "type": "image/png",
