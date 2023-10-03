@@ -1,0 +1,47 @@
+.masthead {
+    
+    padding: 60px 0; /* Espacio arriba y abajo */
+    text-align: center;
+
+    h1 {
+        font-size: 3rem;
+    }
+
+    .lead {
+        font-size: 1.25rem;
+        margin-top: 10px; /* Margen superior */
+        margin-bottom:100px; /* Margen inferior */
+    }
+}
+/* Estilo para el elemento hr */
+hr {
+    /* Cambiar el color de la línea */
+    background-color: #333; /* Puedes usar cualquier color que desees */
+  
+    /* Cambiar el grosor de la línea */
+    height: 2px; /* Puedes ajustar el valor según tu preferencia */
+  
+    /* Añadir márgenes para controlar el espacio alrededor de la línea */
+    margin-top: 20px;
+    margin-bottom: 20px;
+  
+    /* Establecer un ancho personalizado */
+    width: 50%; /* Puedes ajustar el valor según tu diseño */
+  
+    /* Centrar la línea horizontalmente */
+    margin-left: auto;
+    margin-right: auto;
+  
+    /* Otras propiedades opcionales */
+    border: none; /* Elimina el borde predeterminado */
+  }
+  
+
+/* Estilos para el elemento con class "section-heading" */
+.section-heading {
+    margin-bottom: 20px; /* Margen inferior */
+}
+
+.btn {
+    margin-right: 10px; /* Margen derecho entre botones */
+}
