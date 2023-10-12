@@ -13,17 +13,23 @@ export class SplitComponent {
   expense: number | null = null;
 
   addExpense() {
-    if (this.name && this.expense !== null && !isNaN(this.expense)) {
-      const expenseValue = Number(this.expense); // Convierte a número si no lo es
-      this.expenses.push({ name: this.name, expense: expenseValue });
-      this.updateExpenseList();
-      this.name = '';
-      this.expense = null;
+    if (!this.name) {
+      alert('Por favor, completar el campo nombre...');
+      return; 
     }
+    if (this.expense === null || isNaN(this.expense)) {
+      alert('Por favor, completar el campo gasto...');
+      return; 
+    }
+  
+    const expenseValue = Number(this.expense);
+    this.expenses.push({ name: this.name, expense: expenseValue });
+    this.updateExpenseList();
+    this.name = '';
+    this.expense = null;
   }
 
   updateExpenseList() {
-    // Puedes implementar esta función si deseas mostrar la lista de gastos en la vista.
   }
 
   copyTable() {
@@ -67,4 +73,18 @@ export class SplitComponent {
       }
     }
   }
+
+  deleteExpense(expenseItem: { name: string, expense: number }) {
+    const index = this.expenses.indexOf(expenseItem);
+    if (index !== -1) {
+        this.expenses.splice(index, 1);
+    }
+}
+clearExpenses() {
+  this.expenses = [];
+  this.results = [];
+}
+
+
+
 }
