@@ -6,21 +6,24 @@ body {
     /* Texto claro */
 }
 
-h1 {
-    color: #800080;
-    /* Título morado */
+.btn {
+    margin-right: 10px; 
 }
 
-.btn-dark,
-.btn-primary,
-.btn-success {
-    background-color: #000000;
-    /* Botones oscuros */
-    color: #ffffffd8;
-    /* Texto claro */
+.delete-button {
+    margin-left: 272px; 
 }
 
-.btn-dark:hover {
-    background-color: #800080;
-    /* Botones morados al pasar el mouse */
+.expense-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px; /* Ajusta este valor según tus preferencias */
 }
+
+.item-text {
+    flex-grow: 1;
+    margin-right: 10px; /* Espacio entre el texto y el botón */
+}
+
+
