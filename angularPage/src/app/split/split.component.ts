@@ -37,7 +37,7 @@ export class SplitComponent {
 
     navigator.clipboard.writeText(textToCopy)
       .then(() => {
-        alert('Tabla copiada al portapapeles.');
+        alert('Datos copiados exitosamente :)');
       })
       .catch((error) => {
         console.error('Error al copiar al portapapeles: ', error);
