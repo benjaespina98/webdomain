@@ -25,13 +25,27 @@
                         <input type="number" id="expense" name="expense" class="form-control" placeholder="Gasto"
                             inputmode="numeric" pattern="[0-9]+" required [(ngModel)]="expense">
                     </div>
+                    <div class="mb-3">
+                        <h6><label for="category" class="form-label">Categoría:</label></h6>
+                        <select id="category" name="category" class="form-select" [(ngModel)]="selectedCategory">
+                            <option value="" disabled selected>Selecciona una categoría</option>
+                            <option value="Alcohol">Alcohol</option>
+                            <option value="Asado">Asado</option>
+                            <option value="Hamburguesa">Hamburguesa</option>
+                            <option value="Cerveza">Cerveza</option>
+
+                            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+                        </select>                        
+                    </div>
+
+                    <!-- Botones para agregar y limpiar gastos -->
                     <button type="button" class="btn btn-outline-primary" (click)="addExpense()">Agregar Gasto</button>
                     <button type="button" class="btn btn-outline-danger" (click)="clearExpenses()">Limpiar</button>
                 </form>
                 <ul class="list-group mt-3">
                     <li class="list-group-item" *ngFor="let item of expenses">
                         <div class="expense-item">
-                            <span class="item-text">{{ item.name }}: ${{ item.expense }}</span>
+                            <span class="item-text">{{ item.name }} ({{ item.category }}): ${{ item.expense }}</span>
                             <button class="btn btn-danger btn-sm" (click)="deleteExpense(item)"><svg
                                     xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                     class="bi bi-trash3-fill" viewBox="0 0 16 16">
