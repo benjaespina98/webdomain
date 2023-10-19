@@ -8,6 +8,7 @@ import { Component } from '@angular/core';
 export class SplitComponent {
   expenses: { name: string; expense: number }[] = [];
   totalExpense = 0;
+  averageSpent = 0;  // Variable para el promedio
   results: { debtor: string; creditor: string; amount: number }[] = [];
   name: string = '';
   expense: number | null = null;
@@ -23,12 +24,12 @@ export class SplitComponent {
     }
 
     const expenseValue = Number(this.expense);
-    
-    const existingExpense = this.expenses.find((item) => item.name === this.name);
 
-    if (existingExpense) {
+    const existingExpenseIndex = this.expenses.findIndex((item) => item.name === this.name);
+
+    if (existingExpenseIndex !== -1) {
       // Si la persona ya ha ingresado un gasto, sumar el nuevo gasto al gasto existente
-      existingExpense.expense += expenseValue;
+      this.expenses[existingExpenseIndex].expense += expenseValue;
     } else {
       // Si no, agregar un nuevo gasto
       this.expenses.push({ name: this.name, expense: expenseValue });
@@ -43,20 +44,28 @@ export class SplitComponent {
   }
 
   copyTable() {
-    const textToCopy = this.results.map((result) => `- ${result.debtor} le debe pagar $${result.amount.toFixed(2)} a ${result.creditor}`).join('\n');
+    const resultsText = this.results
+        .map((result) => `- ${result.debtor} le debe pagar $${result.amount.toFixed(2)} a ${result.creditor}`)
+        .join('\n');
+
+    // Crea una cadena que incluye los cálculos de Gasto Total y Promedio
+    const calculationsText = `Gasto Total: $${this.totalExpense.toFixed(2)}\nPromedio por Participante: $${this.averageSpent.toFixed(2)}`;
+
+    const textToCopy = `${resultsText}\n\n${calculationsText}`;
 
     navigator.clipboard.writeText(textToCopy)
-      .then(() => {
-        alert('Datos copiados :)');
-      })
-      .catch((error) => {
-        console.error('Error al copiar al portapapeles: ', error);
-      });
+        .then(() => {
+            alert('Datos copiados :)');
+        })
+        .catch((error) => {
+            console.error('Error al copiar al portapapeles: ', error);
+        }); 
   }
 
   calculateShares() {
     this.totalExpense = this.expenses.reduce((total, item) => total + item.expense, 0);
     const individualShare = this.totalExpense / this.expenses.length;
+    this.averageSpent = individualShare;  // Calcular el promedio
 
     const debts: { [key: string]: number } = {};
     const credits: { [key: string]: number } = {};
@@ -92,8 +101,11 @@ export class SplitComponent {
       this.expenses.splice(index, 1);
     }
   }
+
   clearExpenses() {
     this.expenses = [];
     this.results = [];
+    this.totalExpense = 0;
+    this.averageSpent = 0;  // Reiniciar el promedio
   }
 }

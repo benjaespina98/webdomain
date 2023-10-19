@@ -55,6 +55,16 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <!-- Agrega estas líneas para mostrar el gasto total y el promedio -->
+                            <tr *ngIf="totalExpense > 0">
+                                <td>Gasto Total:</td>
+                                <td>$ {{ totalExpense.toFixed(2) }}</td>
+                            </tr>
+                            <tr *ngIf="averageSpent > 0">
+                                <td>Promedio por persona:</td>
+                                <td>$ {{ averageSpent.toFixed(2) }}</td>
+                            </tr>
+                            
                             <tr *ngFor="let result of results">
                                 <td>{{ result.debtor }}</td>
                                 <td>le debe pagar ${{ result.amount.toFixed(2) }} a {{ result.creditor }}</td>
