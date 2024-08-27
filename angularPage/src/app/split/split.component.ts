@@ -6,6 +6,8 @@ import { Component } from '@angular/core';
   styleUrls: ['./split.component.scss']
 })
 export class SplitComponent {
+  rtdo_i: string = `División de Gastos\n*****************************************************\n`;
+  rtdo_f: string = `\n\nBenjapp®`;
   expenses: { name: string; expense: number }[] = [];
   totalExpense = 0;
   averageSpent = 0;  // Variable para el promedio
@@ -45,13 +47,14 @@ export class SplitComponent {
 
   copyTable() {
     const resultsText = this.results
-        .map((result) => `- ${result.debtor} le debe pagar $${result.amount.toFixed(2)} a ${result.creditor}`)
+        .map((result) => `» ${result.debtor} le debe pagar $${result.amount.toFixed(2)} a ${result.creditor}`)
         .join('\n');
 
     // Crea una cadena que incluye los cálculos de Gasto Total y Promedio
-    const calculationsText = `Gasto Total: $${this.totalExpense.toFixed(2)}\nPromedio por Participante: $${this.averageSpent.toFixed(2)}`;
+    const calculationsText = `----------------------------------
+                              \nGasto Total: $${this.totalExpense.toFixed(2)}\nPromedio por Sujeto: $${this.averageSpent.toFixed(2)}`+ this.rtdo_f;
 
-    const textToCopy = `${resultsText}\n\n${calculationsText}`;
+    const textToCopy = this.rtdo_i + `${resultsText}\n\n${calculationsText}`  ;
 
     navigator.clipboard.writeText(textToCopy)
         .then(() => {
