@@ -6,6 +6,20 @@ body {
     /* Texto claro */
 }
 
+/* Título principal con estilo violeta elegante */
+h1.display-4 {
+    background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 50%, #5b21b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: 'Helvetica', sans-serif;
+    font-weight: 700;
+    text-align: center;
+    text-shadow: 0 4px 15px rgba(109, 40, 217, 0.2);
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+}
+
 .btn {
     margin-right: 10px; 
 }
@@ -29,14 +43,158 @@ body {
 /* Agrega margen superior a los botones "Calcular" y "Copiar" */
 .button-container {
     margin-top: 20px; /* Puedes ajustar el valor (en píxeles) según tus preferencias */
-  }
+}
   
-  .form-select{
+.form-select{
     margin-top: 10px;
-  }
+}
 
-  #nueva{
+#nueva{
     margin-top: 10px;
     margin-bottom: 10px;
-  }
+}
+
+/* Estilos básicos para el modo avanzado */
+.mode-switch {
+    background-color: #2a2a2a;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border-left: 4px solid #007bff;
+    color: #fff;
+}
+
+.participants-section {
+    background-color: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.participants-section h4 {
+    color: #fff;
+    margin-bottom: 15px;
+}
+
+.expense-form {
+    background-color: #2a2a2a;
+    padding: 20px;
+    border: 1px solid #4a4a4a;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.expense-form h4 {
+    color: #fff;
+    margin-bottom: 15px;
+}
+
+.participant-checkbox {
+    margin-bottom: 8px;
+}
+
+.list-group-item {
+    background-color: #3a3a3a;
+    border-color: #4a4a4a;
+    color: #fff;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: #4a4a4a;
+    transform: translateX(5px);
+}
+
+.alert-info {
+    background-color: #1e3d59;
+    border-color: #2e5984;
+    color: #b3d4fc;
+    border-radius: 8px;
+}
+
+/* Mejoras visuales para botones en modo avanzado */
+*[ng-reflect-use-advanced-mode="true"] .btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+    transition: all 0.3s ease;
+}
+
+*[ng-reflect-use-advanced-mode="true"] .btn-outline-primary:hover {
+    background-color: #007bff;
+    border-color: #007bff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+}
+
+*[ng-reflect-use-advanced-mode="true"] .btn-outline-success {
+    border-color: #28a745;
+    color: #28a745;
+    transition: all 0.3s ease;
+}
+
+*[ng-reflect-use-advanced-mode="true"] .btn-outline-success:hover {
+    background-color: #28a745;
+    border-color: #28a745;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40,167,69,0.3);
+}
+
+*[ng-reflect-use-advanced-mode="true"] .btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+    transition: all 0.3s ease;
+}
+
+*[ng-reflect-use-advanced-mode="true"] .btn-outline-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220,53,69,0.3);
+}
+
+/* Estilos para inputs en modo avanzado */
+*[ng-reflect-use-advanced-mode="true"] .form-control,
+*[ng-reflect-use-advanced-mode="true"] .form-select {
+    background-color: #3a3a3a;
+    border-color: #4a4a4a;
+    color: #fff;
+    border-radius: 8px;
+}
+
+*[ng-reflect-use-advanced-mode="true"] .form-control:focus,
+*[ng-reflect-use-advanced-mode="true"] .form-select:focus {
+    background-color: #3a3a3a;
+    border-color: #007bff;
+    color: #fff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+/* Estilos para la tabla en modo avanzado */
+*[ng-reflect-use-advanced-mode="true"] .table {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+*[ng-reflect-use-advanced-mode="true"] .table thead th {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+/* Estilos para checkboxes mejorados */
+*[ng-reflect-use-advanced-mode="true"] .form-check-input:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* Estilos para botones de selección de participantes */
+*[ng-reflect-use-advanced-mode="true"] .btn-sm {
+    border-radius: 20px;
+    font-size: 0.8rem;
+    padding: 5px 15px;
+}
 

@@ -5,14 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dividir gastos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 
 <body>
     <div class="container mt-5">
-        <h1 class="display-4"></h1>
-        <div class="row">
+        <h1 class="display-4">Split</h1>
+        
+        <!-- Switch de modo -->
+        <div class="mode-switch mb-4">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="modeSwitch" 
+                       [(ngModel)]="useAdvancedMode" (ngModelChange)="switchMode()">
+                <label class="form-check-label" for="modeSwitch">
+                    <strong>{{ useAdvancedMode ? 'Modo Avanzado' : 'Modo Simple' }}</strong>
+                </label>
+            </div>
+            <!-- <small class="text-muted">
+                {{ useAdvancedMode ? 'Permite especificar quién participa en cada gasto (ej: algunos no toman alcohol)' : 'Divide todos los gastos de forma equitativa entre todos' }}
+            </small> -->
+        </div>
+
+        <!-- MODO SIMPLE -->
+        <div *ngIf="!useAdvancedMode" class="row">
             <div class="col-md-5">
-                <h3>Split</h3>
                 <form>
                     <div class="mb-3">
                         <h6><label for="name" class="form-label">Nombre:</label></h6>
@@ -74,7 +90,190 @@
                 </div>
             </div>
         </div>
+
+        <!-- MODO AVANZADO -->
+        <div *ngIf="useAdvancedMode">
+            <div class="row">
+                <!-- Gestión de personas -->
+                <div class="col-md-4">
+                    <div class="participants-section">
+                        <h4>Participantes</h4>
+                        <form>
+                            <div class="mb-3">
+                                <label for="newPersonName" class="form-label">Agregar Persona:</label>
+                                <div class="input-group">
+                                    <input type="text" id="newPersonName" class="form-control" 
+                                           placeholder="Nombre" [(ngModel)]="newPersonName" name="newPersonName">
+                                    <button type="button" class="btn btn-outline-primary" (click)="addPerson()">+</button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <div *ngIf="people.length === 0" class="text-muted">
+                            No hay personas agregadas aún.
+                        </div>
+                        
+                        <ul class="list-group" *ngIf="people.length > 0">
+                            <li class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let person of people">
+                                {{ person }}
+                                <button class="btn btn-outline-danger btn-sm" (click)="removePerson(person)">×</button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Agregar gastos -->
+                <div class="col-md-8">
+                    <div class="expense-form">
+                        <h4>Agregar Gasto</h4>
+                        
+                        <div *ngIf="people.length === 0" class="alert alert-info">
+                            Primero agrega algunas personas para poder registrar gastos.
+                        </div>
+                        
+                        <form *ngIf="people.length > 0">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="expenseDescription" class="form-label">Descripción:</label>
+                                        <input type="text" id="expenseDescription" class="form-control" 
+                                               placeholder="ej: Alcohol, Comida, etc." [(ngModel)]="newExpenseDescription" name="expenseDescription">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="expenseAmount" class="form-label">Monto:</label>
+                                        <input type="number" id="expenseAmount" class="form-control" 
+                                               placeholder="0.00" step="0.01" [(ngModel)]="newExpenseAmount" name="expenseAmount">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="expensePaidBy" class="form-label">Pagado por:</label>
+                                        <select id="expensePaidBy" class="form-select" [(ngModel)]="newExpensePaidBy" name="expensePaidBy">
+                                            <option value="">Seleccionar...</option>
+                                            <option *ngFor="let person of people" [value]="person">{{ person }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Participantes en este gasto:</label>
+                                <div class="mb-2">
+                                    <button type="button" class="btn btn-outline-success btn-sm me-2" (click)="selectAllParticipants()"
+                                            [class.btn-success]="areAllSelected()">
+                                        <i class="fas fa-users"></i> Todos ({{ people.length }})
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="deselectAllParticipants()">
+                                        <i class="fas fa-times"></i> Ninguno
+                                    </button>
+                                </div>
+                                <div class="row" *ngIf="!areAllSelected()">
+                                    <div class="col-md-4" *ngFor="let person of people">
+                                        <div class="form-check participant-checkbox">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   [checked]="isParticipantSelected(person)"
+                                                   (change)="toggleParticipant(person)" 
+                                                   [id]="'participant-' + person">
+                                            <label class="form-check-label" [for]="'participant-' + person">
+                                                {{ person }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <small class="text-muted" *ngIf="selectedParticipants.length > 0">
+                                    {{ selectedParticipants.length }} de {{ people.length }} participante(s) seleccionado(s)
+                                </small>
+                            </div>
+                            
+                            <button type="button" class="btn btn-outline-success" (click)="addExpenseItem()">Agregar Gasto</button>
+                            <button type="button" class="btn btn-outline-danger" (click)="clearAll()">Limpiar Todo</button>
+                            <button type="button" class="btn btn-outline-primary" (click)="shareAdvancedWhatsApp()" *ngIf="expenseItems.length > 0">
+                                <i class="fab fa-whatsapp"></i> Compartir por WhatsApp
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de gastos -->
+            <div class="row mt-4" *ngIf="expenseItems.length > 0">
+                <div class="col-12">
+                    <h4>Gastos Registrados</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Descripción</th>
+                                    <th>Monto</th>
+                                    <th>Pagado por</th>
+                                    <th>Participantes</th>
+                                    <th>Por persona</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let item of expenseItems">
+                                    <td><strong>{{ item.description }}</strong></td>
+                                    <td>${{ item.amount.toFixed(2) }}</td>
+                                    <td>{{ item.paidBy }}</td>
+                                    <td>{{ item.participants.join(', ') }}</td>
+                                    <td>${{ (item.amount / item.participants.length).toFixed(2) }}</td>
+                                    <td>
+                                        <button class="btn btn-outline-danger btn-sm" (click)="removeExpenseItem(item.id)">
+                                            Eliminar
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resultados -->
+            <div class="row mt-4" *ngIf="expenseItems.length > 0">
+                <div class="col-md-6 button-container">
+                    <button type="button" class="btn btn-outline-secondary" (click)="copyTable()">Copiar Resultados</button>
+                </div>
+                <div class="col-12">
+                    <div class="mt-3">
+                        <table class="table table-dark table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Información</th>
+                                    <th scope="col">Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Gasto Total:</td>
+                                    <td>$ {{ totalExpense.toFixed(2) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Promedio por persona:</td>
+                                    <td>$ {{ averageSpent.toFixed(2) }}</td>
+                                </tr>
+                                
+                                <tr *ngFor="let result of results">
+                                    <td>{{ result.debtor }}</td>
+                                    <td>le debe pagar ${{ result.amount.toFixed(2) }} a {{ result.creditor }}</td>
+                                </tr>
+                                
+                                <tr *ngIf="results.length === 0 && expenseItems.length > 0">
+                                    <td colspan="2" class="text-center text-success">
+                                        <strong>¡Todo balanceado! No hay transferencias pendientes.</strong>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
