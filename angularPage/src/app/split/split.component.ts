@@ -15,6 +15,9 @@ interface ExpenseItem {
 })
 export class SplitComponent {
   // Propiedades para modo simple (existente)
+
+  rtdo_i: string = `División de Gastos\n*****************************************************\n`;
+  rtdo_f: string = `\n\nBenjapp®`;
   expenses: { name: string; expense: number }[] = [];
   totalExpense = 0;
   averageSpent = 0;
@@ -298,13 +301,14 @@ export class SplitComponent {
     } else {
       // Formato para modo simple
       resultsText = this.results
-        .map((result) => `- ${result.debtor} le debe pagar $${result.amount.toFixed(2)} a ${result.creditor}`)
+        .map((result) => `» ${result.debtor} le debe pagar $${result.amount.toFixed(2)} a ${result.creditor}`)
         .join('\n');
 
-      calculationsText = `Gasto Total: $${this.totalExpense.toFixed(2)}\nPromedio por Participante: $${this.averageSpent.toFixed(2)}`;
+      calculationsText = `----------------------------------
+                              \nGasto Total: $${this.totalExpense.toFixed(2)}\nPromedio por Sujeto: $${this.averageSpent.toFixed(2)}` + this.rtdo_f;
     }
 
-    const textToCopy = `${resultsText}\n\n${calculationsText}`;
+    const textToCopy = this.rtdo_i + `${resultsText}\n\n${calculationsText}`;
 
     navigator.clipboard.writeText(textToCopy)
         .then(() => {
