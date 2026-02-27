@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
 
 import { SplitComponent } from './split.component';
 
@@ -8,7 +9,8 @@ describe('SplitComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [SplitComponent]
+      declarations: [SplitComponent],
+      imports: [FormsModule]
     });
     fixture = TestBed.createComponent(SplitComponent);
     component = fixture.componentInstance;
