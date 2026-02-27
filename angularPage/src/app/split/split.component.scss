@@ -1,12 +1,3 @@
-/* Estilos generales */
-body {
-    font-family: 'Helvetica', sans-serif;
-    /* Fondo oscuro */
-    color: #979797;
-    /* Texto claro */
-}
-
-/* Título principal con estilo violeta elegante */
 h1.display-4 {
     background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 50%, #5b21b6 100%);
     -webkit-background-clip: text;
@@ -15,186 +6,257 @@ h1.display-4 {
     font-family: 'Helvetica', sans-serif;
     font-weight: 700;
     text-align: center;
-    text-shadow: 0 4px 15px rgba(109, 40, 217, 0.2);
-    letter-spacing: 2px;
-    margin-bottom: 30px;
-}
-
-.btn {
-    margin-right: 10px; 
-}
-
-.delete-button {
-    margin-left: 272px; 
-}
-
-.expense-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px; /* Ajusta este valor según tus preferencias */
-}
-
-.item-text {
-    flex-grow: 1;
-    margin-right: 10px; /* Espacio entre el texto y el botón */
-}
-
-/* Agrega margen superior a los botones "Calcular" y "Copiar" */
-.button-container {
-    margin-top: 20px; /* Puedes ajustar el valor (en píxeles) según tus preferencias */
-}
-  
-.form-select{
-    margin-top: 10px;
-}
-
-#nueva{
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-/* Estilos básicos para el modo avanzado */
-.mode-switch {
-    background-color: #2a2a2a;
-    padding: 15px;
-    border-radius: 5px;
+    letter-spacing: 1px;
     margin-bottom: 20px;
-    border-left: 4px solid #007bff;
-    color: #fff;
 }
 
-.participants-section {
-    background-color: #2a2a2a;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+:host {
+    --accent-violet: #7c3aed;
+    --accent-violet-soft: rgba(124, 58, 237, 0.2);
 }
 
-.participants-section h4 {
-    color: #fff;
-    margin-bottom: 15px;
+.page-subtitle {
+    color: #bcbcbc;
+    font-size: 0.98rem;
 }
 
-.expense-form {
-    background-color: #2a2a2a;
-    padding: 20px;
-    border: 1px solid #4a4a4a;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-}
-
-.expense-form h4 {
-    color: #fff;
-    margin-bottom: 15px;
-}
-
-.participant-checkbox {
+.section-title {
+    background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 50%, #5b21b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     margin-bottom: 8px;
 }
 
+.muted-help {
+    color: #bcbcbc;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+
+.participants-section,
+.expense-form {
+    background-color: #292929;
+    border: 1px solid #3e3e3e;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.participants-section {
+    margin-bottom: 12px;
+}
+
+.empty-state {
+    background-color: #303030;
+    border: 1px dashed #4e4e4e;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.9rem;
+}
+
 .list-group-item {
-    background-color: #3a3a3a;
+    background-color: #343434;
     border-color: #4a4a4a;
     color: #fff;
     border-radius: 8px;
-    margin-bottom: 5px;
-    transition: all 0.3s ease;
+    margin-bottom: 6px;
 }
 
-.list-group-item:hover {
-    background-color: #4a4a4a;
-    transform: translateX(5px);
+.actions-row,
+.participant-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
-.alert-info {
-    background-color: #1e3d59;
-    border-color: #2e5984;
-    color: #b3d4fc;
+.selection-summary strong {
+    color: #f2e8ff;
+}
+
+.selection-help {
+    color: #b4b4b4;
+    font-size: 0.85rem;
+}
+
+.selection-summary {
+    color: #d8d8d8;
+    font-size: 0.88rem;
+    margin-bottom: 8px;
+}
+
+.actions-row .btn,
+.participant-actions .btn {
+    margin-right: 0;
+}
+
+.participant-actions .btn {
+    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+}
+
+.participant-actions .btn:hover {
+    filter: brightness(1.08);
+}
+
+.participant-actions .btn.is-active {
+    box-shadow: 0 0 0 0.15rem rgba(124, 58, 237, 0.18);
+}
+
+.participant-actions .btn.btn-success,
+.participant-actions .btn.btn-success:hover {
+    color: #fff;
+}
+
+.participant-chip-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    max-height: 210px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.participant-chip {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 36px;
     border-radius: 8px;
+    border: 1px solid #4b4b4b;
+    background: #303030;
+    color: #dcdcdc;
+    padding: 6px 9px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: background-color 0.14s ease, border-color 0.14s ease, transform 0.12s ease;
+    justify-content: space-between;
 }
 
-/* Mejoras visuales para botones en modo avanzado */
-*[ng-reflect-use-advanced-mode="true"] .btn-outline-primary {
-    border-color: #007bff;
-    color: #007bff;
-    transition: all 0.3s ease;
+.participant-chip:hover {
+    background: #404040;
+    border-color: #7a7a7a;
+    transform: translateY(-1px);
 }
 
-*[ng-reflect-use-advanced-mode="true"] .btn-outline-primary:hover {
-    background-color: #007bff;
-    border-color: #007bff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+.participant-chip:active {
+    transform: translateY(0) scale(0.985);
 }
 
-*[ng-reflect-use-advanced-mode="true"] .btn-outline-success {
-    border-color: #28a745;
-    color: #28a745;
-    transition: all 0.3s ease;
+.participant-chip.selected {
+    background: var(--accent-violet-soft);
+    border-color: var(--accent-violet);
+    color: #fff;
 }
 
-*[ng-reflect-use-advanced-mode="true"] .btn-outline-success:hover {
-    background-color: #28a745;
-    border-color: #28a745;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(40,167,69,0.3);
+@media (prefers-reduced-motion: reduce) {
+    .participant-chip {
+        transition: none;
+    }
+
+    .participant-chip:hover,
+    .participant-chip:active {
+        transform: none;
+    }
 }
 
-*[ng-reflect-use-advanced-mode="true"] .btn-outline-danger {
-    border-color: #dc3545;
-    color: #dc3545;
-    transition: all 0.3s ease;
+.participant-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-*[ng-reflect-use-advanced-mode="true"] .btn-outline-danger:hover {
-    background-color: #dc3545;
-    border-color: #dc3545;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(220,53,69,0.3);
+.participant-check {
+    font-weight: 700;
+    color: #f2e8ff;
+    margin-left: 8px;
 }
 
-/* Estilos para inputs en modo avanzado */
-*[ng-reflect-use-advanced-mode="true"] .form-control,
-*[ng-reflect-use-advanced-mode="true"] .form-select {
-    background-color: #3a3a3a;
-    border-color: #4a4a4a;
+.results-header {
+    margin-bottom: 8px;
+}
+
+.advanced-mode .btn {
+    min-height: 42px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.advanced-mode .form-control,
+.advanced-mode .form-select {
+    background-color: #323232;
+    border-color: #505050;
     color: #fff;
     border-radius: 8px;
 }
 
-*[ng-reflect-use-advanced-mode="true"] .form-control:focus,
-*[ng-reflect-use-advanced-mode="true"] .form-select:focus {
-    background-color: #3a3a3a;
-    border-color: #007bff;
+.advanced-mode .form-control:focus,
+.advanced-mode .form-select:focus {
+    background-color: #353535;
     color: #fff;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    border-color: var(--accent-violet);
+    box-shadow: 0 0 0 0.18rem rgba(124, 58, 237, 0.2);
 }
 
-/* Estilos para la tabla en modo avanzado */
-*[ng-reflect-use-advanced-mode="true"] .table {
+.advanced-mode .alert-info {
+    background-color: rgba(124, 58, 237, 0.14);
+    border-color: rgba(124, 58, 237, 0.55);
+    color: #d9c8ff;
+}
+
+.advanced-mode .table {
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
-*[ng-reflect-use-advanced-mode="true"] .table thead th {
-    background-color: #007bff;
-    color: white;
+.advanced-mode .table thead th {
+    background-color: #5f2db6;
+    color: #fff;
     border: none;
 }
 
-/* Estilos para checkboxes mejorados */
-*[ng-reflect-use-advanced-mode="true"] .form-check-input:checked {
-    background-color: #007bff;
-    border-color: #007bff;
+@media (max-width: 767px) {
+    .container.advanced-mode {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .participant-actions .btn,
+    .actions-row .btn {
+        flex: 1 1 100%;
+    }
+
+    .actions-row {
+        position: sticky;
+        bottom: 8px;
+        background: #292929;
+        border: 1px solid #3e3e3e;
+        border-radius: 10px;
+        padding: 8px;
+        z-index: 2;
+    }
+
+    .participant-chip-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-height: 220px;
+    }
+
+    .advanced-mode .form-control,
+    .advanced-mode .form-select {
+        font-size: 16px;
+        min-height: 44px;
+    }
+
+    .results-header {
+        gap: 10px;
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }
 
-/* Estilos para botones de selección de participantes */
-*[ng-reflect-use-advanced-mode="true"] .btn-sm {
-    border-radius: 20px;
-    font-size: 0.8rem;
-    padding: 5px 15px;
+@media (max-width: 420px) {
+    .participant-chip-grid {
+        grid-template-columns: 1fr;
+    }
 }
 

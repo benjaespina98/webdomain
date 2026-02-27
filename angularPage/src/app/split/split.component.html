@@ -1,279 +1,191 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dividir gastos</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
+<div class="container mt-5 advanced-mode">
+    <h1 class="display-4">Dividimos?</h1>
+    <p class="page-subtitle text-center mb-4">Sumá personas, cargá gastos y resolvé quién le paga a quién en un toque.</p>
 
-<body>
-    <div class="container mt-5">
-        <h1 class="display-4">Split</h1>
-        
-        <!-- Switch de modo -->
-        <div class="mode-switch mb-4">
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="modeSwitch" 
-                       [(ngModel)]="useAdvancedMode" (ngModelChange)="switchMode()">
-                <label class="form-check-label" for="modeSwitch">
-                    <strong>{{ useAdvancedMode ? 'Modo Avanzado' : 'Modo Simple' }}</strong>
-                </label>
-            </div>
-            <!-- <small class="text-muted">
-                {{ useAdvancedMode ? 'Permite especificar quién participa en cada gasto (ej: algunos no toman alcohol)' : 'Divide todos los gastos de forma equitativa entre todos' }}
-            </small> -->
-        </div>
-
-        <!-- MODO SIMPLE -->
-        <div *ngIf="!useAdvancedMode" class="row">
-            <div class="col-md-5">
-                <form>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="participants-section">
+                <h4 class="section-title">Participantes</h4>
+                <p class="muted-help">Agregalos una sola vez y listo. Después elegís quién participa en cada gasto.</p>
+                <form (ngSubmit)="addPerson()">
                     <div class="mb-3">
-                        <h6><label for="name" class="form-label">Nombre:</label></h6>
-                        <input type="text" id="name" name="name" class="form-control" placeholder="Nombre" required
-                            [(ngModel)]="name">
-                    </div>
-                    <div class="mb-3">
-                        <h6><label for="expense" class="form-label">Gasto:</label></h6>
-                        <input type="number" id="expense" name="expense" class="form-control" placeholder="Gasto"
-                            inputmode="numeric" pattern="[0-9]+" required [(ngModel)]="expense">
-                    </div>
-
-                    <!-- Botones para agregar y limpiar gastos -->
-                    <button type="button" class="btn btn-outline-primary" (click)="addExpense()">Agregar Gasto</button>
-                    <button type="button" class="btn btn-outline-danger" (click)="clearExpenses()">Limpiar</button>
-                </form>
-                <ul class="list-group mt-3">
-                    <li class="list-group-item" *ngFor="let item of expenses">
-                        <div class="expense-item">
-                            <span class="item-text">{{ item.name }}: ${{ item.expense }}</span>
-                            <button class="btn btn-danger btn-sm" (click)="deleteExpense(item)"><svg
-                                    xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                    class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                                    <path
-                                        d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a.5.5 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z" />
-                                </svg></button>
+                        <label for="newPersonName" class="form-label">Agregar Persona:</label>
+                        <div class="input-group">
+                            <input type="text" id="newPersonName" class="form-control" placeholder="Ej: Juan" [(ngModel)]="newPersonName" name="newPersonName" aria-label="Nombre del participante">
+                            <button type="submit" class="btn btn-outline-primary" title="Agregar participante">
+                                <i class="fas fa-plus me-1"></i>Agregar
+                            </button>
                         </div>
+                    </div>
+                </form>
+
+                <div *ngIf="people.length === 0" class="empty-state text-muted">Todavía no cargaste participantes.</div>
+
+                <ul class="list-group" *ngIf="people.length > 0">
+                    <li class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let person of people; trackBy: trackByPerson">
+                        {{ person }}
+                        <button class="btn btn-outline-danger btn-sm" (click)="removePerson(person)" title="Eliminar participante">×</button>
                     </li>
                 </ul>
             </div>
-            <div class="col-md-6 button-container">
-                <button type="button" class="btn btn-outline-success" (click)="calculateShares()">Calcular</button>
-                <button type="button" class="btn btn-outline-secondary" (click)="copyTable()">Copiar</button>
-                <div class="mt-3">
-                    <table class="table table-dark table-striped">
-                        <thead>
-                            <tr>
-                                <th scope="col">Nombre</th>
-                                <th scope="col">Divisiones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Agrega estas líneas para mostrar el gasto total y el promedio -->
-                            <tr *ngIf="totalExpense > 0">
-                                <td>Gasto Total:</td>
-                                <td>$ {{ totalExpense.toFixed(2) }}</td>
-                            </tr>
-                            <tr *ngIf="averageSpent > 0">
-                                <td>Promedio por persona:</td>
-                                <td>$ {{ averageSpent.toFixed(2) }}</td>
-                            </tr>
-                            
-                            <tr *ngFor="let result of results">
-                                <td>{{ result.debtor }}</td>
-                                <td>le debe pagar ${{ result.amount.toFixed(2) }} a {{ result.creditor }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </div>
 
-        <!-- MODO AVANZADO -->
-        <div *ngIf="useAdvancedMode">
-            <div class="row">
-                <!-- Gestión de personas -->
-                <div class="col-md-4">
-                    <div class="participants-section">
-                        <h4>Participantes</h4>
-                        <form>
-                            <div class="mb-3">
-                                <label for="newPersonName" class="form-label">Agregar Persona:</label>
-                                <div class="input-group">
-                                    <input type="text" id="newPersonName" class="form-control" 
-                                           placeholder="Nombre" [(ngModel)]="newPersonName" name="newPersonName">
-                                    <button type="button" class="btn btn-outline-primary" (click)="addPerson()">+</button>
-                                </div>
-                            </div>
-                        </form>
-                        
-                        <div *ngIf="people.length === 0" class="text-muted">
-                            No hay personas agregadas aún.
-                        </div>
-                        
-                        <ul class="list-group" *ngIf="people.length > 0">
-                            <li class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let person of people">
-                                {{ person }}
-                                <button class="btn btn-outline-danger btn-sm" (click)="removePerson(person)">×</button>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+        <div class="col-md-8">
+            <div class="expense-form">
+                <h4 class="section-title">Agregar Gasto</h4>
+                <p class="muted-help">Completá los datos y marcá quiénes comparten ese gasto.</p>
 
-                <!-- Agregar gastos -->
-                <div class="col-md-8">
-                    <div class="expense-form">
-                        <h4>Agregar Gasto</h4>
-                        
-                        <div *ngIf="people.length === 0" class="alert alert-info">
-                            Primero agrega algunas personas para poder registrar gastos.
-                        </div>
-                        
-                        <form *ngIf="people.length > 0">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="expenseDescription" class="form-label">Descripción:</label>
-                                        <input type="text" id="expenseDescription" class="form-control" 
-                                               placeholder="ej: Alcohol, Comida, etc." [(ngModel)]="newExpenseDescription" name="expenseDescription">
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label for="expenseAmount" class="form-label">Monto:</label>
-                                        <input type="number" id="expenseAmount" class="form-control" 
-                                               placeholder="0.00" step="0.01" [(ngModel)]="newExpenseAmount" name="expenseAmount">
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label for="expensePaidBy" class="form-label">Pagado por:</label>
-                                        <select id="expensePaidBy" class="form-select" [(ngModel)]="newExpensePaidBy" name="expensePaidBy">
-                                            <option value="">Seleccionar...</option>
-                                            <option *ngFor="let person of people" [value]="person">{{ person }}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            
+                <div *ngIf="people.length === 0" class="alert alert-info">Primero agregá al menos una persona para empezar.</div>
+
+                <form *ngIf="people.length > 0" (ngSubmit)="addExpenseItem()">
+                    <div class="row">
+                        <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Participantes en este gasto:</label>
-                                <div class="mb-2">
-                                    <button type="button" class="btn btn-outline-success btn-sm me-2" (click)="selectAllParticipants()"
-                                            [class.btn-success]="areAllSelected()">
-                                        <i class="fas fa-users"></i> Todos ({{ people.length }})
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="deselectAllParticipants()">
-                                        <i class="fas fa-times"></i> Ninguno
-                                    </button>
-                                </div>
-                                <div class="row" *ngIf="!areAllSelected()">
-                                    <div class="col-md-4" *ngFor="let person of people">
-                                        <div class="form-check participant-checkbox">
-                                            <input class="form-check-input" type="checkbox" 
-                                                   [checked]="isParticipantSelected(person)"
-                                                   (change)="toggleParticipant(person)" 
-                                                   [id]="'participant-' + person">
-                                            <label class="form-check-label" [for]="'participant-' + person">
-                                                {{ person }}
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <small class="text-muted" *ngIf="selectedParticipants.length > 0">
-                                    {{ selectedParticipants.length }} de {{ people.length }} participante(s) seleccionado(s)
-                                </small>
+                                <label for="expenseDescription" class="form-label">Descripción:</label>
+                                <input type="text" id="expenseDescription" class="form-control" placeholder="Ej: Cena, Nafta, Uber" [(ngModel)]="newExpenseDescription" name="expenseDescription" aria-label="Descripción del gasto">
                             </div>
-                            
-                            <button type="button" class="btn btn-outline-success" (click)="addExpenseItem()">Agregar Gasto</button>
-                            <button type="button" class="btn btn-outline-danger" (click)="clearAll()">Limpiar Todo</button>
-                            <button type="button" class="btn btn-outline-primary" (click)="shareAdvancedWhatsApp()" *ngIf="expenseItems.length > 0">
-                                <i class="fab fa-whatsapp"></i> Compartir por WhatsApp
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="expenseAmount" class="form-label">Monto:</label>
+                                <input type="number" id="expenseAmount" class="form-control" placeholder="Ej: 15000" step="0.01" [(ngModel)]="newExpenseAmount" name="expenseAmount" aria-label="Monto del gasto">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="expensePaidBy" class="form-label">Pagó:</label>
+                                <select id="expensePaidBy" class="form-select" [(ngModel)]="newExpensePaidBy" (ngModelChange)="onPaidByChange()" name="expensePaidBy">
+                                    <option value="">Seleccionar...</option>
+                                    <option *ngFor="let person of people; trackBy: trackByPerson" [value]="person">{{ person }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" title="Si elegís Todos, el gasto se divide entre todas las personas cargadas">¿Quiénes participan en este gasto?</label>
+                        <p class="selection-help mb-2">Tocá cada nombre para incluirlo o quitarlo del gasto.</p>
+                        <div class="mb-2 participant-actions">
+                            <button type="button" class="btn btn-outline-success" (click)="selectAllParticipants()" [class.btn-success]="areAllSelected()" [class.is-active]="areAllSelected()">
+                                <i class="fas fa-users"></i> Seleccionar todos
                             </button>
-                        </form>
+                            <button type="button" class="btn btn-outline-secondary" (click)="deselectAllParticipants()" [class.is-active]="areNoneSelected()" title="Desmarcar todas las personas">
+                                <i class="fas fa-times"></i> Borrar selección
+                            </button>
+                        </div>
+                        <div class="selection-summary">
+                            <span>Seleccionados: <strong>{{ selectedParticipants.length }}</strong> / {{ people.length }}</span>
+                            <small class="text-muted ms-2" *ngIf="selectedParticipants.length > 0 && selectedParticipants.length < people.length">(los seleccionados aparecen primero)</small>
+                        </div>
+                        <div class="participant-chip-grid">
+                            <button
+                                type="button"
+                                class="participant-chip"
+                                *ngFor="let person of getPeopleForSelection(); trackBy: trackByPerson"
+                                [class.selected]="isParticipantSelected(person)"
+                                [attr.aria-pressed]="isParticipantSelected(person)"
+                                (click)="toggleParticipant(person)">
+                                <span class="participant-name">{{ person }}</span>
+                                <span class="participant-check" *ngIf="isParticipantSelected(person)">✓</span>
+                            </button>
+                        </div>
+                        <small class="text-warning d-block mt-1" *ngIf="newExpensePaidBy && !isPayerIncludedInParticipants()">
+                            ⚠️ {{ newExpensePaidBy }} pagó, pero no está incluido en el reparto.
+                        </small>
+                        <small class="text-muted" *ngIf="selectedParticipants.length > 0">
+                            Listo: {{ selectedParticipants.length }} participante(s) incluidos.
+                        </small>
                     </div>
-                </div>
-            </div>
 
-            <!-- Lista de gastos -->
-            <div class="row mt-4" *ngIf="expenseItems.length > 0">
-                <div class="col-12">
-                    <h4>Gastos Registrados</h4>
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Descripción</th>
-                                    <th>Monto</th>
-                                    <th>Pagado por</th>
-                                    <th>Participantes</th>
-                                    <th>Por persona</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let item of expenseItems">
-                                    <td><strong>{{ item.description }}</strong></td>
-                                    <td>${{ item.amount.toFixed(2) }}</td>
-                                    <td>{{ item.paidBy }}</td>
-                                    <td>{{ item.participants.join(', ') }}</td>
-                                    <td>${{ (item.amount / item.participants.length).toFixed(2) }}</td>
-                                    <td>
-                                        <button class="btn btn-outline-danger btn-sm" (click)="removeExpenseItem(item.id)">
-                                            Eliminar
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="actions-row">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="fas fa-plus-circle me-1"></i>Agregar Gasto
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" (click)="clearAll()" title="Borra participantes y gastos">
+                            <i class="fas fa-trash me-1"></i>Limpiar Todo
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" (click)="shareWhatsApp()" *ngIf="expenseItems.length > 0">
+                            <i class="fab fa-whatsapp"></i> Compartir por WhatsApp
+                        </button>
                     </div>
-                </div>
-            </div>
-
-            <!-- Resultados -->
-            <div class="row mt-4" *ngIf="expenseItems.length > 0">
-                <div class="col-md-6 button-container">
-                    <button type="button" class="btn btn-outline-secondary" (click)="copyTable()">Copiar Resultados</button>
-                </div>
-                <div class="col-12">
-                    <div class="mt-3">
-                        <table class="table table-dark table-striped">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Información</th>
-                                    <th scope="col">Valor</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Gasto Total:</td>
-                                    <td>$ {{ totalExpense.toFixed(2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Promedio por persona:</td>
-                                    <td>$ {{ averageSpent.toFixed(2) }}</td>
-                                </tr>
-                                
-                                <tr *ngFor="let result of results">
-                                    <td>{{ result.debtor }}</td>
-                                    <td>le debe pagar ${{ result.amount.toFixed(2) }} a {{ result.creditor }}</td>
-                                </tr>
-                                
-                                <tr *ngIf="results.length === 0 && expenseItems.length > 0">
-                                    <td colspan="2" class="text-center text-success">
-                                        <strong>¡Todo balanceado! No hay transferencias pendientes.</strong>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+
+    <div class="row mt-4" *ngIf="expenseItems.length > 0">
+        <div class="col-12">
+            <h4 class="section-title">Gastos Registrados</h4>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Monto</th>
+                            <th>Pagado por</th>
+                            <th>Participantes</th>
+                            <th>Por persona</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
+                            <td><strong>{{ item.description }}</strong></td>
+                            <td>${{ item.amount.toFixed(2) }}</td>
+                            <td>{{ item.paidBy }}</td>
+                            <td>{{ item.participants.join(', ') }}</td>
+                            <td>${{ (item.amount / item.participants.length).toFixed(2) }}</td>
+                            <td>
+                                <button class="btn btn-outline-danger btn-sm" (click)="removeExpenseItem(item.id)" title="Eliminar gasto">
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4" *ngIf="expenseItems.length > 0">
+        <div class="col-12 d-flex justify-content-between align-items-center results-header">
+            <h4 class="section-title mb-0">Resultados</h4>
+            <button type="button" class="btn btn-outline-secondary" (click)="copyTable()" title="Copiar resumen y transferencias">
+                <i class="fas fa-copy me-1"></i>Copiar Resultados
+            </button>
+        </div>
+        <div class="col-12">
+            <div class="mt-3">
+                <table class="table table-dark table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Información</th>
+                            <th scope="col">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Gasto Total:</td>
+                            <td>$ {{ totalExpense.toFixed(2) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Promedio por persona:</td>
+                            <td>$ {{ averageSpent.toFixed(2) }}</td>
+                        </tr>
+
+                        <tr *ngFor="let result of results; trackBy: trackByResult">
+                            <td>{{ result.debtor }}</td>
+                            <td>le debe pagar ${{ result.amount.toFixed(2) }} a {{ result.creditor }}</td>
+                        </tr>
+
+                        <tr *ngIf="results.length === 0 && expenseItems.length > 0">
+                            <td colspan="2" class="text-center text-success">
+                                <strong>✅ Todo saldado. No hay pagos pendientes.</strong>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
