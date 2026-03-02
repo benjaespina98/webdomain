@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 
 interface ExpenseItem {
   id: number;
@@ -15,6 +15,126 @@ interface SettlementResult {
 }
 
 type BalanceMap = Record<string, number>;
+type LanguageCode = 'es' | 'en';
+type ShareMode = 'full' | 'short';
+
+interface TranslationMap {
+  appSubtitle: string;
+  participants: string;
+  participantsHelp: string;
+  addPersonLabel: string;
+  addButton: string;
+  personPlaceholder: string;
+  noParticipantsYet: string;
+  addExpense: string;
+  addExpenseHelp: string;
+  needPersonFirst: string;
+  expenseDescriptionLabel: string;
+  expenseDescriptionPlaceholder: string;
+  totalAmountLabel: string;
+  amountPlaceholder: string;
+  whoPaidLabel: string;
+  selectPlaceholder: string;
+  whoParticipates: string;
+  participantHint: string;
+  selectAll: string;
+  clearSelection: string;
+  selected: string;
+  selectedFirstHint: string;
+  payerNotIncluded: string;
+  ready: string;
+  includedParticipants: string;
+  addExpenseButton: string;
+  clearAll: string;
+  clearAllTitle: string;
+  shareWhatsapp: string;
+  registeredExpenses: string;
+  description: string;
+  amount: string;
+  paidBy: string;
+  participantsColumn: string;
+  perPerson: string;
+  actions: string;
+  deleteExpense: string;
+  deleteParticipantTitle: string;
+  deleteExpenseTitle: string;
+  results: string;
+  copyResults: string;
+  copyResultsTitle: string;
+  info: string;
+  value: string;
+  totalExpense: string;
+  averagePerPerson: string;
+  owesTo: string;
+  allSettled: string;
+  enterValidName: string;
+  personAlreadyExists: string;
+  noExpensesToShare: string;
+  enterExpenseDescription: string;
+  enterValidAmount: string;
+  selectWhoPaid: string;
+  addParticipantsToSplit: string;
+  dataCopied: string;
+  copyError: string;
+  shareHeader: string;
+  shareParticipants: string;
+  shareExpensesLoaded: string;
+  shareTotal: string;
+  shareAverage: string;
+  shareDetailTitle: string;
+  sharePaidBy: string;
+  shareAndMoreExpenses: string;
+  shareTransfersTitle: string;
+  shareAndMoreTransfers: string;
+  shareAllSettled: string;
+  shareNoTransfers: string;
+  shareFooter: string;
+  shareTo: string;
+  copyHeader: string;
+  copyTotal: string;
+  copyAverage: string;
+  copyExpenseDetail: string;
+  copyPaidBy: string;
+  copyParticipants: string;
+  copyOwesTo: string;
+  languageAria: string;
+  clearSelectionTitle: string;
+  splitAllTitle: string;
+  languageSpanish: string;
+  languageEnglish: string;
+  languageChangedEs: string;
+  languageChangedEn: string;
+  personAdded: string;
+  personRemoved: string;
+  expenseAdded: string;
+  expenseRemoved: string;
+  allCleared: string;
+  undo: string;
+  undoApplied: string;
+  confirmClearAll: string;
+  confirmRemovePerson: string;
+  confirmRemoveExpense: string;
+  nothingToClear: string;
+  shareGeneratedAt: string;
+  shareOpenApp: string;
+  shareWhatsappShort: string;
+  shareShortTitle: string;
+  whatsappOpened: string;
+}
+
+interface AppSnapshot {
+  people: string[];
+  expenseItems: ExpenseItem[];
+  newPersonName: string;
+  newExpenseDescription: string;
+  newExpenseAmount: number | null;
+  newExpensePaidBy: string;
+  selectedParticipants: string[];
+  nextExpenseId: number;
+  totalExpense: number;
+  averageSpent: number;
+  results: SettlementResult[];
+}
 
 @Component({
   selector: 'app-split',
@@ -22,7 +142,222 @@ type BalanceMap = Record<string, number>;
   styleUrls: ['./split.component.scss']
 })
 export class SplitComponent {
-  private readonly copyHeader = `División de Gastos\n*****************************************************\n`;
+  private readonly languageStorageKey = 'split-language';
+  private readonly translations: Record<LanguageCode, TranslationMap> = {
+    es: {
+      appSubtitle: 'Sumá personas, cargá gastos y resolvé quién le paga a quién en un toque.',
+      participants: 'Participantes',
+      participantsHelp: 'Agregalos una sola vez y listo. Después elegís quién participa en cada gasto.',
+      addPersonLabel: 'Agregar Persona:',
+      addButton: 'Agregar',
+      personPlaceholder: 'Ej: Juan',
+      noParticipantsYet: 'Todavía no cargaste participantes.',
+      addExpense: 'Agregar Gasto',
+      addExpenseHelp: 'Completá los datos y marcá quiénes comparten ese gasto.',
+      needPersonFirst: 'Primero agregá al menos una persona para empezar.',
+      expenseDescriptionLabel: 'Descripción del gasto:',
+      expenseDescriptionPlaceholder: 'Ej: Cena, Nafta, Uber',
+      totalAmountLabel: 'Monto total:',
+      amountPlaceholder: 'Ej: 15000',
+      whoPaidLabel: '¿Quién pagó?',
+      selectPlaceholder: 'Seleccionar...',
+      whoParticipates: '¿Quiénes participan en este gasto?',
+      participantHint: 'Tocá cada nombre para incluirlo o quitarlo del gasto.',
+      selectAll: 'Seleccionar todos',
+      clearSelection: 'Borrar selección',
+      selected: 'Seleccionados',
+      selectedFirstHint: '(los seleccionados aparecen primero)',
+      payerNotIncluded: 'pagó, pero no está incluido en el reparto.',
+      ready: 'Listo',
+      includedParticipants: 'participante(s) incluidos.',
+      addExpenseButton: 'Agregar Gasto',
+      clearAll: 'Limpiar Todo',
+      clearAllTitle: 'Borra participantes y gastos',
+      shareWhatsapp: 'Compartir por WhatsApp',
+      registeredExpenses: 'Gastos Registrados',
+      description: 'Descripción',
+      amount: 'Monto',
+      paidBy: 'Pagado por',
+      participantsColumn: 'Participantes',
+      perPerson: 'Por persona',
+      actions: 'Acciones',
+      deleteExpense: 'Eliminar',
+      deleteParticipantTitle: 'Eliminar participante',
+      deleteExpenseTitle: 'Eliminar gasto',
+      results: 'Resultados',
+      copyResults: 'Copiar Resultados',
+      copyResultsTitle: 'Copiar resumen y transferencias',
+      info: 'Información',
+      value: 'Valor',
+      totalExpense: 'Gasto Total:',
+      averagePerPerson: 'Promedio por persona:',
+      owesTo: 'le debe pagar',
+      allSettled: '✅ Todo saldado. No hay pagos pendientes.',
+      enterValidName: 'Por favor, ingresa un nombre válido',
+      personAlreadyExists: 'Esta persona ya está en la lista',
+      noExpensesToShare: 'No hay gastos para compartir',
+      enterExpenseDescription: 'Por favor, ingresa una descripción del gasto',
+      enterValidAmount: 'Por favor, ingresa un monto válido',
+      selectWhoPaid: 'Por favor, selecciona quién pagó',
+      addParticipantsToSplit: 'Por favor, agrega participantes para dividir el gasto',
+      dataCopied: 'Datos copiados :)',
+      copyError: 'Error al copiar al portapapeles: ',
+      shareHeader: '💸 *Dividimos?*',
+      shareParticipants: '👥 Participantes',
+      shareExpensesLoaded: '🧾 Gastos cargados',
+      shareTotal: '💰 Total',
+      shareAverage: '📊 Promedio por persona',
+      shareDetailTitle: '🧾 *Detalle de gastos*',
+      sharePaidBy: '👤 Pagó',
+      shareAndMoreExpenses: '… y {count} gasto(s) más',
+      shareTransfersTitle: '🔁 *Transferencias sugeridas*',
+      shareAndMoreTransfers: '… y {count} transferencia(s) más',
+      shareAllSettled: '✅ *Todo saldado*',
+      shareNoTransfers: 'No hay transferencias pendientes.',
+      shareFooter: '📲 Generado con Dividimos?',
+      shareTo: 'a',
+      copyHeader: 'División de Gastos\n*****************************************************\n',
+      copyTotal: 'Gasto Total',
+      copyAverage: 'Promedio por Participante',
+      copyExpenseDetail: 'Detalle de gastos',
+      copyPaidBy: 'pagado por',
+      copyParticipants: 'participantes',
+      copyOwesTo: 'le debe pagar',
+      languageAria: 'Cambiar idioma',
+      clearSelectionTitle: 'Desmarcar todas las personas',
+      splitAllTitle: 'Si elegís Todos, el gasto se divide entre todas las personas cargadas',
+      languageSpanish: 'Español',
+      languageEnglish: 'Inglés',
+      languageChangedEs: 'Idioma cambiado a Español',
+      languageChangedEn: 'Idioma cambiado a Inglés',
+      personAdded: 'Participante agregado',
+      personRemoved: 'Participante eliminado',
+      expenseAdded: 'Gasto agregado',
+      expenseRemoved: 'Gasto eliminado',
+      allCleared: 'Se limpió toda la información',
+      undo: 'Deshacer',
+      undoApplied: 'Cambio deshecho',
+      confirmClearAll: '¿Seguro que querés borrar participantes y gastos?',
+      confirmRemovePerson: '¿Eliminar este participante y sus gastos relacionados?',
+      confirmRemoveExpense: '¿Eliminar este gasto?',
+      nothingToClear: 'No hay datos para limpiar',
+      shareGeneratedAt: '🕒 Generado',
+      shareOpenApp: '🌐 Probar app',
+      shareWhatsappShort: 'WhatsApp corto',
+      shareShortTitle: '⚡ *Resumen rápido*',
+      whatsappOpened: 'WhatsApp abierto'
+    },
+    en: {
+      appSubtitle: 'Add people, enter expenses, and quickly see who owes whom.',
+      participants: 'Participants',
+      participantsHelp: 'Add them once and you are done. Then choose who is included in each expense.',
+      addPersonLabel: 'Add Person:',
+      addButton: 'Add',
+      personPlaceholder: 'Ex: John',
+      noParticipantsYet: 'You have not added participants yet.',
+      addExpense: 'Add Expense',
+      addExpenseHelp: 'Fill in the details and mark who shares this expense.',
+      needPersonFirst: 'Add at least one person first to start.',
+      expenseDescriptionLabel: 'Expense description:',
+      expenseDescriptionPlaceholder: 'Ex: Dinner, Fuel, Uber',
+      totalAmountLabel: 'Total amount:',
+      amountPlaceholder: 'Ex: 15000',
+      whoPaidLabel: 'Who paid?',
+      selectPlaceholder: 'Select...',
+      whoParticipates: 'Who participates in this expense?',
+      participantHint: 'Tap each name to include or remove it from this expense.',
+      selectAll: 'Select all',
+      clearSelection: 'Clear selection',
+      selected: 'Selected',
+      selectedFirstHint: '(selected participants appear first)',
+      payerNotIncluded: 'paid, but is not included in the split.',
+      ready: 'Ready',
+      includedParticipants: 'participant(s) included.',
+      addExpenseButton: 'Add Expense',
+      clearAll: 'Clear All',
+      clearAllTitle: 'Deletes participants and expenses',
+      shareWhatsapp: 'Share on WhatsApp',
+      registeredExpenses: 'Registered Expenses',
+      description: 'Description',
+      amount: 'Amount',
+      paidBy: 'Paid by',
+      participantsColumn: 'Participants',
+      perPerson: 'Per person',
+      actions: 'Actions',
+      deleteExpense: 'Delete',
+      deleteParticipantTitle: 'Delete participant',
+      deleteExpenseTitle: 'Delete expense',
+      results: 'Results',
+      copyResults: 'Copy Results',
+      copyResultsTitle: 'Copy summary and transfers',
+      info: 'Information',
+      value: 'Value',
+      totalExpense: 'Total Expense:',
+      averagePerPerson: 'Average per person:',
+      owesTo: 'owes',
+      allSettled: '✅ All settled. No pending payments.',
+      enterValidName: 'Please enter a valid name',
+      personAlreadyExists: 'This person is already in the list',
+      noExpensesToShare: 'There are no expenses to share',
+      enterExpenseDescription: 'Please enter an expense description',
+      enterValidAmount: 'Please enter a valid amount',
+      selectWhoPaid: 'Please select who paid',
+      addParticipantsToSplit: 'Please add participants to split the expense',
+      dataCopied: 'Data copied :)',
+      copyError: 'Error copying to clipboard: ',
+      shareHeader: '💸 *Dividimos?*',
+      shareParticipants: '👥 Participants',
+      shareExpensesLoaded: '🧾 Expenses loaded',
+      shareTotal: '💰 Total',
+      shareAverage: '📊 Average per person',
+      shareDetailTitle: '🧾 *Expense details*',
+      sharePaidBy: '👤 Paid by',
+      shareAndMoreExpenses: '… and {count} more expense(s)',
+      shareTransfersTitle: '🔁 *Suggested transfers*',
+      shareAndMoreTransfers: '… and {count} more transfer(s)',
+      shareAllSettled: '✅ *All settled*',
+      shareNoTransfers: 'There are no pending transfers.',
+      shareFooter: '📲 Generated with Dividimos?',
+      shareTo: 'to',
+      copyHeader: 'Expense Split\n*****************************************************\n',
+      copyTotal: 'Total Expense',
+      copyAverage: 'Average per Participant',
+      copyExpenseDetail: 'Expense details',
+      copyPaidBy: 'paid by',
+      copyParticipants: 'participants',
+      copyOwesTo: 'owes',
+      languageAria: 'Change language',
+      clearSelectionTitle: 'Uncheck all people',
+      splitAllTitle: 'If you choose All, the expense is split across all loaded people',
+      languageSpanish: 'Spanish',
+      languageEnglish: 'English',
+      languageChangedEs: 'Language changed to Spanish',
+      languageChangedEn: 'Language changed to English',
+      personAdded: 'Participant added',
+      personRemoved: 'Participant removed',
+      expenseAdded: 'Expense added',
+      expenseRemoved: 'Expense deleted',
+      allCleared: 'All information has been cleared',
+      undo: 'Undo',
+      undoApplied: 'Change undone',
+      confirmClearAll: 'Are you sure you want to delete participants and expenses?',
+      confirmRemovePerson: 'Delete this participant and related expenses?',
+      confirmRemoveExpense: 'Delete this expense?',
+      nothingToClear: 'There is no data to clear',
+      shareGeneratedAt: '🕒 Generated',
+      shareOpenApp: '🌐 Try app',
+      shareWhatsappShort: 'WhatsApp short',
+      shareShortTitle: '⚡ *Quick summary*',
+      whatsappOpened: 'WhatsApp opened'
+    }
+  };
+
+  currentLanguage: LanguageCode = 'es';
+  uiNotice = '';
+  uiNoticeType: 'success' | 'info' | 'warning' = 'info';
+  canUndoLastAction = false;
+  private lastSnapshot: AppSnapshot | null = null;
+  private noticeTimer: ReturnType<typeof setTimeout> | null = null;
 
   totalExpense = 0;
   averageSpent = 0;
@@ -37,21 +372,71 @@ export class SplitComponent {
   selectedParticipants: string[] = [];
   nextExpenseId = 1;
 
+  constructor() {
+    this.initializeLanguage();
+  }
+
+  t(key: keyof TranslationMap): string {
+    return this.translations[this.currentLanguage][key];
+  }
+
+  setLanguage(language: LanguageCode): void {
+    this.currentLanguage = language;
+    localStorage.setItem(this.languageStorageKey, language);
+    const languageMessage = language === 'es' ? this.t('languageChangedEs') : this.t('languageChangedEn');
+    this.showNotice(languageMessage, 'info');
+  }
+
+  dismissNotice(): void {
+    this.uiNotice = '';
+    this.canUndoLastAction = false;
+    if (this.noticeTimer) {
+      clearTimeout(this.noticeTimer);
+      this.noticeTimer = null;
+    }
+  }
+
+  undoLastAction(): void {
+    if (!this.lastSnapshot) {
+      return;
+    }
+
+    this.restoreSnapshot(this.lastSnapshot);
+    this.lastSnapshot = null;
+    this.canUndoLastAction = false;
+    this.showNotice(this.t('undoApplied'), 'info');
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardShortcut(event: KeyboardEvent): void {
+    if (!(event.ctrlKey || event.metaKey) || event.key !== 'Enter') {
+      return;
+    }
+
+    if (!this.isExpenseFormValid()) {
+      return;
+    }
+
+    event.preventDefault();
+    this.addExpenseItem();
+  }
+
   addPerson(): void {
     const cleanPersonName = this.newPersonName.trim();
 
     if (!cleanPersonName) {
-      alert('Por favor, ingresa un nombre válido');
+      alert(this.t('enterValidName'));
       return;
     }
 
     if (this.people.includes(cleanPersonName)) {
-      alert('Esta persona ya está en la lista');
+      alert(this.t('personAlreadyExists'));
       return;
     }
 
     this.people.push(cleanPersonName);
     this.newPersonName = '';
+    this.showNotice(this.t('personAdded'), 'success');
 
     if (this.selectedParticipants.length === 0) {
       this.selectAllParticipants();
@@ -59,11 +444,17 @@ export class SplitComponent {
   }
 
   removePerson(person: string): void {
+    if (!confirm(this.t('confirmRemovePerson'))) {
+      return;
+    }
+
+    this.saveSnapshotForUndo();
     this.people = this.people.filter((currentPerson) => currentPerson !== person);
     this.expenseItems = this.expenseItems.filter((item) =>
       item.paidBy !== person && !item.participants.includes(person)
     );
     this.calculateAdvancedShares();
+    this.showNotice(this.t('personRemoved'), 'warning', true);
   }
 
   toggleParticipant(person: string): void {
@@ -92,8 +483,8 @@ export class SplitComponent {
       return;
     }
 
-    if (this.selectedParticipants.length === 0) {
-      this.selectedParticipants = [this.newExpensePaidBy];
+    if (!this.selectedParticipants.includes(this.newExpensePaidBy)) {
+      this.selectedParticipants = [...this.selectedParticipants, this.newExpensePaidBy];
     }
   }
 
@@ -119,55 +510,117 @@ export class SplitComponent {
     return this.selectedParticipants.includes(this.newExpensePaidBy);
   }
 
-  shareWhatsApp(): void {
+  shareWhatsApp(mode: ShareMode = 'full'): void {
     if (this.expenseItems.length === 0) {
-      alert('No hay gastos para compartir');
+      alert(this.t('noExpensesToShare'));
       return;
     }
 
-    const maxTransfersToShow = 6;
-    const baseMessage = [
-      '💸 *Dividimos?*',
-      `👥 ${this.people.length} | 🧾 ${this.expenseItems.length}`,
-      `💰 Total: $${this.totalExpense.toFixed(2)} | 📊 Promedio: $${this.averageSpent.toFixed(2)}`
+    const maxExpensesToShow = 8;
+    const maxTransfersToShow = 8;
+    const visibleExpenses = this.expenseItems.slice(0, maxExpensesToShow);
+    const hiddenExpensesCount = this.expenseItems.length - visibleExpenses.length;
+    const visibleTransfers = this.results.slice(0, maxTransfersToShow);
+    const hiddenTransfersCount = this.results.length - visibleTransfers.length;
+
+    const generatedAt = new Date().toLocaleString(this.currentLanguage === 'es' ? 'es-AR' : 'en-US', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    const appLink = this.getShareAppLink();
+
+    const headerLines = [
+      this.t('shareHeader'),
+      '━━━━━━━━━━━━━━━━━━',
+      `${this.t('shareParticipants')}: *${this.people.length}*`,
+      `${this.t('shareExpensesLoaded')}: *${this.expenseItems.length}*`,
+      `${this.t('shareTotal')}: *${this.formatCurrency(this.totalExpense)}*`,
+      `${this.t('shareAverage')}: *${this.formatCurrency(this.averageSpent)}*`,
+      `${this.t('shareGeneratedAt')}: ${generatedAt}`
     ];
 
-    let message = `${baseMessage.join('\n')}\n`;
+    if (mode === 'short') {
+      const shortTransfers = this.results.slice(0, 4);
+      const shortTransfersLines = [''];
+
+      shortTransfersLines.push(this.t('shareShortTitle'));
+      if (shortTransfers.length > 0) {
+        shortTransfers.forEach((result, index) => {
+          shortTransfersLines.push(`${index + 1}. ${result.debtor} ➜ ${result.creditor}: *${this.formatCurrency(result.amount)}*`);
+        });
+      } else {
+        shortTransfersLines.push(this.t('shareAllSettled'));
+      }
+
+      const shortFooterLines = [
+        '',
+        this.t('shareFooter'),
+        ...(appLink ? [`${this.t('shareOpenApp')}: ${appLink}`] : [])
+      ];
+
+      const shortMessage = [...headerLines, ...shortTransfersLines, ...shortFooterLines].join('\n');
+      const encodedShortMessage = encodeURIComponent(shortMessage);
+      window.open(`https://wa.me/?text=${encodedShortMessage}`, '_blank');
+      this.showNotice(this.t('whatsappOpened'), 'success');
+      return;
+    }
+
+    const expensesLines = [
+      '',
+      this.t('shareDetailTitle'),
+      ...visibleExpenses.map((item, index) =>
+        `${index + 1}) ${item.description} • ${this.formatCurrency(item.amount)}\n   ${this.t('sharePaidBy')}: ${item.paidBy} | 👥 ${item.participants.join(', ')}`
+      )
+    ];
+
+    if (hiddenExpensesCount > 0) {
+      expensesLines.push(this.t('shareAndMoreExpenses').replace('{count}', hiddenExpensesCount.toString()));
+    }
+
+    const transfersLines = [''];
 
     if (this.results.length > 0) {
-      const visibleTransfers = this.results.slice(0, maxTransfersToShow);
-      const hiddenTransfersCount = this.results.length - visibleTransfers.length;
-
-      message += `\n🔁 *Transferencias:*\n`;
-      visibleTransfers.forEach((result) => {
-        message += `• ${result.debtor} ➜ ${result.creditor}: $${result.amount.toFixed(2)}\n`;
+      transfersLines.push(this.t('shareTransfersTitle'));
+      visibleTransfers.forEach((result, index) => {
+        transfersLines.push(`${index + 1}. ${result.debtor} ➜ ${result.creditor}: *${this.formatCurrency(result.amount)}*`);
       });
 
       if (hiddenTransfersCount > 0) {
-        message += `… y ${hiddenTransfersCount} más\n`;
+        transfersLines.push(this.t('shareAndMoreTransfers').replace('{count}', hiddenTransfersCount.toString()));
       }
     } else {
-      message += `\n✅ Todo saldado. No hay transferencias pendientes.`;
+      transfersLines.push(this.t('shareAllSettled'));
+      transfersLines.push(this.t('shareNoTransfers'));
     }
+
+    const footerLines = [
+      '',
+      this.t('shareFooter'),
+      ...(appLink ? [`${this.t('shareOpenApp')}: ${appLink}`] : [])
+    ];
+    const message = [...headerLines, ...expensesLines, ...transfersLines, ...footerLines].join('\n');
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
+    this.showNotice(this.t('whatsappOpened'), 'success');
   }
 
   addExpenseItem(): void {
     if (!this.newExpenseDescription.trim()) {
-      alert('Por favor, ingresa una descripción del gasto');
+      alert(this.t('enterExpenseDescription'));
       return;
     }
     
     if (this.newExpenseAmount === null || this.newExpenseAmount <= 0) {
-      alert('Por favor, ingresa un monto válido');
+      alert(this.t('enterValidAmount'));
       return;
     }
 
     if (!this.newExpensePaidBy) {
-      alert('Por favor, selecciona quién pagó');
+      alert(this.t('selectWhoPaid'));
       return;
     }
 
@@ -176,7 +629,7 @@ export class SplitComponent {
     }
 
     if (this.selectedParticipants.length === 0) {
-      alert('Por favor, agrega participantes para dividir el gasto');
+      alert(this.t('addParticipantsToSplit'));
       return;
     }
 
@@ -196,11 +649,18 @@ export class SplitComponent {
     this.selectAllParticipants();
 
     this.calculateAdvancedShares();
+    this.showNotice(this.t('expenseAdded'), 'success');
   }
 
   removeExpenseItem(expenseId: number): void {
+    if (!confirm(this.t('confirmRemoveExpense'))) {
+      return;
+    }
+
+    this.saveSnapshotForUndo();
     this.expenseItems = this.expenseItems.filter((item) => item.id !== expenseId);
     this.calculateAdvancedShares();
+    this.showNotice(this.t('expenseRemoved'), 'warning', true);
   }
 
   calculateAdvancedShares(): void {
@@ -231,6 +691,16 @@ export class SplitComponent {
   }
 
   clearAll(): void {
+    if (this.people.length === 0 && this.expenseItems.length === 0) {
+      this.showNotice(this.t('nothingToClear'), 'info');
+      return;
+    }
+
+    if (!confirm(this.t('confirmClearAll'))) {
+      return;
+    }
+
+    this.saveSnapshotForUndo();
     this.people = [];
     this.expenseItems = [];
     this.newPersonName = '';
@@ -241,28 +711,37 @@ export class SplitComponent {
     this.nextExpenseId = 1;
 
     this.resetResults();
+    this.showNotice(this.t('allCleared'), 'warning', true);
   }
 
   copyTable(): void {
     const resultsText = this.results
-      .map((result) => `- ${result.debtor} le debe pagar $${result.amount.toFixed(2)} a ${result.creditor}`)
+      .map((result) => `- ${result.debtor} ${this.t('copyOwesTo')} $${result.amount.toFixed(2)} ${this.t('shareTo')} ${result.creditor}`)
       .join('\n');
 
     const expenseDetailsText = this.expenseItems
-      .map((item) => `${item.description}: $${item.amount.toFixed(2)} (pagado por ${item.paidBy}, participantes: ${item.participants.join(', ')})`)
+      .map((item) => `${item.description}: $${item.amount.toFixed(2)} (${this.t('copyPaidBy')} ${item.paidBy}, ${this.t('copyParticipants')}: ${item.participants.join(', ')})`)
       .join('\n');
 
-    const calculationsText = `Gasto Total: $${this.totalExpense.toFixed(2)}\nPromedio por Participante: $${this.averageSpent.toFixed(2)}\n\nDetalle de gastos:\n${expenseDetailsText}`;
+    const calculationsText = `${this.t('copyTotal')}: $${this.totalExpense.toFixed(2)}\n${this.t('copyAverage')}: $${this.averageSpent.toFixed(2)}\n\n${this.t('copyExpenseDetail')}:\n${expenseDetailsText}`;
 
-    const textToCopy = this.copyHeader + `${resultsText}\n\n${calculationsText}`;
+    const textToCopy = this.t('copyHeader') + `${resultsText}\n\n${calculationsText}`;
 
     navigator.clipboard.writeText(textToCopy)
         .then(() => {
-            alert('Datos copiados :)');
+            this.showNotice(this.t('dataCopied'), 'success');
         })
         .catch((error) => {
-            console.error('Error al copiar al portapapeles: ', error);
+            console.error(this.t('copyError'), error);
         }); 
+  }
+
+  private isExpenseFormValid(): boolean {
+    return this.people.length > 0
+      && !!this.newExpenseDescription.trim()
+      && !!this.newExpenseAmount
+      && this.newExpenseAmount > 0
+      && !!this.newExpensePaidBy;
   }
 
   trackByPerson(_index: number, person: string): string {
@@ -325,5 +804,81 @@ export class SplitComponent {
     }
 
     return transferResults;
+  }
+
+  private formatCurrency(amount: number): string {
+    return `$${amount.toFixed(2)}`;
+  }
+
+  private getShareAppLink(): string {
+    const baseUrl = `${window.location.origin}${window.location.pathname}`;
+    if (baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1')) {
+      return '';
+    }
+
+    const separator = baseUrl.includes('?') ? '&' : '?';
+    return `${baseUrl}${separator}ref=whatsapp`;
+  }
+
+  private showNotice(message: string, type: 'success' | 'info' | 'warning', enableUndo = false): void {
+    this.uiNotice = message;
+    this.uiNoticeType = type;
+    this.canUndoLastAction = enableUndo && !!this.lastSnapshot;
+
+    if (this.noticeTimer) {
+      clearTimeout(this.noticeTimer);
+    }
+
+    this.noticeTimer = setTimeout(() => {
+      this.uiNotice = '';
+      this.canUndoLastAction = false;
+      this.noticeTimer = null;
+    }, 4500);
+  }
+
+  private saveSnapshotForUndo(): void {
+    this.lastSnapshot = {
+      people: [...this.people],
+      expenseItems: this.expenseItems.map((item) => ({ ...item, participants: [...item.participants] })),
+      newPersonName: this.newPersonName,
+      newExpenseDescription: this.newExpenseDescription,
+      newExpenseAmount: this.newExpenseAmount,
+      newExpensePaidBy: this.newExpensePaidBy,
+      selectedParticipants: [...this.selectedParticipants],
+      nextExpenseId: this.nextExpenseId,
+      totalExpense: this.totalExpense,
+      averageSpent: this.averageSpent,
+      results: this.results.map((result) => ({ ...result }))
+    };
+  }
+
+  private restoreSnapshot(snapshot: AppSnapshot): void {
+    this.people = [...snapshot.people];
+    this.expenseItems = snapshot.expenseItems.map((item) => ({ ...item, participants: [...item.participants] }));
+    this.newPersonName = snapshot.newPersonName;
+    this.newExpenseDescription = snapshot.newExpenseDescription;
+    this.newExpenseAmount = snapshot.newExpenseAmount;
+    this.newExpensePaidBy = snapshot.newExpensePaidBy;
+    this.selectedParticipants = [...snapshot.selectedParticipants];
+    this.nextExpenseId = snapshot.nextExpenseId;
+    this.totalExpense = snapshot.totalExpense;
+    this.averageSpent = snapshot.averageSpent;
+    this.results = snapshot.results.map((result) => ({ ...result }));
+  }
+
+  private initializeLanguage(): void {
+    const savedLanguage = localStorage.getItem(this.languageStorageKey);
+
+    if (savedLanguage === 'es' || savedLanguage === 'en') {
+      this.currentLanguage = savedLanguage;
+      return;
+    }
+
+    this.currentLanguage = this.detectDeviceLanguage();
+  }
+
+  private detectDeviceLanguage(): LanguageCode {
+    const browserLanguage = (navigator.languages?.[0] ?? navigator.language ?? 'es').toLowerCase();
+    return browserLanguage.startsWith('es') ? 'es' : 'en';
   }
 }
