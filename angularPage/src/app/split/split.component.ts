@@ -119,6 +119,7 @@ interface TranslationMap {
   shareOpenApp: string;
   shareWhatsappShort: string;
   shareShortTitle: string;
+  whatsappOpened: string;
 }
 
 interface AppSnapshot {
@@ -243,7 +244,8 @@ export class SplitComponent {
       shareGeneratedAt: '🕒 Generado',
       shareOpenApp: '🌐 Probar app',
       shareWhatsappShort: 'WhatsApp corto',
-      shareShortTitle: '⚡ *Resumen rápido*'
+      shareShortTitle: '⚡ *Resumen rápido*',
+      whatsappOpened: 'WhatsApp abierto'
     },
     en: {
       appSubtitle: 'Add people, enter expenses, and quickly see who owes whom.',
@@ -345,7 +347,8 @@ export class SplitComponent {
       shareGeneratedAt: '🕒 Generated',
       shareOpenApp: '🌐 Try app',
       shareWhatsappShort: 'WhatsApp short',
-      shareShortTitle: '⚡ *Quick summary*'
+      shareShortTitle: '⚡ *Quick summary*',
+      whatsappOpened: 'WhatsApp opened'
     }
   };
 
@@ -560,7 +563,7 @@ export class SplitComponent {
       const shortMessage = [...headerLines, ...shortTransfersLines, ...shortFooterLines].join('\n');
       const encodedShortMessage = encodeURIComponent(shortMessage);
       window.open(`https://wa.me/?text=${encodedShortMessage}`, '_blank');
-      this.showNotice('WhatsApp ✓', 'success');
+      this.showNotice(this.t('whatsappOpened'), 'success');
       return;
     }
 
@@ -602,7 +605,7 @@ export class SplitComponent {
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
-    this.showNotice('WhatsApp ✓', 'success');
+    this.showNotice(this.t('whatsappOpened'), 'success');
   }
 
   addExpenseItem(): void {
