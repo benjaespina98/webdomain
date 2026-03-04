@@ -1,4 +1,20 @@
-h1.display-4 {
+.brand-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.brand-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    object-fit: cover;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.brand-title .brand-name {
     background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 50%, #5b21b6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -7,7 +23,7 @@ h1.display-4 {
     font-weight: 700;
     text-align: center;
     letter-spacing: 1px;
-    margin-bottom: 20px;
+    margin-bottom: 0;
 }
 
 :host {

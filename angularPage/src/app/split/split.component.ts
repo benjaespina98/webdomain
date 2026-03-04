@@ -16,7 +16,6 @@ interface SettlementResult {
 
 type BalanceMap = Record<string, number>;
 type LanguageCode = 'es' | 'en';
-type ShareMode = 'full' | 'short';
 
 interface TranslationMap {
   appSubtitle: string;
@@ -59,8 +58,6 @@ interface TranslationMap {
   deleteParticipantTitle: string;
   deleteExpenseTitle: string;
   results: string;
-  copyResults: string;
-  copyResultsTitle: string;
   info: string;
   value: string;
   totalExpense: string;
@@ -74,8 +71,6 @@ interface TranslationMap {
   enterValidAmount: string;
   selectWhoPaid: string;
   addParticipantsToSplit: string;
-  dataCopied: string;
-  copyError: string;
   shareHeader: string;
   shareParticipants: string;
   shareExpensesLoaded: string;
@@ -90,13 +85,6 @@ interface TranslationMap {
   shareNoTransfers: string;
   shareFooter: string;
   shareTo: string;
-  copyHeader: string;
-  copyTotal: string;
-  copyAverage: string;
-  copyExpenseDetail: string;
-  copyPaidBy: string;
-  copyParticipants: string;
-  copyOwesTo: string;
   languageAria: string;
   clearSelectionTitle: string;
   splitAllTitle: string;
@@ -117,8 +105,6 @@ interface TranslationMap {
   nothingToClear: string;
   shareGeneratedAt: string;
   shareOpenApp: string;
-  shareWhatsappShort: string;
-  shareShortTitle: string;
   whatsappOpened: string;
 }
 
@@ -185,8 +171,6 @@ export class SplitComponent {
       deleteParticipantTitle: 'Eliminar participante',
       deleteExpenseTitle: 'Eliminar gasto',
       results: 'Resultados',
-      copyResults: 'Copiar Resultados',
-      copyResultsTitle: 'Copiar resumen y transferencias',
       info: 'Información',
       value: 'Valor',
       totalExpense: 'Gasto Total:',
@@ -200,10 +184,8 @@ export class SplitComponent {
       enterValidAmount: 'Por favor, ingresa un monto válido',
       selectWhoPaid: 'Por favor, selecciona quién pagó',
       addParticipantsToSplit: 'Por favor, agrega participantes para dividir el gasto',
-      dataCopied: 'Datos copiados :)',
-      copyError: 'Error al copiar al portapapeles: ',
-      shareHeader: '💸 *Dividimos?*',
-      shareParticipants: '👥 Participantes',
+      shareHeader: '💸 *Dividimos? — Resumen*',
+      shareParticipants: '👥 Participantes cargados',
       shareExpensesLoaded: '🧾 Gastos cargados',
       shareTotal: '💰 Total',
       shareAverage: '📊 Promedio por persona',
@@ -214,15 +196,8 @@ export class SplitComponent {
       shareAndMoreTransfers: '… y {count} transferencia(s) más',
       shareAllSettled: '✅ *Todo saldado*',
       shareNoTransfers: 'No hay transferencias pendientes.',
-      shareFooter: '📲 Generado con Dividimos?',
+      shareFooter: '📲 Hecho con Dividimos?',
       shareTo: 'a',
-      copyHeader: 'División de Gastos\n*****************************************************\n',
-      copyTotal: 'Gasto Total',
-      copyAverage: 'Promedio por Participante',
-      copyExpenseDetail: 'Detalle de gastos',
-      copyPaidBy: 'pagado por',
-      copyParticipants: 'participantes',
-      copyOwesTo: 'le debe pagar',
       languageAria: 'Cambiar idioma',
       clearSelectionTitle: 'Desmarcar todas las personas',
       splitAllTitle: 'Si elegís Todos, el gasto se divide entre todas las personas cargadas',
@@ -243,8 +218,6 @@ export class SplitComponent {
       nothingToClear: 'No hay datos para limpiar',
       shareGeneratedAt: '🕒 Generado',
       shareOpenApp: '🌐 Probar app',
-      shareWhatsappShort: 'WhatsApp corto',
-      shareShortTitle: '⚡ *Resumen rápido*',
       whatsappOpened: 'WhatsApp abierto'
     },
     en: {
@@ -288,8 +261,6 @@ export class SplitComponent {
       deleteParticipantTitle: 'Delete participant',
       deleteExpenseTitle: 'Delete expense',
       results: 'Results',
-      copyResults: 'Copy Results',
-      copyResultsTitle: 'Copy summary and transfers',
       info: 'Information',
       value: 'Value',
       totalExpense: 'Total Expense:',
@@ -303,10 +274,8 @@ export class SplitComponent {
       enterValidAmount: 'Please enter a valid amount',
       selectWhoPaid: 'Please select who paid',
       addParticipantsToSplit: 'Please add participants to split the expense',
-      dataCopied: 'Data copied :)',
-      copyError: 'Error copying to clipboard: ',
-      shareHeader: '💸 *Dividimos?*',
-      shareParticipants: '👥 Participants',
+      shareHeader: '💸 *Dividimos? — Summary*',
+      shareParticipants: '👥 Participants loaded',
       shareExpensesLoaded: '🧾 Expenses loaded',
       shareTotal: '💰 Total',
       shareAverage: '📊 Average per person',
@@ -317,15 +286,8 @@ export class SplitComponent {
       shareAndMoreTransfers: '… and {count} more transfer(s)',
       shareAllSettled: '✅ *All settled*',
       shareNoTransfers: 'There are no pending transfers.',
-      shareFooter: '📲 Generated with Dividimos?',
+      shareFooter: '📲 Built with Dividimos?',
       shareTo: 'to',
-      copyHeader: 'Expense Split\n*****************************************************\n',
-      copyTotal: 'Total Expense',
-      copyAverage: 'Average per Participant',
-      copyExpenseDetail: 'Expense details',
-      copyPaidBy: 'paid by',
-      copyParticipants: 'participants',
-      copyOwesTo: 'owes',
       languageAria: 'Change language',
       clearSelectionTitle: 'Uncheck all people',
       splitAllTitle: 'If you choose All, the expense is split across all loaded people',
@@ -346,8 +308,6 @@ export class SplitComponent {
       nothingToClear: 'There is no data to clear',
       shareGeneratedAt: '🕒 Generated',
       shareOpenApp: '🌐 Try app',
-      shareWhatsappShort: 'WhatsApp short',
-      shareShortTitle: '⚡ *Quick summary*',
       whatsappOpened: 'WhatsApp opened'
     }
   };
@@ -510,7 +470,7 @@ export class SplitComponent {
     return this.selectedParticipants.includes(this.newExpensePaidBy);
   }
 
-  shareWhatsApp(mode: ShareMode = 'full'): void {
+  shareWhatsApp(): void {
     if (this.expenseItems.length === 0) {
       alert(this.t('noExpensesToShare'));
       return;
@@ -540,32 +500,6 @@ export class SplitComponent {
       `${this.t('shareAverage')}: *${this.formatCurrency(this.averageSpent)}*`,
       `${this.t('shareGeneratedAt')}: ${generatedAt}`
     ];
-
-    if (mode === 'short') {
-      const shortTransfers = this.results.slice(0, 4);
-      const shortTransfersLines = [''];
-
-      shortTransfersLines.push(this.t('shareShortTitle'));
-      if (shortTransfers.length > 0) {
-        shortTransfers.forEach((result, index) => {
-          shortTransfersLines.push(`${index + 1}. ${result.debtor} ➜ ${result.creditor}: *${this.formatCurrency(result.amount)}*`);
-        });
-      } else {
-        shortTransfersLines.push(this.t('shareAllSettled'));
-      }
-
-      const shortFooterLines = [
-        '',
-        this.t('shareFooter'),
-        ...(appLink ? [`${this.t('shareOpenApp')}: ${appLink}`] : [])
-      ];
-
-      const shortMessage = [...headerLines, ...shortTransfersLines, ...shortFooterLines].join('\n');
-      const encodedShortMessage = encodeURIComponent(shortMessage);
-      window.open(`https://wa.me/?text=${encodedShortMessage}`, '_blank');
-      this.showNotice(this.t('whatsappOpened'), 'success');
-      return;
-    }
 
     const expensesLines = [
       '',
@@ -712,28 +646,6 @@ export class SplitComponent {
 
     this.resetResults();
     this.showNotice(this.t('allCleared'), 'warning', true);
-  }
-
-  copyTable(): void {
-    const resultsText = this.results
-      .map((result) => `- ${result.debtor} ${this.t('copyOwesTo')} $${result.amount.toFixed(2)} ${this.t('shareTo')} ${result.creditor}`)
-      .join('\n');
-
-    const expenseDetailsText = this.expenseItems
-      .map((item) => `${item.description}: $${item.amount.toFixed(2)} (${this.t('copyPaidBy')} ${item.paidBy}, ${this.t('copyParticipants')}: ${item.participants.join(', ')})`)
-      .join('\n');
-
-    const calculationsText = `${this.t('copyTotal')}: $${this.totalExpense.toFixed(2)}\n${this.t('copyAverage')}: $${this.averageSpent.toFixed(2)}\n\n${this.t('copyExpenseDetail')}:\n${expenseDetailsText}`;
-
-    const textToCopy = this.t('copyHeader') + `${resultsText}\n\n${calculationsText}`;
-
-    navigator.clipboard.writeText(textToCopy)
-        .then(() => {
-            this.showNotice(this.t('dataCopied'), 'success');
-        })
-        .catch((error) => {
-            console.error(this.t('copyError'), error);
-        }); 
   }
 
   private isExpenseFormValid(): boolean {
