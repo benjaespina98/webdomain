@@ -11,7 +11,10 @@
         <button type="button" class="language-btn" [class.active]="currentLanguage === 'es'" (click)="setLanguage('es')" [title]="t('languageSpanish')">ES</button>
         <button type="button" class="language-btn" [class.active]="currentLanguage === 'en'" (click)="setLanguage('en')" [title]="t('languageEnglish')">EN</button>
     </div>
-    <h1 class="display-4">Dividimos?</h1>
+    <h1 class="display-4 brand-title">
+        <img class="brand-icon" src="assets/icons/icon-180x180.png" alt="Dividimos logo">
+        <span class="brand-name">Dividimos?</span>
+    </h1>
     <p class="page-subtitle text-center mb-4">{{ t('appSubtitle') }}</p>
     <div class="quick-stats" *ngIf="people.length > 0 || expenseItems.length > 0">
         <span class="stat-pill"><strong>{{ people.length }}</strong> {{ t('participants') }}</span>
@@ -126,9 +129,6 @@
                         <button type="button" class="btn btn-outline-primary btn-sm-action" (click)="shareWhatsApp()" *ngIf="expenseItems.length > 0">
                             <i class="fab fa-whatsapp"></i> {{ t('shareWhatsapp') }}
                         </button>
-                        <button type="button" class="btn btn-outline-light btn-sm-action" (click)="shareWhatsApp('short')" *ngIf="expenseItems.length > 0">
-                            <i class="fab fa-whatsapp"></i> {{ t('shareWhatsappShort') }}
-                        </button>
                     </div>
                 </form>
             </div>
@@ -172,9 +172,6 @@
     <div class="row mt-4" *ngIf="expenseItems.length > 0">
         <div class="col-12 d-flex justify-content-between align-items-center results-header">
             <h4 class="section-title mb-0">{{ t('results') }}</h4>
-            <button type="button" class="btn btn-outline-secondary" (click)="copyTable()" [title]="t('copyResultsTitle')">
-                <i class="fas fa-copy me-1"></i>{{ t('copyResults') }}
-            </button>
         </div>
         <div class="col-12">
             <div class="mt-3">
