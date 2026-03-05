@@ -83,6 +83,7 @@ interface TranslationMap {
   shareAndMoreTransfers: string;
   shareAllSettled: string;
   shareNoTransfers: string;
+  shareTransferConnector: string;
   shareFooter: string;
   shareTo: string;
   languageAria: string;
@@ -184,19 +185,20 @@ export class SplitComponent {
       enterValidAmount: 'Por favor, ingresa un monto válido',
       selectWhoPaid: 'Por favor, selecciona quién pagó',
       addParticipantsToSplit: 'Por favor, agrega participantes para dividir el gasto',
-      shareHeader: '💸 *Dividimos? — Resumen*',
+      shareHeader: '💸 dividimos? - Resumen',
       shareParticipants: '👥 Participantes cargados',
       shareExpensesLoaded: '🧾 Gastos cargados',
       shareTotal: '💰 Total',
       shareAverage: '📊 Promedio por persona',
-      shareDetailTitle: '🧾 *Detalle de gastos*',
+      shareDetailTitle: '🧾 Detalle de gastos',
       sharePaidBy: '👤 Pagó',
       shareAndMoreExpenses: '… y {count} gasto(s) más',
-      shareTransfersTitle: '🔁 *Transferencias sugeridas*',
+      shareTransfersTitle: '🔁 Transferencias sugeridas',
       shareAndMoreTransfers: '… y {count} transferencia(s) más',
-      shareAllSettled: '✅ *Todo saldado*',
+      shareAllSettled: '✅ Todo saldado',
       shareNoTransfers: 'No hay transferencias pendientes.',
-      shareFooter: '📲 Hecho con Dividimos?',
+      shareTransferConnector: 'd/.',
+      shareFooter: '📲 Hecho con dividimos?',
       shareTo: 'a',
       languageAria: 'Cambiar idioma',
       clearSelectionTitle: 'Desmarcar todas las personas',
@@ -274,19 +276,20 @@ export class SplitComponent {
       enterValidAmount: 'Please enter a valid amount',
       selectWhoPaid: 'Please select who paid',
       addParticipantsToSplit: 'Please add participants to split the expense',
-      shareHeader: '💸 *Dividimos? — Summary*',
+      shareHeader: '💸 dividimos? - Summary',
       shareParticipants: '👥 Participants loaded',
       shareExpensesLoaded: '🧾 Expenses loaded',
       shareTotal: '💰 Total',
       shareAverage: '📊 Average per person',
-      shareDetailTitle: '🧾 *Expense details*',
+      shareDetailTitle: '🧾 Expense details',
       sharePaidBy: '👤 Paid by',
       shareAndMoreExpenses: '… and {count} more expense(s)',
-      shareTransfersTitle: '🔁 *Suggested transfers*',
+      shareTransfersTitle: '🔁 Suggested transfers',
       shareAndMoreTransfers: '… and {count} more transfer(s)',
-      shareAllSettled: '✅ *All settled*',
+      shareAllSettled: '✅ All settled',
       shareNoTransfers: 'There are no pending transfers.',
-      shareFooter: '📲 Built with Dividimos?',
+      shareTransferConnector: 'to',
+      shareFooter: '📲 Built with dividimos?',
       shareTo: 'to',
       languageAria: 'Change language',
       clearSelectionTitle: 'Uncheck all people',
@@ -457,9 +460,7 @@ export class SplitComponent {
   }
 
   getPeopleForSelection(): string[] {
-    const selected = this.people.filter((person) => this.selectedParticipants.includes(person));
-    const notSelected = this.people.filter((person) => !this.selectedParticipants.includes(person));
-    return [...selected, ...notSelected];
+    return this.people;
   }
 
   isPayerIncludedInParticipants(): boolean {
@@ -493,11 +494,10 @@ export class SplitComponent {
 
     const headerLines = [
       this.t('shareHeader'),
-      '━━━━━━━━━━━━━━━━━━',
-      `${this.t('shareParticipants')}: *${this.people.length}*`,
-      `${this.t('shareExpensesLoaded')}: *${this.expenseItems.length}*`,
-      `${this.t('shareTotal')}: *${this.formatCurrency(this.totalExpense)}*`,
-      `${this.t('shareAverage')}: *${this.formatCurrency(this.averageSpent)}*`,
+      `${this.t('shareParticipants')}: ${this.people.length}`,
+      `${this.t('shareExpensesLoaded')}: ${this.expenseItems.length}`,
+      `${this.t('shareTotal')}: ${this.formatCurrency(this.totalExpense)}`,
+      `${this.t('shareAverage')}: ${this.formatCurrency(this.averageSpent)}`,
       `${this.t('shareGeneratedAt')}: ${generatedAt}`
     ];
 
@@ -505,7 +505,7 @@ export class SplitComponent {
       '',
       this.t('shareDetailTitle'),
       ...visibleExpenses.map((item, index) =>
-        `${index + 1}) ${item.description} • ${this.formatCurrency(item.amount)}\n   ${this.t('sharePaidBy')}: ${item.paidBy} | 👥 ${item.participants.join(', ')}`
+        `${index + 1}) ${item.description} - ${this.formatCurrency(item.amount)}\n   ${this.t('sharePaidBy')}: ${item.paidBy} | 👥 ${item.participants.join(', ')}`
       )
     ];
 
@@ -518,7 +518,7 @@ export class SplitComponent {
     if (this.results.length > 0) {
       transfersLines.push(this.t('shareTransfersTitle'));
       visibleTransfers.forEach((result, index) => {
-        transfersLines.push(`${index + 1}. ${result.debtor} ➜ ${result.creditor}: *${this.formatCurrency(result.amount)}*`);
+        transfersLines.push(`${index + 1}. ${result.debtor} ${this.t('shareTransferConnector')} ${result.creditor}: ${this.formatCurrency(result.amount)}`);
       });
 
       if (hiddenTransfersCount > 0) {

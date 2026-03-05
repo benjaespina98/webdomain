@@ -12,8 +12,8 @@
         <button type="button" class="language-btn" [class.active]="currentLanguage === 'en'" (click)="setLanguage('en')" [title]="t('languageEnglish')">EN</button>
     </div>
     <h1 class="display-4 brand-title">
-        <img class="brand-icon" src="assets/icons/icon-180x180.png" alt="Dividimos logo">
-        <span class="brand-name">Dividimos?</span>
+        <img class="brand-icon" src="assets/icons/icon-180x180.png" alt="dividimos? logo">
+        <span class="brand-name">dividimos?</span>
     </h1>
     <p class="page-subtitle text-center mb-4">{{ t('appSubtitle') }}</p>
     <div class="quick-stats" *ngIf="people.length > 0 || expenseItems.length > 0">
@@ -94,7 +94,6 @@
                         </div>
                         <div class="selection-summary">
                             <span>{{ t('selected') }}: <strong>{{ selectedParticipants.length }}</strong> / {{ people.length }}</span>
-                            <small class="text-muted ms-2" *ngIf="selectedParticipants.length > 0 && selectedParticipants.length < people.length">{{ t('selectedFirstHint') }}</small>
                         </div>
                         <div class="participant-chip-grid">
                             <button
