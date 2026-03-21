@@ -517,7 +517,11 @@ export class SplitComponent {
     if (this.results.length > 0) {
       transfersLines.push(this.t('shareTransfersTitle'));
       visibleTransfers.forEach((result, index) => {
-        transfersLines.push(`${index + 1}. ${result.debtor} ${this.t('shareTransferConnector')} ${result.creditor}: ${this.formatCurrency(result.amount)}`);
+        if (this.currentLanguage === 'es') {
+          transfersLines.push(`${index + 1}. ${result.debtor} le debe pagar a ${result.creditor}: ${this.formatCurrency(result.amount)}`);
+        } else {
+          transfersLines.push(`${index + 1}. ${result.debtor} ${this.t('shareTransferConnector')} ${result.creditor}: ${this.formatCurrency(result.amount)}`);
+        }
       });
 
       if (hiddenTransfersCount > 0) {
