@@ -493,12 +493,11 @@ export class SplitComponent {
     const appLink = this.getShareAppLink();
 
     const headerLines = [
-      this.t('shareHeader'),
+      '🟣 Dividimos?',
       `${this.t('shareParticipants')}: ${this.people.length}`,
       `${this.t('shareExpensesLoaded')}: ${this.expenseItems.length}`,
       `${this.t('shareTotal')}: ${this.formatCurrency(this.totalExpense)}`,
-      `${this.t('shareAverage')}: ${this.formatCurrency(this.averageSpent)}`,
-      `${this.t('shareGeneratedAt')}: ${generatedAt}`
+      `${this.t('shareAverage')}: ${this.formatCurrency(this.averageSpent)}`
     ];
 
     const expensesLines = [
