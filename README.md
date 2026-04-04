@@ -21,9 +21,7 @@ Está desarrollada con Angular y pensada para uso real en situaciones cotidianas
 	- promedio por persona,
 	- transferencias sugeridas entre deudores y acreedores.
 - Compartir resumen por WhatsApp con detalle de gastos y transferencias.
-- Interfaz bilingüe (Español/Inglés) con persistencia del idioma en localStorage.
-- Avisos de estado y opción de deshacer acciones críticas.
-- Atajo de teclado para carga rápida de gasto: Ctrl/Cmd + Enter.
+- Interfaz bilingüe (Español/Inglés).
 - Diseño responsive para desktop y mobile.
 - Soporte PWA (instalable) con Service Worker y actualización automática de versión.
 
