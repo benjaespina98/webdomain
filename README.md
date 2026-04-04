@@ -102,7 +102,7 @@ El proyecto está preparado para deploy en Vercel, con headers de caché optimiz
 
 ## Demo
 
-- Web: agregar URL pública de Vercel aquí.
+- Web: https://dividimos.vercel.app/
 
 ## Estado
 
