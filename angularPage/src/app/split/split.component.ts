@@ -477,13 +477,6 @@ export class SplitComponent {
       return;
     }
 
-    const maxExpensesToShow = 8;
-    const maxTransfersToShow = 8;
-    const visibleExpenses = this.expenseItems.slice(0, maxExpensesToShow);
-    const hiddenExpensesCount = this.expenseItems.length - visibleExpenses.length;
-    const visibleTransfers = this.results.slice(0, maxTransfersToShow);
-    const hiddenTransfersCount = this.results.length - visibleTransfers.length;
-
     const generatedAt = new Date().toLocaleString(this.currentLanguage === 'es' ? 'es-AR' : 'en-US', {
       day: '2-digit',
       month: '2-digit',
@@ -503,30 +496,22 @@ export class SplitComponent {
     const expensesLines = [
       '',
       this.t('shareDetailTitle'),
-      ...visibleExpenses.map((item, index) =>
+      ...this.expenseItems.map((item, index) =>
         `${index + 1}) ${item.description} - ${this.formatCurrency(item.amount)}\n   ${this.t('sharePaidBy')}: ${item.paidBy} | 👥 ${item.participants.join(', ')}`
       )
     ];
-
-    if (hiddenExpensesCount > 0) {
-      expensesLines.push(this.t('shareAndMoreExpenses').replace('{count}', hiddenExpensesCount.toString()));
-    }
 
     const transfersLines = [''];
 
     if (this.results.length > 0) {
       transfersLines.push(this.t('shareTransfersTitle'));
-      visibleTransfers.forEach((result, index) => {
+      this.results.forEach((result, index) => {
         if (this.currentLanguage === 'es') {
           transfersLines.push(`${index + 1}. ${result.debtor} le debe pagar a ${result.creditor}: ${this.formatCurrency(result.amount)}`);
         } else {
           transfersLines.push(`${index + 1}. ${result.debtor} ${this.t('shareTransferConnector')} ${result.creditor}: ${this.formatCurrency(result.amount)}`);
         }
       });
-
-      if (hiddenTransfersCount > 0) {
-        transfersLines.push(this.t('shareAndMoreTransfers').replace('{count}', hiddenTransfersCount.toString()));
-      }
     } else {
       transfersLines.push(this.t('shareAllSettled'));
       transfersLines.push(this.t('shareNoTransfers'));
