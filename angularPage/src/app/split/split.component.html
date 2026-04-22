@@ -83,36 +83,56 @@
 
                     <div class="mb-3">
                         <label class="form-label" [title]="t('splitAllTitle')">{{ t('whoParticipates') }}</label>
-                        <p class="selection-help mb-2">{{ t('participantHint') }}</p>
-                        <div class="mb-2 participant-actions">
-                            <button type="button" class="btn" (click)="selectAllParticipants()" [class.btn-success]="areAllSelected()" [class.btn-outline-success]="!areAllSelected()" [class.is-active]="areAllSelected()">
-                                <i class="fas fa-users"></i> {{ t('selectAll') }}
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary" (click)="deselectAllParticipants()" [class.is-active]="areNoneSelected()" [title]="t('clearSelectionTitle')">
-                                <i class="fas fa-times"></i> {{ t('clearSelection') }}
-                            </button>
+
+                        <div class="d-flex gap-4 mb-2 mt-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="splitMode" id="splitModeAll" value="all" [(ngModel)]="splitMode">
+                                <label class="form-check-label fw-medium" for="splitModeAll">
+                                    {{ t('splitModeAll') }}
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="splitMode" id="splitModeCustom" value="custom" [(ngModel)]="splitMode">
+                                <label class="form-check-label fw-medium" for="splitModeCustom">
+                                    {{ t('splitModeCustom') }}
+                                </label>
+                            </div>
                         </div>
-                        <div class="selection-summary">
-                            <span>{{ t('selected') }}: <strong>{{ selectedParticipants.length }}</strong> / {{ people.length }}</span>
+
+                        <p class="text-muted small mb-3" *ngIf="splitMode === 'all'">{{ t('splitAllHelp') }}</p>
+
+                        <div *ngIf="splitMode === 'custom'" class="custom-participants-box p-3 border rounded bg-light">
+                            <p class="selection-help mb-2">{{ t('participantHint') }}</p>
+                            <div class="mb-2 participant-actions">
+                                <button type="button" class="btn" (click)="selectAllParticipants()" [class.btn-success]="areAllSelected()" [class.btn-outline-success]="!areAllSelected()" [class.is-active]="areAllSelected()">
+                                    <i class="fas fa-users"></i> {{ t('selectAll') }}
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" (click)="deselectAllParticipants()" [class.is-active]="areNoneSelected()" [title]="t('clearSelectionTitle')">
+                                    <i class="fas fa-times"></i> {{ t('clearSelection') }}
+                                </button>
+                            </div>
+                            <div class="selection-summary mb-2">
+                                <span>{{ t('selected') }}: <strong>{{ selectedParticipants.length }}</strong> / {{ people.length }}</span>
+                            </div>
+                            <div class="participant-chip-grid">
+                                <button
+                                    type="button"
+                                    class="participant-chip"
+                                    *ngFor="let person of getPeopleForSelection(); trackBy: trackByPerson"
+                                    [class.selected]="isParticipantSelected(person)"
+                                    [attr.aria-pressed]="isParticipantSelected(person)"
+                                    (click)="toggleParticipant(person)">
+                                    <span class="participant-name">{{ person }}</span>
+                                    <span class="participant-check" *ngIf="isParticipantSelected(person)">✓</span>
+                                </button>
+                            </div>
+                            <small class="text-warning d-block mt-2" *ngIf="newExpensePaidBy && !isPayerIncludedInParticipants()">
+                                ⚠️ {{ newExpensePaidBy }} {{ t('payerNotIncluded') }}
+                            </small>
+                            <small class="text-muted d-block mt-1" *ngIf="selectedParticipants.length > 0">
+                                {{ t('ready') }}: {{ selectedParticipants.length }} {{ t('includedParticipants') }}
+                            </small>
                         </div>
-                        <div class="participant-chip-grid">
-                            <button
-                                type="button"
-                                class="participant-chip"
-                                *ngFor="let person of getPeopleForSelection(); trackBy: trackByPerson"
-                                [class.selected]="isParticipantSelected(person)"
-                                [attr.aria-pressed]="isParticipantSelected(person)"
-                                (click)="toggleParticipant(person)">
-                                <span class="participant-name">{{ person }}</span>
-                                <span class="participant-check" *ngIf="isParticipantSelected(person)">✓</span>
-                            </button>
-                        </div>
-                        <small class="text-warning d-block mt-1" *ngIf="newExpensePaidBy && !isPayerIncludedInParticipants()">
-                            ⚠️ {{ newExpensePaidBy }} {{ t('payerNotIncluded') }}
-                        </small>
-                        <small class="text-muted" *ngIf="selectedParticipants.length > 0">
-                            {{ t('ready') }}: {{ selectedParticipants.length }} {{ t('includedParticipants') }}
-                        </small>
                     </div>
 
                     <div class="actions-row">

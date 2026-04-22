@@ -107,6 +107,10 @@ interface TranslationMap {
   shareGeneratedAt: string;
   shareOpenApp: string;
   whatsappOpened: string;
+  splitModeAll: string;
+  splitModeCustom: string;
+  splitAllHelp: string;
+  splitCustomHelp: string;
 }
 
 interface AppSnapshot {
@@ -116,6 +120,7 @@ interface AppSnapshot {
   newExpenseDescription: string;
   newExpenseAmount: number | null;
   newExpensePaidBy: string;
+  splitMode: 'all' | 'custom';
   selectedParticipants: string[];
   nextExpenseId: number;
   totalExpense: number;
@@ -220,7 +225,11 @@ export class SplitComponent {
       nothingToClear: 'No hay datos para limpiar',
       shareGeneratedAt: '🕒 Generado',
       shareOpenApp: '🌐 Probar app',
-      whatsappOpened: 'WhatsApp abierto'
+      whatsappOpened: 'WhatsApp abierto',
+      splitModeAll: 'Dividir entre todos',
+      splitModeCustom: 'Elegir participantes',
+      splitAllHelp: 'El gasto se dividirá en partes iguales entre todos los participantes registrados.',
+      splitCustomHelp: 'Elegí quiénes participan de este gasto.'
     },
     en: {
       appSubtitle: 'Add people, enter expenses, and quickly see who owes whom.',
@@ -311,7 +320,11 @@ export class SplitComponent {
       nothingToClear: 'There is no data to clear',
       shareGeneratedAt: '🕒 Generated',
       shareOpenApp: '🌐 Try app',
-      whatsappOpened: 'WhatsApp opened'
+      whatsappOpened: 'WhatsApp opened',
+      splitModeAll: 'Split equally',
+      splitModeCustom: 'Choose participants',
+      splitAllHelp: 'The expense will be divided equally among all registered participants.',
+      splitCustomHelp: 'Choose who takes part in this expense.'
     }
   };
 
@@ -332,6 +345,7 @@ export class SplitComponent {
   newExpenseDescription: string = '';
   newExpenseAmount: number | null = null;
   newExpensePaidBy: string = '';
+  splitMode: 'all' | 'custom' = 'all';
   selectedParticipants: string[] = [];
   nextExpenseId = 1;
 
@@ -546,11 +560,9 @@ export class SplitComponent {
       return;
     }
 
-    if (this.selectedParticipants.length === 0) {
+    if (this.splitMode === 'all') {
       this.selectAllParticipants();
-    }
-
-    if (this.selectedParticipants.length === 0) {
+    } else if (this.splitMode === 'custom' && this.selectedParticipants.length === 0) {
       alert(this.t('addParticipantsToSplit'));
       return;
     }
@@ -629,6 +641,7 @@ export class SplitComponent {
     this.newExpenseDescription = '';
     this.newExpenseAmount = null;
     this.newExpensePaidBy = '';
+    this.splitMode = 'all';
     this.selectedParticipants = [];
     this.nextExpenseId = 1;
 
@@ -744,6 +757,7 @@ export class SplitComponent {
       newExpenseDescription: this.newExpenseDescription,
       newExpenseAmount: this.newExpenseAmount,
       newExpensePaidBy: this.newExpensePaidBy,
+      splitMode: this.splitMode,
       selectedParticipants: [...this.selectedParticipants],
       nextExpenseId: this.nextExpenseId,
       totalExpense: this.totalExpense,
@@ -759,6 +773,7 @@ export class SplitComponent {
     this.newExpenseDescription = snapshot.newExpenseDescription;
     this.newExpenseAmount = snapshot.newExpenseAmount;
     this.newExpensePaidBy = snapshot.newExpensePaidBy;
+    this.splitMode = snapshot.splitMode;
     this.selectedParticipants = [...snapshot.selectedParticipants];
     this.nextExpenseId = snapshot.nextExpenseId;
     this.totalExpense = snapshot.totalExpense;
