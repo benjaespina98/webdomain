@@ -11,9 +11,19 @@ body {
         linear-gradient(180deg, #020617 0%, #0b1120 52%, #0f172a 100%);
 	background-attachment: fixed;
 	min-height: 100vh;
+	overflow-y: scroll;
 	margin: 0;
 	padding: 0;
 	-webkit-font-smoothing: antialiased;
+}
+
+app-split .ux-notice-slot {
+	min-height: 3.15rem;
+	margin-bottom: 0.2rem;
+}
+
+app-split .ux-notice-slot .ux-notice {
+	margin-bottom: 0;
 }
 
 /* Custom scrollbar para navegadores webkit */
@@ -594,6 +604,10 @@ app-split .add-person-btn:hover {
 }
 
 @media (max-width: 767px) {
+	app-split .ux-notice-slot {
+		min-height: 3.5rem;
+	}
+
 	app-split .workflow-steps {
 		grid-template-columns: 1fr;
 		margin-top: 0.2rem;

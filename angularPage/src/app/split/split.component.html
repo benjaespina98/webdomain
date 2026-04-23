@@ -1,9 +1,11 @@
 <div class="container-fluid advanced-mode">
-    <div class="ux-notice" *ngIf="uiNotice" [class.notice-success]="uiNoticeType === 'success'" [class.notice-warning]="uiNoticeType === 'warning'" [class.notice-info]="uiNoticeType === 'info'">
-        <span>{{ uiNotice }}</span>
-        <div class="ux-notice-actions">
-            <button type="button" class="btn btn-link btn-notice" *ngIf="canUndoLastAction" (click)="undoLastAction()">{{ t('undo') }}</button>
-            <button type="button" class="btn btn-link btn-notice" (click)="dismissNotice()" aria-label="Close">×</button>
+    <div class="ux-notice-slot" aria-live="polite">
+        <div class="ux-notice" *ngIf="uiNotice" [class.notice-success]="uiNoticeType === 'success'" [class.notice-warning]="uiNoticeType === 'warning'" [class.notice-info]="uiNoticeType === 'info'">
+            <span>{{ uiNotice }}</span>
+            <div class="ux-notice-actions">
+                <button type="button" class="btn btn-link btn-notice" *ngIf="canUndoLastAction" (click)="undoLastAction()">{{ t('undo') }}</button>
+                <button type="button" class="btn btn-link btn-notice" (click)="dismissNotice()" aria-label="Close">×</button>
+            </div>
         </div>
     </div>
 
