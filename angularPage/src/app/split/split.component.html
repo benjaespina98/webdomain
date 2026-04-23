@@ -34,14 +34,14 @@
     </div>
 
     <div class="row g-3 justify-content-center workflow-content-row">
-        <div class="col-12 col-xl-8" *ngIf="isStageActive('participants')">
+        <div class="col-12 col-xl-10" *ngIf="isStageActive('participants')">
             <div class="participants-section mb-3" [class.stage-focus]="isStageActive('participants')">
                 <form (ngSubmit)="addPerson()">
                     <div class="mb-0">
                         <label for="newPersonName" class="form-label mb-1 fw-bold">{{ t('addPersonLabel') }}</label>
                         <div class="add-person-row">
-                            <input #newPersonInput type="text" id="newPersonName" class="form-control flex-grow-1" [placeholder]="t('personPlaceholder')" [(ngModel)]="newPersonName" name="newPersonName" [attr.aria-label]="t('participants')">
-                            <button type="submit" class="btn btn-primary add-person-btn" [title]="t('addPersonLabel')">
+                            <input #newPersonInput type="text" id="newPersonName" class="form-control form-control-lg flex-grow-1" [placeholder]="t('personPlaceholder')" [(ngModel)]="newPersonName" name="newPersonName" [attr.aria-label]="t('participants')">
+                            <button type="submit" class="btn btn-primary btn-lg add-person-btn" [title]="t('addPersonLabel')">
                                 <i class="fas fa-plus me-1"></i>{{ t('addButton') }}
                             </button>
                         </div>
