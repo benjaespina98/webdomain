@@ -21,7 +21,7 @@ describe('SplitComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should generate a concise WhatsApp summary with suggested payments', () => {
+  it('should generate a WhatsApp summary with totals, average, and suggested transfers', () => {
     component.currentLanguage = 'es';
     component.people = ['Pepe', 'Juan', 'Ana'];
     component.expenseItems = Array.from({ length: 10 }, (_, index) => ({
@@ -47,13 +47,15 @@ describe('SplitComponent', () => {
     const openedUrl = openSpy.calls.mostRecent().args[0] as string;
     const message = decodeURIComponent(openedUrl.split('text=')[1]);
 
-    expect(message).toContain('dividimos? | Resumen');
-    expect(message).toContain('Personas: 3');
-    expect(message).toContain('Gastos: 10');
-    expect(message).toContain('Pagos sugeridos:');
-    expect(message).toContain('1. Deudor 1 le debe pagar $100.00 a Acreedor 1');
-    expect(message).toContain('9. Deudor 9 le debe pagar $108.00 a Acreedor 9');
-    expect(message).not.toContain('Detalle de gastos');
-    expect(message).not.toContain('Gasto 10');
+    expect(message).toContain('dividimos? 💸');
+    expect(message).toContain('👥 3 Personas');
+    expect(message).toContain('🧾 Gastos:');
+    expect(message).toContain('• Gasto 10: $1090.00 (Pagó: Juan)');
+    expect(message).toContain('💰 Total: $10450.00');
+    expect(message).toContain('🧮 Promedio por persona: $3483.33');
+    expect(message).toContain('🔁 Transferencias:');
+    expect(message).toContain('• Deudor 1 le debe a Acreedor 1: $100.00');
+    expect(message).toContain('• Deudor 9 le debe a Acreedor 9: $108.00');
+    expect(message).toContain('Hecho con --> https://dividimos.vercel.app/');
   });
 });

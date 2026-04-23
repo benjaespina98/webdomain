@@ -153,7 +153,7 @@
                                     <td>${{ item.amount.toFixed(2) }}</td>
                                     <td>{{ item.paidBy }}</td>
                                     <td>
-                                        <button class="btn btn-outline-danger btn-sm" (click)="removeExpenseItem(item.id)" [title]="t('deleteExpenseTitle')">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" (click)="removeExpenseItem(item.id)" [title]="t('deleteExpenseTitle')">
                                             {{ t('deleteExpense') }}
                                         </button>
                                     </td>

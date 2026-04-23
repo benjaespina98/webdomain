@@ -1,11 +1,23 @@
 import { TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
+import { SwUpdate } from '@angular/service-worker';
+import { EMPTY } from 'rxjs';
 import { AppComponent } from './app.component';
+import { SplitComponent } from './split/split.component';
 
 describe('AppComponent', () => {
+  const swUpdateMock = {
+    isEnabled: false,
+    versionUpdates: EMPTY,
+    checkForUpdate: jasmine.createSpy('checkForUpdate').and.resolveTo(false),
+    activateUpdate: jasmine.createSpy('activateUpdate').and.resolveTo(true)
+  };
+
   beforeEach(() => TestBed.configureTestingModule({
-    imports: [RouterTestingModule],
-    declarations: [AppComponent]
+    imports: [FormsModule, RouterTestingModule],
+    declarations: [AppComponent, SplitComponent],
+    providers: [{ provide: SwUpdate, useValue: swUpdateMock }]
   }));
 
   it('should create the app', () => {
