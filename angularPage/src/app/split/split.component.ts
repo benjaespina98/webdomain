@@ -946,6 +946,7 @@ export class SplitComponent {
       '🧾 Gastos:',
       ...expenseLines,
       `💰 ${this.t('shareTotal')}: ${this.formatCurrency(this.totalExpense)}`,
+      `🧮 ${this.t('averagePerPerson')} ${this.formatCurrency(this.averageSpent)}`,
       '',
       '🔁 Transferencias:'
     ];
