@@ -17,28 +17,30 @@
     </h1>
     <p class="page-subtitle text-center mb-4">{{ t('appSubtitle') }}</p>
 
-    <div class="workflow-strip" role="button" tabindex="0" (click)="toggleWorkflowGuide()" [attr.aria-expanded]="showWorkflowGuide">
-        <div class="workflow-strip-steps" aria-hidden="true">
-            <span class="strip-step" [class.active]="isStageActive('participants')" [class.done]="isStageDone('participants')">1</span>
-            <span class="strip-step" [class.active]="isStageActive('expenses')" [class.done]="isStageDone('expenses')">2</span>
-            <span class="strip-step" [class.active]="isStageActive('results')" [class.done]="isStageDone('results')">3</span>
+    <div class="workflow-shell">
+        <div class="workflow-strip" role="button" tabindex="0" (click)="toggleWorkflowGuide()" [attr.aria-expanded]="showWorkflowGuide">
+            <div class="workflow-strip-steps" aria-hidden="true">
+                <span class="strip-step" [class.active]="isStageActive('participants')" [class.done]="isStageDone('participants')">1</span>
+                <span class="strip-step" [class.active]="isStageActive('expenses')" [class.done]="isStageDone('expenses')">2</span>
+                <span class="strip-step" [class.active]="isStageActive('results')" [class.done]="isStageDone('results')">3</span>
+            </div>
+            <span class="workflow-strip-title">{{ getCurrentStepTitle() }}</span>
         </div>
-        <span class="workflow-strip-title">{{ getCurrentStepTitle() }}</span>
-    </div>
 
-    <div class="workflow-steps" aria-label="Workflow" *ngIf="showWorkflowGuide">
-        <button type="button" class="workflow-step" [class.active]="isStageActive('participants')" [class.done]="isStageDone('participants')" (click)="setWorkflowStage('participants')">
-            <span>{{ t('workflowStepParticipants') }}</span>
-            <small>{{ t('workflowParticipantsHelp') }}</small>
-        </button>
-        <button type="button" class="workflow-step" [class.active]="isStageActive('expenses')" [class.done]="isStageDone('expenses')" (click)="setWorkflowStage('expenses')" [disabled]="!canAccessExpenses()">
-            <span>{{ t('workflowStepExpenses') }}</span>
-            <small>{{ t('workflowExpensesHelp') }}</small>
-        </button>
-        <button type="button" class="workflow-step" [class.active]="isStageActive('results')" [class.done]="isStageDone('results')" (click)="setWorkflowStage('results')" [disabled]="!canAccessResults()">
-            <span>{{ t('workflowStepResults') }}</span>
-            <small>{{ t('workflowResultsHelp') }}</small>
-        </button>
+        <div class="workflow-steps" aria-label="Workflow" *ngIf="showWorkflowGuide">
+            <button type="button" class="workflow-step" [class.active]="isStageActive('participants')" [class.done]="isStageDone('participants')" (click)="setWorkflowStage('participants')">
+                <span>{{ t('workflowStepParticipants') }}</span>
+                <small>{{ t('workflowParticipantsHelp') }}</small>
+            </button>
+            <button type="button" class="workflow-step" [class.active]="isStageActive('expenses')" [class.done]="isStageDone('expenses')" (click)="setWorkflowStage('expenses')" [disabled]="!canAccessExpenses()">
+                <span>{{ t('workflowStepExpenses') }}</span>
+                <small>{{ t('workflowExpensesHelp') }}</small>
+            </button>
+            <button type="button" class="workflow-step" [class.active]="isStageActive('results')" [class.done]="isStageDone('results')" (click)="setWorkflowStage('results')" [disabled]="!canAccessResults()">
+                <span>{{ t('workflowStepResults') }}</span>
+                <small>{{ t('workflowResultsHelp') }}</small>
+            </button>
+        </div>
     </div>
 
     <div class="quick-stats" *ngIf="people.length > 0 || expenseItems.length > 0">
@@ -46,8 +48,8 @@
         <span class="stat-pill"><strong>{{ expenseItems.length }}</strong> {{ t('registeredExpenses') }}</span>
     </div>
 
-    <div class="row g-3 justify-content-center">
-        <div class="col-12 col-lg-6" *ngIf="isStageActive('participants')">
+    <div class="row g-3 justify-content-center workflow-content-row">
+        <div class="col-12 col-xl-8" *ngIf="isStageActive('participants')">
             <div class="participants-section mb-3" [class.stage-focus]="isStageActive('participants')">
                 <form (ngSubmit)="addPerson()">
                     <div class="mb-0">
@@ -76,7 +78,7 @@
             </div>
         </div>
 
-        <div class="col-12" *ngIf="canAccessExpenses() && isStageActive('expenses')">
+        <div class="col-12 col-xl-10" *ngIf="canAccessExpenses() && isStageActive('expenses')">
             <div class="expense-form" [class.stage-focus]="isStageActive('expenses')">
                 <form (ngSubmit)="addExpenseItem()">
                     <div class="row g-2 mb-3">
@@ -150,18 +152,25 @@
                         </button>
                     </div>
 
+                    <div class="results-cta" *ngIf="isStageActive('expenses')">
+                        <p class="results-cta-help mb-2" *ngIf="expenseItems.length === 0">{{ t('addExpenseToContinue') }}</p>
+                        <p class="results-cta-help mb-2" *ngIf="expenseItems.length > 0">{{ t('readyToCalculate') }}</p>
+                        <div class="results-cta-actions">
+                            <button type="button" class="btn btn-outline-light btn-sm-action" (click)="setWorkflowStage('expenses')" *ngIf="expenseItems.length > 0">
+                                <i class="fas fa-pen me-1"></i>{{ t('reviewExpenses') }}
+                            </button>
+                            <button type="button" class="btn btn-primary btn-sm-action btn-results" (click)="continueToResults()" [disabled]="expenseItems.length === 0">
+                                <i class="fas fa-calculator me-1"></i>{{ t('viewResults') }}
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="secondary-actions">
                         <button type="button" class="btn btn-outline-light btn-sm-action" (click)="setWorkflowStage('participants')">
                             <i class="fas fa-arrow-left me-1"></i>{{ t('backToParticipants') }}
                         </button>
                         <button type="button" class="btn btn-outline-danger btn-sm-action" (click)="clearAll()" [title]="t('clearAllTitle')">
                             <i class="fas fa-trash me-1"></i>{{ t('clearAll') }}
-                        </button>
-                        <button type="button" class="btn btn-outline-info btn-sm-action" (click)="copySummary()" *ngIf="expenseItems.length > 0">
-                            <i class="fas fa-copy"></i> {{ t('copySummary') }}
-                        </button>
-                        <button type="button" class="btn btn-outline-primary btn-sm-action" (click)="shareWhatsApp()" *ngIf="expenseItems.length > 0">
-                            <i class="fab fa-whatsapp"></i> {{ t('shareWhatsapp') }}
                         </button>
                     </div>
                 </form>
@@ -170,7 +179,7 @@
     </div>
 
     <div class="row mt-4 justify-content-center" *ngIf="expenseItems.length > 0 && isStageActive('results')" [class.results-focus]="isStageActive('results')">
-        <div class="col-md-12">
+        <div class="col-12 col-xl-10">
             <h4 class="section-title">{{ t('registeredExpenses') }}</h4>
             <div class="table-responsive">
                 <table class="table table-striped">
@@ -203,11 +212,19 @@
         </div>
     </div>
 
-    <div class="row mt-4" *ngIf="expenseItems.length > 0 && isStageActive('results')" [class.results-focus]="isStageActive('results')">
-        <div class="col-12 d-flex justify-content-between align-items-center results-header">
+    <div class="row mt-4 justify-content-center" *ngIf="expenseItems.length > 0 && isStageActive('results')" [class.results-focus]="isStageActive('results')">
+        <div class="col-12 col-xl-10 d-flex justify-content-between align-items-center results-header">
             <h4 class="section-title mb-0">{{ t('results') }}</h4>
+            <div class="secondary-actions results-share-actions">
+                <button type="button" class="btn btn-outline-info btn-sm-action" (click)="copySummary()">
+                    <i class="fas fa-copy"></i> {{ t('copySummary') }}
+                </button>
+                <button type="button" class="btn btn-outline-success btn-sm-action" (click)="shareWhatsApp()">
+                    <i class="fab fa-whatsapp"></i> {{ t('shareWhatsapp') }}
+                </button>
+            </div>
         </div>
-        <div class="col-12">
+        <div class="col-12 col-xl-10">
             <div class="mt-3">
                                 <table class="table table-striped">
                     <thead>

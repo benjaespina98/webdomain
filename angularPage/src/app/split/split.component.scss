@@ -12,14 +12,14 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-.container.advanced-mode {
+.container-fluid.advanced-mode {
     position: relative;
     width: min(96vw, 1380px);
     margin: clamp(0.9rem, 3vh, 2rem) auto 0;
     padding-bottom: 1.5rem;
 }
 
-.container.advanced-mode::before {
+.container-fluid.advanced-mode::before {
     content: '';
     position: fixed;
     border-radius: 999px;
@@ -28,7 +28,7 @@
     z-index: -1;
 }
 
-.container.advanced-mode::before {
+.container-fluid.advanced-mode::before {
     width: 320px;
     height: 320px;
     right: -80px;
@@ -148,6 +148,17 @@
     flex-wrap: wrap;
     gap: 0.55rem;
     justify-content: center;
+}
+
+.workflow-shell {
+    width: min(100%, 980px);
+    margin: 0 auto 0.8rem;
+}
+
+.workflow-content-row {
+    width: min(100%, 1080px);
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .stat-pill {
@@ -345,6 +356,39 @@
 
 .results-header {
     margin-bottom: 0.5rem;
+    gap: 0.75rem;
+}
+
+.results-cta {
+    margin: 0.85rem 0 0.45rem;
+    padding: 0.75rem;
+    border-radius: 0.85rem;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    background: rgba(15, 23, 42, 0.55);
+}
+
+.results-cta-help {
+    color: #dbeafe;
+    font-size: 0.86rem;
+}
+
+.results-cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+.btn-results {
+    border-radius: 0.78rem;
+    min-height: 2.4rem;
+    border: 0;
+    background: linear-gradient(120deg, #7c3aed 0%, #6366f1 100%);
+    color: #f8fafc;
+    font-weight: 700;
+}
+
+.results-share-actions {
+    justify-content: flex-end;
 }
 
 .table-responsive {
@@ -388,11 +432,16 @@
 }
 
 @media (max-width: 767px) {
-    .container.advanced-mode {
+    .container-fluid.advanced-mode {
         width: min(100vw, 100%);
         margin-top: 0.8rem !important;
         padding-left: 0.75rem;
         padding-right: 0.75rem;
+    }
+
+    .workflow-shell,
+    .workflow-content-row {
+        width: 100%;
     }
 
     .participants-section,
@@ -403,7 +452,8 @@
 
     .participant-actions .btn,
     .actions-row .btn,
-    .secondary-actions .btn {
+    .secondary-actions .btn,
+    .results-cta-actions .btn {
         flex: 1 1 100%;
     }
 
@@ -417,6 +467,10 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 0.55rem;
+    }
+
+    .results-share-actions {
+        width: 100%;
     }
 }
 
