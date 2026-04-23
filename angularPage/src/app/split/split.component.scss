@@ -74,6 +74,11 @@
     font-size: 0.9rem;
 }
 
+.payments-table .table {
+    width: 100%;
+    table-layout: fixed;
+}
+
 .table-responsive.payments-table {
     max-height: min(58vh, 520px);
     overflow-x: auto;
@@ -88,14 +93,16 @@
 }
 
 .payments-table .table tbody td {
-    padding-top: 0.62rem;
-    padding-bottom: 0.62rem;
+    padding-top: 0.52rem;
+    padding-bottom: 0.52rem;
 }
 
 .settlement-text {
-    font-size: clamp(0.84rem, 1.8vw, 0.93rem);
+    font-size: clamp(0.86rem, 1.75vw, 0.96rem);
     color: #dbeafe;
-    line-height: 1.35;
+    line-height: 1.25;
+    white-space: normal;
+    word-break: break-word;
 }
 
 .settlement-text strong {
@@ -159,9 +166,26 @@
     color: #dbeafe;
 }
 
-.compact-expenses .table,
-.payments-table .table {
+.compact-expenses .table {
     min-width: 620px;
+}
+
+.payments-table .table {
+    min-width: 100%;
+}
+
+.payments-table .col-settlement {
+    width: calc(100% - 118px);
+}
+
+.payments-table .col-payment {
+    width: 118px;
+    text-align: right;
+}
+
+.payments-table .payment-amount {
+    text-align: right;
+    white-space: nowrap;
 }
 
 .advanced-mode .table thead th {
@@ -247,9 +271,22 @@
         font-size: 16px;
     }
 
-    .compact-expenses .table,
-    .payments-table .table {
+    .compact-expenses .table {
         min-width: 560px;
+    }
+
+    .payments-table .table {
+        min-width: 100%;
+    }
+
+    .payments-table .col-payment {
+        width: 104px;
+    }
+
+    .payments-table .table thead th,
+    .payments-table .table tbody td {
+        padding-left: 0.62rem;
+        padding-right: 0.62rem;
     }
 
     .table-responsive.payments-table {

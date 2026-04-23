@@ -201,8 +201,8 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th scope="col">{{ t('description') }}</th>
-                            <th scope="col">{{ t('paymentLabel') }}</th>
+                            <th scope="col" class="col-settlement">{{ t('description') }}</th>
+                            <th scope="col" class="col-payment">{{ t('paymentLabel') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -210,7 +210,7 @@
                             <td class="settlement-text">
                                 <strong>{{ result.debtor }}</strong> {{ t('owesToInline') }} <strong>{{ result.creditor }}</strong>
                             </td>
-                            <td><strong>${{ result.amount.toFixed(2) }}</strong></td>
+                            <td class="payment-amount"><strong>${{ result.amount.toFixed(2) }}</strong></td>
                         </tr>
                     </tbody>
                 </table>
