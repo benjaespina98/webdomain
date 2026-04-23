@@ -144,6 +144,7 @@
                                     <th>{{ t('description') }}</th>
                                     <th>{{ t('amount') }}</th>
                                     <th>{{ t('paidBy') }}</th>
+                                    <th>{{ t('participantsColumn') }}</th>
                                     <th>{{ t('actions') }}</th>
                                 </tr>
                             </thead>
@@ -152,6 +153,7 @@
                                     <td><strong>{{ item.description }}</strong></td>
                                     <td>${{ item.amount.toFixed(2) }}</td>
                                     <td>{{ item.paidBy }}</td>
+                                    <td>{{ formatExpenseParticipants(item) }}</td>
                                     <td>
                                         <button type="button" class="btn btn-outline-danger btn-sm" (click)="removeExpenseItem(item.id)" [title]="t('deleteExpenseTitle')">
                                             {{ t('deleteExpense') }}
@@ -202,6 +204,7 @@
                             <th scope="col">{{ t('detail') }}</th>
                             <th scope="col">{{ t('amount') }}</th>
                             <th scope="col">{{ t('paidBy') }}</th>
+                            <th scope="col">{{ t('participantsColumn') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -209,6 +212,7 @@
                             <td><strong>{{ item.description }}</strong></td>
                             <td>${{ item.amount.toFixed(2) }}</td>
                             <td>{{ item.paidBy }}</td>
+                            <td>{{ formatExpenseParticipants(item) }}</td>
                         </tr>
                     </tbody>
                 </table>
