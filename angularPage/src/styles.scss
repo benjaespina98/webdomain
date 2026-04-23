@@ -6,8 +6,8 @@ body {
 	color: #e2e8f0;
 	background-color: #020617;
 	background-image:
-        radial-gradient(circle at 12% 16%, rgba(124, 58, 237, 0.18) 0%, transparent 36%),
-        radial-gradient(circle at 88% 84%, rgba(99, 102, 241, 0.2) 0%, transparent 38%),
+	radial-gradient(circle at 12% 16%, rgba(14, 165, 233, 0.14) 0%, transparent 36%),
+	radial-gradient(circle at 88% 84%, rgba(2, 132, 199, 0.14) 0%, transparent 38%),
         linear-gradient(180deg, #020617 0%, #0b1120 52%, #0f172a 100%);
 	background-attachment: fixed;
 	min-height: 100vh;
@@ -63,14 +63,14 @@ app-split .split-mode-option:hover {
 
 app-split .split-mode-option.active {
 	color: #f5f3ff;
-	border-color: rgba(139, 92, 246, 0.92);
-	background: linear-gradient(130deg, rgba(91, 33, 182, 0.55), rgba(79, 70, 229, 0.42));
+	border-color: rgba(139, 92, 246, 0.86);
+	background: rgba(139, 92, 246, 0.22);
 	box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.2) inset;
 }
 
 app-split .split-mode-help {
 	font-size: 0.8rem;
-	color: #c4b5fd;
+	color: #94a3b8;
 }
 
 app-split .workflow-steps {
@@ -83,18 +83,13 @@ app-split .workflow-steps {
 app-split .workflow-strip {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
+	justify-content: flex-start;
 	gap: 0.6rem;
 	margin-bottom: 0.65rem;
 	padding: 0.5rem 0.62rem;
 	border: 1px solid rgba(148, 163, 184, 0.3);
 	border-radius: 0.8rem;
 	background: rgba(15, 23, 42, 0.55);
-	cursor: pointer;
-}
-
-app-split .workflow-strip:hover {
-	border-color: rgba(167, 139, 250, 0.65);
 }
 
 app-split .workflow-strip-steps {
@@ -118,12 +113,12 @@ app-split .strip-step {
 
 app-split .strip-step.active {
 	color: #f5f3ff;
-	border-color: rgba(139, 92, 246, 0.92);
-	background: linear-gradient(130deg, rgba(91, 33, 182, 0.62), rgba(79, 70, 229, 0.42));
+	border-color: rgba(139, 92, 246, 0.86);
+	background: rgba(139, 92, 246, 0.25);
 }
 
 app-split .strip-step.done:not(.active) {
-	border-color: rgba(99, 102, 241, 0.7);
+	border-color: rgba(167, 139, 250, 0.72);
 }
 
 app-split .workflow-strip-title {
@@ -184,8 +179,8 @@ app-split .workflow-content-row {
 }
 
 app-split .stage-focus {
-	border-color: rgba(167, 139, 250, 0.65) !important;
-	box-shadow: 0 16px 30px rgba(49, 46, 129, 0.24);
+	border-color: rgba(139, 92, 246, 0.62) !important;
+	box-shadow: 0 12px 24px rgba(91, 33, 182, 0.2);
 }
 
 app-split .participants-footer {
@@ -196,13 +191,13 @@ app-split .participants-footer {
 
 app-split .participants-next {
 	width: 100%;
-	border-color: rgba(167, 139, 250, 0.55);
-	color: #e9d5ff;
+	border-color: rgba(139, 92, 246, 0.55);
+	color: #ede9fe;
 	font-weight: 500;
 }
 
 app-split .participants-next:hover {
-	background: rgba(124, 58, 237, 0.2);
+	background: rgba(139, 92, 246, 0.16);
 	border-color: rgba(167, 139, 250, 0.82);
 	color: #f5f3ff;
 }
@@ -239,7 +234,7 @@ app-split .btn-results {
 	border-radius: 0.78rem;
 	min-height: 2.4rem;
 	border: 0;
-	background: linear-gradient(120deg, #7c3aed 0%, #6366f1 100%);
+	background: linear-gradient(120deg, #7c3aed 0%, #6d28d9 100%);
 	color: #f8fafc;
 	font-weight: 700;
 }
@@ -260,8 +255,8 @@ app-split .add-person-btn {
 	min-width: 126px;
 	min-height: 2.65rem;
 	border-radius: 0.85rem;
-	border: 1px solid rgba(167, 139, 250, 0.55);
-	background: linear-gradient(120deg, #7c3aed 0%, #6366f1 100%);
+	border: 1px solid rgba(139, 92, 246, 0.55);
+	background: linear-gradient(120deg, #7c3aed 0%, #6d28d9 100%);
 	font-weight: 600;
 }
 
