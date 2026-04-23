@@ -18,6 +18,7 @@ type BalanceMap = Record<string, number>;
 type LanguageCode = 'es' | 'en';
 
 interface TranslationMap {
+  detail: string;
   appSubtitle: string;
   participants: string;
   participantsHelp: string;
@@ -156,6 +157,7 @@ export class SplitComponent {
   private readonly publicAppUrl = 'https://dividimos.vercel.app/';
   private readonly translations: Record<LanguageCode, TranslationMap> = {
     es: {
+      detail: 'Detalle',
       appSubtitle: 'sumá personas, cargá gastos y resolvé quién le paga a quién en un toque.',
       participants: 'Personas',
       participantsHelp: 'sumalas una sola vez y listo; después elegís quién entra en cada gasto.',
@@ -267,6 +269,7 @@ export class SplitComponent {
       paymentLabel: 'Monto'
     },
     en: {
+      detail: 'Detail',
       appSubtitle: 'Add people, enter expenses, and quickly see who owes whom.',
       participants: 'people',
       participantsHelp: 'Add them once and you are done. Then choose who is included in each expense.',
