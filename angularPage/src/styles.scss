@@ -244,6 +244,325 @@ app-split .results-share-actions {
 	justify-content: flex-end;
 }
 
+app-split .language-switch-wrap {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.35rem;
+	margin-bottom: clamp(0.55rem, 1.5vh, 0.9rem);
+}
+
+app-split .language-btn {
+	min-height: 2rem;
+	padding: 0.2rem 0.62rem;
+	border-radius: 999px;
+	border: 1px solid rgba(148, 163, 184, 0.26);
+	background: rgba(30, 41, 59, 0.45);
+	color: #cbd5e1;
+	font-size: clamp(0.74rem, 1.4vw, 0.8rem);
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	transition: all 0.2s ease;
+}
+
+app-split .language-btn.active {
+	color: #ecfeff;
+	border-color: rgba(139, 92, 246, 0.8);
+	background: rgba(139, 92, 246, 0.22);
+	box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.2) inset;
+}
+
+app-split .brand-title {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: clamp(0.5rem, 1.6vw, 0.8rem);
+	margin: 0;
+}
+
+app-split .brand-icon {
+	width: clamp(38px, 5vw, 46px);
+	height: clamp(38px, 5vw, 46px);
+	border-radius: 14px;
+	object-fit: cover;
+	border: 1px solid rgba(226, 232, 240, 0.22);
+	box-shadow: 0 8px 16px rgba(124, 58, 237, 0.3);
+}
+
+app-split .brand-name {
+	font-size: clamp(1.8rem, 3.1vw, 2.35rem);
+	font-weight: 700;
+	letter-spacing: -0.03em;
+	background: linear-gradient(110deg, #f8fafc 0%, #ddd6fe 45%, #8b5cf6 100%);
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	-webkit-background-clip: text;
+}
+
+app-split .page-subtitle {
+	margin: clamp(0.2rem, 0.9vh, 0.4rem) auto 0;
+	color: #9ca3af;
+	text-align: center;
+	font-size: clamp(0.82rem, 1.6vw, 0.9rem);
+	max-width: 68ch;
+	letter-spacing: 0;
+}
+
+app-split .ux-notice {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.8rem;
+	border-radius: 0.9rem;
+	padding: 0.58rem 0.72rem;
+	margin-bottom: 0.9rem;
+	border: 1px solid rgba(148, 163, 184, 0.26);
+	background: rgba(15, 23, 42, 0.82);
+	color: #dbeafe;
+	backdrop-filter: blur(10px);
+}
+
+app-split .ux-notice.notice-success {
+	border-color: rgba(16, 185, 129, 0.5);
+	background: rgba(4, 120, 87, 0.23);
+}
+
+app-split .ux-notice.notice-warning {
+	border-color: rgba(250, 204, 21, 0.55);
+	background: rgba(113, 63, 18, 0.2);
+}
+
+app-split .ux-notice.notice-info {
+	border-color: rgba(139, 92, 246, 0.46);
+}
+
+app-split .ux-notice-actions {
+	display: flex;
+	align-items: center;
+}
+
+app-split .btn-notice {
+	color: #bae6fd;
+	padding: 0.1rem 0.35rem;
+	text-decoration: none;
+}
+
+app-split .btn-notice:hover {
+	color: #f0f9ff;
+	text-decoration: underline;
+}
+
+app-split .quick-stats {
+	margin: clamp(0.35rem, 1.2vh, 0.55rem) 0 clamp(0.8rem, 2vh, 1.2rem);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.55rem;
+	justify-content: center;
+}
+
+app-split .stat-pill {
+	padding: 0.35rem 0.72rem;
+	border-radius: 999px;
+	border: 1px solid rgba(167, 139, 250, 0.34);
+	background: rgba(15, 23, 42, 0.62);
+	color: #ede9fe;
+	font-size: clamp(0.82rem, 1.6vw, 0.9rem);
+}
+
+app-split .section-title {
+	margin-bottom: 0.5rem;
+	font-size: clamp(1rem, 2.2vw, 1.12rem);
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	color: #e5e7eb;
+}
+
+app-split .participants-section,
+app-split .expense-form {
+	border-radius: 1.05rem;
+	border: 1px solid rgba(148, 163, 184, 0.26);
+	background: rgba(15, 23, 42, 0.78);
+	padding: clamp(0.85rem, 2.5vw, 1.1rem);
+	box-shadow: 0 6px 16px rgba(15, 23, 42, 0.22);
+	transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+app-split .expense-form {
+	background: rgba(15, 23, 42, 0.72);
+}
+
+app-split .stage-helper {
+	margin: 0 0 0.75rem;
+	color: #94a3b8;
+	font-size: 0.82rem;
+}
+
+app-split .participants-section {
+	margin-bottom: 0;
+}
+
+app-split .advanced-mode .form-label {
+	color: #e2e8f0;
+	font-weight: 600;
+	font-size: clamp(0.82rem, 1.6vw, 0.9rem);
+}
+
+app-split .advanced-mode .form-control,
+app-split .advanced-mode .form-select {
+	border-radius: 0.85rem;
+	border: 1px solid rgba(148, 163, 184, 0.35);
+	background: rgba(15, 23, 42, 0.78);
+	color: #f8fafc;
+	min-height: clamp(2.45rem, 4.8vh, 2.7rem);
+	padding: 0.5rem 0.72rem;
+	font-size: clamp(0.9rem, 1.8vw, 0.98rem);
+	transition: all 0.2s ease;
+}
+
+app-split .advanced-mode .form-control::placeholder {
+	color: #94a3b8;
+	opacity: 1;
+}
+
+app-split .advanced-mode .form-control:focus,
+app-split .advanced-mode .form-select:focus {
+	border-color: rgba(139, 92, 246, 0.86);
+	background: rgba(15, 23, 42, 0.94);
+	color: #f0f9ff;
+	box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.2);
+}
+
+app-split .advanced-mode input[type='number'] {
+	-moz-appearance: textfield;
+}
+
+app-split .advanced-mode input[type='number']::-webkit-outer-spin-button,
+app-split .advanced-mode input[type='number']::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+app-split .badge.bg-secondary {
+	background: rgba(76, 29, 149, 0.24) !important;
+	border: 1px solid rgba(167, 139, 250, 0.62);
+	border-radius: 999px;
+	color: #f5f3ff;
+	font-size: clamp(0.82rem, 1.6vw, 0.9rem);
+	font-weight: 600;
+	padding: 0.46rem 0.62rem;
+}
+
+app-split .custom-participants-box {
+	margin-top: 0.6rem;
+	border-radius: 0.9rem;
+	border: 1px solid rgba(148, 163, 184, 0.28);
+	background: rgba(15, 23, 42, 0.46);
+	padding: 0.68rem;
+}
+
+app-split .actions-row,
+app-split .participant-actions,
+app-split .secondary-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.55rem;
+}
+
+app-split .btn-compact-action {
+	color: #cbd5e1;
+	text-decoration: none;
+	padding: 0.1rem 0.3rem;
+	font-size: 0.84rem;
+}
+
+app-split .btn-compact-action:hover {
+	color: #e2e8f0;
+	text-decoration: underline;
+}
+
+app-split .actions-row {
+	margin-top: 0.75rem;
+	margin-bottom: 0.35rem;
+}
+
+app-split .btn-add-expense {
+	width: 100%;
+	min-height: clamp(2.6rem, 5vh, 2.85rem);
+	border-radius: 0.85rem;
+	border: 0;
+	color: #f8fafc;
+	font-weight: 700;
+	font-size: clamp(0.82rem, 1.6vw, 0.9rem);
+	letter-spacing: 0.01em;
+	background: linear-gradient(115deg, #7c3aed 0%, #6d28d9 100%);
+	box-shadow: 0 10px 18px rgba(124, 58, 237, 0.3);
+}
+
+app-split .btn-add-expense:hover:not(:disabled) {
+	transform: translateY(-1px);
+	filter: saturate(1.08);
+}
+
+app-split .btn-add-expense:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+app-split .participant-actions .btn,
+app-split .secondary-actions .btn {
+	border-radius: 0.78rem;
+	min-height: clamp(2.2rem, 4.4vh, 2.4rem);
+	font-weight: 500;
+	font-size: clamp(0.82rem, 1.6vw, 0.9rem);
+}
+
+app-split .participant-chip-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.42rem;
+	max-height: 180px;
+	overflow-y: auto;
+}
+
+app-split .participant-chip {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	min-height: 2.35rem;
+	border-radius: 0.72rem;
+	border: 1px solid rgba(148, 163, 184, 0.35);
+	background: rgba(30, 41, 59, 0.46);
+	color: #dbeafe;
+	padding: 0.36rem 0.52rem;
+	font-size: 0.86rem;
+	font-weight: 500;
+	transition: all 0.18s ease;
+}
+
+app-split .participant-chip:hover {
+	border-color: rgba(167, 139, 250, 0.72);
+	background: rgba(30, 41, 59, 0.9);
+	transform: translateY(-1px);
+}
+
+app-split .participant-chip.selected {
+	border-color: rgba(139, 92, 246, 0.88);
+	background: rgba(139, 92, 246, 0.16);
+	color: #ecfeff;
+}
+
+app-split .participant-name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+app-split .participant-check {
+	margin-left: 0.4rem;
+	color: #c4b5fd;
+	font-weight: 800;
+}
+
 app-split .add-person-row {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto;
@@ -284,6 +603,34 @@ app-split .add-person-btn:hover {
 		grid-template-columns: 1fr;
 	}
 
+	app-split .participants-section,
+	app-split .expense-form {
+		padding: 0.78rem;
+		border-radius: 0.95rem;
+	}
+
+	app-split .participant-actions .btn,
+	app-split .actions-row .btn,
+	app-split .secondary-actions .btn {
+		flex: 1 1 100%;
+	}
+
+	app-split .quick-stats {
+		gap: 0.42rem;
+		width: 100%;
+	}
+
+	app-split .stat-pill {
+		flex: 1 1 calc(50% - 0.21rem);
+		text-align: center;
+	}
+
+	app-split .advanced-mode .form-control,
+	app-split .advanced-mode .form-select {
+		min-height: 2.65rem;
+		font-size: 16px;
+	}
+
 	app-split .workflow-shell,
 	app-split .workflow-content-row {
 		width: 100%;
@@ -298,6 +645,10 @@ app-split .add-person-btn:hover {
 	app-split .add-person-btn {
 		width: 100%;
 		min-width: 0;
+	}
+
+	app-split .participant-chip-grid {
+		grid-template-columns: 1fr;
 	}
 
 	app-split .results-cta-actions .btn {
