@@ -62,7 +62,7 @@ interface TranslationMap {
   value: string;
   totalExpense: string;
   averagePerPerson: string;
-  owesTo: string;
+  owesToInline: string;
   allSettled: string;
   enterValidName: string;
   personAlreadyExists: string;
@@ -72,10 +72,7 @@ interface TranslationMap {
   selectWhoPaid: string;
   addParticipantsToSplit: string;
   shareHeader: string;
-  shareParticipants: string;
-  shareExpensesLoaded: string;
   shareTotal: string;
-  shareAverage: string;
   shareDetailTitle: string;
   sharePaidBy: string;
   shareAndMoreExpenses: string;
@@ -85,7 +82,6 @@ interface TranslationMap {
   shareNoTransfers: string;
   shareTransferConnector: string;
   shareFooter: string;
-  shareTo: string;
   languageAria: string;
   clearSelectionTitle: string;
   splitAllTitle: string;
@@ -104,11 +100,10 @@ interface TranslationMap {
   confirmRemovePerson: string;
   confirmRemoveExpense: string;
   nothingToClear: string;
-  shareGeneratedAt: string;
-  shareOpenApp: string;
   whatsappOpened: string;
   summaryCopied: string;
   copySummary: string;
+  copySummaryDone: string;
   clipboardUnavailable: string;
   splitModeAll: string;
   splitModeCustom: string;
@@ -126,6 +121,7 @@ interface TranslationMap {
   hideStepGuide: string;
   currentStepLabel: string;
   viewResults: string;
+  reviewExpenses: string;
   readyToCalculate: string;
   addExpenseToContinue: string;
   debtorLabel: string;
@@ -157,16 +153,17 @@ interface AppSnapshot {
 })
 export class SplitComponent {
   private readonly languageStorageKey = 'split-language';
+  private readonly publicAppUrl = 'https://dividimos.vercel.app/';
   private readonly translations: Record<LanguageCode, TranslationMap> = {
     es: {
       appSubtitle: 'sumá personas, cargá gastos y resolvé quién le paga a quién en un toque.',
-      participants: 'personas',
+      participants: 'Personas',
       participantsHelp: 'sumalas una sola vez y listo; después elegís quién entra en cada gasto.',
       addPersonLabel: 'Agregar personas:',
       addButton: 'Agregar',
       personPlaceholder: 'Ej: Juan',
       noParticipantsYet: 'todavía no sumaste personas.',
-      addExpense: 'sumar gasto',
+      addExpense: 'Sumar gasto',
       addExpenseHelp: 'completá los datos y marcá quiénes comparten ese gasto.',
       needPersonFirst: 'primero sumá al menos una persona para empezar.',
       expenseDescriptionLabel: 'Descripción del gasto:',
@@ -184,26 +181,26 @@ export class SplitComponent {
       payerNotIncluded: 'pagó, pero no está incluido en el reparto.',
       ready: 'Listo',
       includedParticipants: 'persona(s) incluidas.',
-      addExpenseButton: 'sumar gasto',
-      clearAll: 'limpiar todo',
+      addExpenseButton: 'Sumar gasto',
+      clearAll: 'Limpiar todo',
       clearAllTitle: 'Borra participantes y gastos',
-      shareWhatsapp: 'compartir por WhatsApp',
-      registeredExpenses: 'gastos cargados',
+      shareWhatsapp: 'Compartir por WhatsApp',
+      registeredExpenses: 'Gastos cargados',
       description: 'Descripción',
       amount: 'Monto',
       paidBy: 'Pagado por',
       participantsColumn: 'personas',
       perPerson: 'Por persona',
-      actions: 'acciones',
+      actions: 'Acciones',
       deleteExpense: 'Eliminar',
       deleteParticipantTitle: 'Eliminar participante',
       deleteExpenseTitle: 'Eliminar gasto',
-      results: 'resultados',
+      results: 'Resultados',
       info: 'Información',
       value: 'Valor',
       totalExpense: 'Gasto Total:',
       averagePerPerson: 'Promedio por persona:',
-      owesTo: 'le debe pagar',
+      owesToInline: 'le debe a',
       allSettled: '✅ Todo saldado. No hay pagos pendientes.',
       enterValidName: 'por favor, ingresá un nombre válido',
       personAlreadyExists: 'Esta persona ya está en la lista',
@@ -213,10 +210,7 @@ export class SplitComponent {
       selectWhoPaid: 'por favor, seleccioná quién pagó',
       addParticipantsToSplit: 'por favor, sumá personas para dividir el gasto',
       shareHeader: 'dividimos? | Resumen',
-      shareParticipants: 'Personas',
-      shareExpensesLoaded: 'Gastos',
       shareTotal: 'Total',
-      shareAverage: 'Promedio por persona',
       shareDetailTitle: 'Detalle de gastos',
       sharePaidBy: 'Pagó',
       shareAndMoreExpenses: '… y {count} gasto(s) más',
@@ -226,7 +220,6 @@ export class SplitComponent {
       shareNoTransfers: 'No hay transferencias pendientes.',
       shareTransferConnector: 'd/.',
       shareFooter: 'Hecho con dividimos?',
-      shareTo: 'a',
       languageAria: 'cambiar idioma',
       clearSelectionTitle: 'Desmarcar todas las personas',
       splitAllTitle: 'Si elegís Todos, el gasto se divide entre todas las personas cargadas',
@@ -245,28 +238,28 @@ export class SplitComponent {
       confirmRemovePerson: '¿Eliminar este participante y sus gastos relacionados?',
       confirmRemoveExpense: '¿Eliminar este gasto?',
       nothingToClear: 'No hay datos para limpiar',
-      shareGeneratedAt: '🕒 Generado',
-      shareOpenApp: '🌐 Probar app',
       whatsappOpened: 'WhatsApp abierto',
       summaryCopied: 'Resumen copiado al portapapeles',
       copySummary: 'Copiar resumen',
+      copySummaryDone: 'Copiado',
       clipboardUnavailable: 'No se pudo copiar automáticamente. Copiá el texto manualmente.',
-      splitModeAll: 'dividir entre todos',
-      splitModeCustom: 'elegir personas',
+      splitModeAll: 'Dividir entre todos',
+      splitModeCustom: 'Elegir personas',
       splitAllHelp: 'este gasto se divide en partes iguales entre todas las personas cargadas.',
       splitCustomHelp: 'elegí quiénes entran en este gasto.',
-      workflowStepParticipants: 'paso 1: personas',
-      workflowStepExpenses: 'paso 2: gastos',
-      workflowStepResults: 'paso 3: resultados',
+      workflowStepParticipants: 'Paso 1: Personas',
+      workflowStepExpenses: 'Paso 2: Gastos',
+      workflowStepResults: 'Paso 3: Resultados',
       workflowParticipantsHelp: 'agregá solo los nombres de las personas.',
       workflowExpensesHelp: 'cargá gasto, monto y quién pagó. Elegí personas solo si no participan todos.',
       workflowResultsHelp: 'revisá cuánto paga cada persona y compartí el resumen.',
-      continueToExpenses: 'seguir a gastos',
-      backToParticipants: 'volver a personas',
+      continueToExpenses: 'Seguir a gastos',
+      backToParticipants: 'Volver a personas',
       showStepGuide: 'ver guía de pasos',
       hideStepGuide: 'ocultar guía de pasos',
       currentStepLabel: 'paso actual',
-      viewResults: 'calcular / ver resultados',
+      viewResults: 'Calcular / Ver resultados',
+      reviewExpenses: 'Seguir cargando gastos',
       readyToCalculate: 'Ya podés calcular el resultado.',
       addExpenseToContinue: 'Cargá al menos un gasto para pasar al paso 3.',
       debtorLabel: 'Debe',
@@ -281,7 +274,7 @@ export class SplitComponent {
       addButton: 'Add',
       personPlaceholder: 'Ex: John',
       noParticipantsYet: 'You have not added participants yet.',
-      addExpense: 'add expense',
+      addExpense: 'Add expense',
       addExpenseHelp: 'Fill in the details and mark who shares this expense.',
       needPersonFirst: 'Add at least one person first to start.',
       expenseDescriptionLabel: 'Expense description:',
@@ -318,7 +311,7 @@ export class SplitComponent {
       value: 'Value',
       totalExpense: 'Total Expense:',
       averagePerPerson: 'Average per person:',
-      owesTo: 'owes',
+      owesToInline: 'owes',
       allSettled: '✅ All settled. No pending payments.',
       enterValidName: 'Please enter a valid name',
       personAlreadyExists: 'This person is already in the list',
@@ -328,10 +321,7 @@ export class SplitComponent {
       selectWhoPaid: 'Please select who paid',
       addParticipantsToSplit: 'Please add participants to split the expense',
       shareHeader: 'dividimos? | Summary',
-      shareParticipants: 'People',
-      shareExpensesLoaded: 'Expenses',
       shareTotal: 'Total',
-      shareAverage: 'Average per person',
       shareDetailTitle: 'Expense details',
       sharePaidBy: 'Paid by',
       shareAndMoreExpenses: '… and {count} more expense(s)',
@@ -341,7 +331,6 @@ export class SplitComponent {
       shareNoTransfers: 'There are no pending transfers.',
       shareTransferConnector: 'to',
       shareFooter: 'Built with dividimos?',
-      shareTo: 'to',
       languageAria: 'Change language',
       clearSelectionTitle: 'Uncheck all people',
       splitAllTitle: 'If you choose All, the expense is split across all loaded people',
@@ -360,14 +349,13 @@ export class SplitComponent {
       confirmRemovePerson: 'Delete this participant and related expenses?',
       confirmRemoveExpense: 'Delete this expense?',
       nothingToClear: 'There is no data to clear',
-      shareGeneratedAt: '🕒 Generated',
-      shareOpenApp: '🌐 Try app',
       whatsappOpened: 'WhatsApp opened',
       summaryCopied: 'Summary copied to clipboard',
       copySummary: 'Copy summary',
+      copySummaryDone: 'Copied',
       clipboardUnavailable: 'Could not copy automatically. Please copy the text manually.',
-      splitModeAll: 'split equally',
-      splitModeCustom: 'choose people',
+      splitModeAll: 'Split equally',
+      splitModeCustom: 'Choose people',
       splitAllHelp: 'The expense will be divided equally among all registered participants.',
       splitCustomHelp: 'Choose who takes part in this expense.',
       workflowStepParticipants: 'Step 1: Participants',
@@ -377,11 +365,12 @@ export class SplitComponent {
       workflowExpensesHelp: 'Add expense, amount, and who paid. Pick people only if not everyone is included.',
       workflowResultsHelp: 'Review who pays whom and share the summary.',
       continueToExpenses: 'Continue to expenses',
-      backToParticipants: 'Keep adding participants',
+      backToParticipants: 'Back to participants',
       showStepGuide: 'Show step guide',
       hideStepGuide: 'Hide step guide',
       currentStepLabel: 'Current step',
-      viewResults: 'calculate / view results',
+      viewResults: 'Calculate / View results',
+      reviewExpenses: 'Keep adding expenses',
       readyToCalculate: 'You can now calculate the result.',
       addExpenseToContinue: 'Add at least one expense to continue to step 3.',
       debtorLabel: 'Pays',
@@ -394,8 +383,10 @@ export class SplitComponent {
   uiNotice = '';
   uiNoticeType: 'success' | 'info' | 'warning' = 'info';
   canUndoLastAction = false;
+  isCopySummaryDone = false;
   private lastSnapshot: AppSnapshot | null = null;
   private noticeTimer: ReturnType<typeof setTimeout> | null = null;
+  private copyFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
 
   totalExpense = 0;
   averageSpent = 0;
@@ -657,6 +648,7 @@ export class SplitComponent {
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(message);
+        this.triggerCopyFeedback();
         this.showNotice(this.t('summaryCopied'), 'success');
         return;
       }
@@ -675,11 +667,24 @@ export class SplitComponent {
       document.body.removeChild(textArea);
 
       if (copied) {
+        this.triggerCopyFeedback();
         this.showNotice(this.t('summaryCopied'), 'success');
       } else {
         alert(this.t('clipboardUnavailable'));
       }
     }
+  }
+
+  private triggerCopyFeedback(): void {
+    this.isCopySummaryDone = true;
+    if (this.copyFeedbackTimer) {
+      clearTimeout(this.copyFeedbackTimer);
+    }
+
+    this.copyFeedbackTimer = setTimeout(() => {
+      this.isCopySummaryDone = false;
+      this.copyFeedbackTimer = null;
+    }, 1800);
   }
 
   addExpenseItem(): void {
@@ -770,7 +775,7 @@ export class SplitComponent {
     });
 
     const { debts, credits } = this.splitBalances(balancesInCents);
-    this.results = this.buildTransfers(debts, credits, 1);
+    this.results = this.buildTransfers(debts, credits);
     this.totalExpense = this.fromCents(totalExpenseInCents);
     this.averageSpent = this.people.length > 0 ? this.fromCents(Math.round(totalExpenseInCents / this.people.length)) : 0;
   }
@@ -894,7 +899,7 @@ export class SplitComponent {
     return { debts, credits };
   }
 
-  private buildTransfers(debts: BalanceMap, credits: BalanceMap, minTransfer = 0): SettlementResult[] {
+  private buildTransfers(debts: BalanceMap, credits: BalanceMap): SettlementResult[] {
     const transferResults: SettlementResult[] = [];
 
     const remainingDebts: BalanceMap = { ...debts };
@@ -904,7 +909,7 @@ export class SplitComponent {
       for (const creditor in remainingCredits) {
         if (debtor !== creditor && remainingDebts[debtor] > 0 && remainingCredits[creditor] > 0) {
           const amount = Math.min(remainingDebts[debtor], remainingCredits[creditor]);
-          if (amount > minTransfer) {
+          if (amount > 0) {
             transferResults.push({ debtor, creditor, amount: this.fromCents(amount) });
             remainingDebts[debtor] -= amount;
             remainingCredits[creditor] -= amount;
@@ -929,35 +934,38 @@ export class SplitComponent {
   }
 
   private buildShareMessage(): string {
+    const appLink = this.getShareAppLink();
+    const expenseLines = this.expenseItems.map((item) =>
+      `• ${item.description}: ${this.formatCurrency(item.amount)} (${this.t('sharePaidBy')}: ${item.paidBy})`
+    );
+
     const lines: string[] = [
-      this.t('shareHeader'),
-      `${this.t('shareParticipants')}: ${this.people.length}`,
-      `${this.t('shareExpensesLoaded')}: ${this.expenseItems.length}`,
-      `${this.t('shareTotal')}: ${this.formatCurrency(this.totalExpense)}`,
-      `${this.t('shareAverage')}: ${this.formatCurrency(this.averageSpent)}`,
+      'dividimos? 💸',
       '',
-      `${this.t('shareTransfersTitle')}:`
+      `👥 ${this.people.length} ${this.t('participants')}`,
+      '🧾 Gastos:',
+      ...expenseLines,
+      `💰 ${this.t('shareTotal')}: ${this.formatCurrency(this.totalExpense)}`,
+      '',
+      '🔁 Transferencias:'
     ];
 
     if (this.results.length > 0) {
-      this.results.forEach((result, index) => {
-        lines.push(`${index + 1}. ${result.debtor} ${this.t('owesTo')} ${this.formatCurrency(result.amount)} ${this.t('shareTo')} ${result.creditor}`);
+      this.results.forEach((result) => {
+        lines.push(`• ${result.debtor} ${this.t('owesToInline')} ${result.creditor}: ${this.formatCurrency(result.amount)}`);
       });
     } else {
       lines.push(this.t('shareAllSettled'));
     }
 
+    lines.push('');
+    lines.push(`Hecho con --> ${appLink}`);
+
     return lines.join('\n');
   }
 
   private getShareAppLink(): string {
-    const baseUrl = `${window.location.origin}${window.location.pathname}`;
-    if (baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1')) {
-      return '';
-    }
-
-    const separator = baseUrl.includes('?') ? '&' : '?';
-    return `${baseUrl}${separator}ref=whatsapp`;
+    return this.publicAppUrl;
   }
 
   private showNotice(message: string, type: 'success' | 'info' | 'warning', enableUndo = false): void {

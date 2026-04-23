@@ -36,7 +36,6 @@
     <div class="row g-3 justify-content-center workflow-content-row">
         <div class="col-12 col-xl-8" *ngIf="isStageActive('participants')">
             <div class="participants-section mb-3" [class.stage-focus]="isStageActive('participants')">
-                <p class="stage-helper">{{ t('workflowParticipantsHelp') }}</p>
                 <form (ngSubmit)="addPerson()">
                     <div class="mb-0">
                         <label for="newPersonName" class="form-label mb-1 fw-bold">{{ t('addPersonLabel') }}</label>
@@ -66,7 +65,6 @@
 
         <div class="col-12 col-xl-10" *ngIf="canAccessExpenses() && isStageActive('expenses')">
             <div class="expense-form" [class.stage-focus]="isStageActive('expenses')">
-            <p class="stage-helper">{{ t('workflowExpensesHelp') }}</p>
                 <form (ngSubmit)="addExpenseItem()">
                     <div class="row g-2 mb-3">
                         <div class="col-md-5">
@@ -129,8 +127,7 @@
                     </div>
 
                     <div class="results-cta" *ngIf="isStageActive('expenses')">
-                        <p class="results-cta-help mb-2" *ngIf="expenseItems.length === 0">{{ t('addExpenseToContinue') }}</p>
-                        <p class="results-cta-help mb-2" *ngIf="expenseItems.length > 0">{{ t('readyToCalculate') }}</p>
+                        <div class="step-divider" aria-hidden="true"></div>
                         <div class="results-cta-actions">
                             <button type="button" class="btn btn-primary btn-sm-action btn-results" (click)="continueToResults()" [disabled]="expenseItems.length === 0">
                                 <i class="fas fa-calculator me-1"></i>{{ t('viewResults') }}
@@ -180,8 +177,8 @@
         <div class="col-12 col-xl-10 d-flex justify-content-between align-items-center results-header">
             <h4 class="section-title mb-0">{{ t('results') }}</h4>
             <div class="secondary-actions results-share-actions">
-                <button type="button" class="btn btn-outline-info btn-sm-action" (click)="copySummary()">
-                    <i class="fas fa-copy"></i> {{ t('copySummary') }}
+                <button type="button" class="btn btn-outline-info btn-sm-action btn-copy-summary" [class.copy-done]="isCopySummaryDone" (click)="copySummary()">
+                    <i class="fas" [ngClass]="isCopySummaryDone ? 'fa-check' : 'fa-copy'"></i> {{ isCopySummaryDone ? t('copySummaryDone') : t('copySummary') }}
                 </button>
                 <button type="button" class="btn btn-outline-success btn-sm-action" (click)="shareWhatsApp()">
                     <i class="fab fa-whatsapp"></i> {{ t('shareWhatsapp') }}
@@ -189,8 +186,6 @@
             </div>
         </div>
         <div class="col-12 col-xl-10">
-            <p class="stage-helper mt-2">{{ t('workflowResultsHelp') }}</p>
-
             <div class="results-grid mt-3">
                 <div class="result-kpi">
                     <span class="kpi-label">{{ t('totalExpense') }}</span>
@@ -206,15 +201,15 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th scope="col">{{ t('debtorLabel') }}</th>
-                            <th scope="col">{{ t('creditorLabel') }}</th>
+                            <th scope="col">{{ t('description') }}</th>
                             <th scope="col">{{ t('paymentLabel') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr *ngFor="let result of results; trackBy: trackByResult">
-                            <td>{{ result.debtor }}</td>
-                            <td>{{ result.creditor }}</td>
+                            <td class="settlement-text">
+                                <strong>{{ result.debtor }}</strong> {{ t('owesToInline') }} <strong>{{ result.creditor }}</strong>
+                            </td>
                             <td><strong>${{ result.amount.toFixed(2) }}</strong></td>
                         </tr>
                     </tbody>
