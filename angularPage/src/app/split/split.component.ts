@@ -129,7 +129,6 @@ interface TranslationMap {
   reviewExpenses: string;
   readyToCalculate: string;
   addExpenseToContinue: string;
-  actionsAndShare: string;
 }
 
 interface AppSnapshot {
@@ -268,8 +267,7 @@ export class SplitComponent {
       viewResults: 'calcular / ver resultados',
       reviewExpenses: 'seguir cargando gastos',
       readyToCalculate: 'Ya cargaste gastos. Ahora podés calcular y ver resultados.',
-      addExpenseToContinue: 'Cargá al menos un gasto para pasar al paso 3.',
-      actionsAndShare: 'acciones y compartir'
+      addExpenseToContinue: 'Cargá al menos un gasto para pasar al paso 3.'
     },
     en: {
       appSubtitle: 'Add people, enter expenses, and quickly see who owes whom.',
@@ -382,8 +380,7 @@ export class SplitComponent {
       viewResults: 'calculate / view results',
       reviewExpenses: 'keep adding expenses',
       readyToCalculate: 'You already added expenses. You can now calculate and view results.',
-      addExpenseToContinue: 'Add at least one expense to continue to step 3.',
-      actionsAndShare: 'actions and sharing'
+      addExpenseToContinue: 'Add at least one expense to continue to step 3.'
     }
   };
 

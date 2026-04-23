@@ -150,17 +150,6 @@
     justify-content: center;
 }
 
-.workflow-shell {
-    width: min(100%, 980px);
-    margin: 0 auto 0.8rem;
-}
-
-.workflow-content-row {
-    width: min(100%, 1080px);
-    margin-left: auto;
-    margin-right: auto;
-}
-
 .stat-pill {
     padding: 0.38rem 0.84rem;
     border-radius: 999px;
@@ -356,39 +345,6 @@
 
 .results-header {
     margin-bottom: 0.5rem;
-    gap: 0.75rem;
-}
-
-.results-cta {
-    margin: 0.85rem 0 0.45rem;
-    padding: 0.75rem;
-    border-radius: 0.85rem;
-    border: 1px solid rgba(148, 163, 184, 0.28);
-    background: rgba(15, 23, 42, 0.55);
-}
-
-.results-cta-help {
-    color: #dbeafe;
-    font-size: 0.86rem;
-}
-
-.results-cta-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.55rem;
-}
-
-.btn-results {
-    border-radius: 0.78rem;
-    min-height: 2.4rem;
-    border: 0;
-    background: linear-gradient(120deg, #7c3aed 0%, #6366f1 100%);
-    color: #f8fafc;
-    font-weight: 700;
-}
-
-.results-share-actions {
-    justify-content: flex-end;
 }
 
 .table-responsive {
@@ -439,11 +395,6 @@
         padding-right: 0.75rem;
     }
 
-    .workflow-shell,
-    .workflow-content-row {
-        width: 100%;
-    }
-
     .participants-section,
     .expense-form {
         padding: 0.9rem;
@@ -452,8 +403,7 @@
 
     .participant-actions .btn,
     .actions-row .btn,
-    .secondary-actions .btn,
-    .results-cta-actions .btn {
+    .secondary-actions .btn {
         flex: 1 1 100%;
     }
 
@@ -469,9 +419,6 @@
         gap: 0.55rem;
     }
 
-    .results-share-actions {
-        width: 100%;
-    }
 }
 
 @media (max-width: 460px) {
