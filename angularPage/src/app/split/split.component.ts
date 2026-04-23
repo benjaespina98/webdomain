@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 
 interface ExpenseItem {
   id: number;
@@ -405,12 +405,6 @@ export class SplitComponent {
   hasUnlockedExpenses = false;
   showWorkflowGuide = false;
 
-  @ViewChild('newPersonInput')
-  private newPersonInput?: ElementRef<HTMLInputElement>;
-
-  @ViewChild('expenseDescriptionInput')
-  private expenseDescriptionInput?: ElementRef<HTMLInputElement>;
-
   constructor() {
     this.initializeLanguage();
   }
@@ -481,10 +475,6 @@ export class SplitComponent {
     if (this.selectedParticipants.length === 0) {
       this.selectAllParticipants();
     }
-
-    setTimeout(() => {
-      this.newPersonInput?.nativeElement.focus();
-    }, 0);
   }
 
   removePerson(person: string): void {
@@ -569,17 +559,6 @@ export class SplitComponent {
     }
 
     this.workflowStage = stage;
-    if (stage === 'participants') {
-      setTimeout(() => {
-        this.newPersonInput?.nativeElement.focus();
-      }, 0);
-    }
-
-    if (stage === 'expenses') {
-      setTimeout(() => {
-        this.expenseDescriptionInput?.nativeElement.focus();
-      }, 0);
-    }
   }
 
   continueToExpenses(): void {
@@ -660,7 +639,11 @@ export class SplitComponent {
       textArea.style.position = 'fixed';
       textArea.style.opacity = '0';
       document.body.appendChild(textArea);
-      textArea.focus();
+      try {
+        textArea.focus({ preventScroll: true });
+      } catch {
+        textArea.focus();
+      }
       textArea.select();
 
       const copied = document.execCommand('copy');
