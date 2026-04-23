@@ -76,6 +76,7 @@ interface TranslationMap {
   shareTotal: string;
   shareDetailTitle: string;
   sharePaidBy: string;
+  shareParticipants: string;
   shareAndMoreExpenses: string;
   shareTransfersTitle: string;
   shareAndMoreTransfers: string;
@@ -215,6 +216,7 @@ export class SplitComponent {
       shareTotal: 'Total',
       shareDetailTitle: 'Detalle de gastos',
       sharePaidBy: 'Pagó',
+      shareParticipants: 'Participan',
       shareAndMoreExpenses: '… y {count} gasto(s) más',
       shareTransfersTitle: 'Pagos sugeridos',
       shareAndMoreTransfers: '… y {count} transferencia(s) más',
@@ -327,6 +329,7 @@ export class SplitComponent {
       shareTotal: 'Total',
       shareDetailTitle: 'Expense details',
       sharePaidBy: 'Paid by',
+      shareParticipants: 'Participants',
       shareAndMoreExpenses: '… and {count} more expense(s)',
       shareTransfersTitle: 'Suggested payments',
       shareAndMoreTransfers: '… and {count} more transfer(s)',
@@ -853,6 +856,12 @@ export class SplitComponent {
     return expenseItem.id;
   }
 
+  formatExpenseParticipants(expenseItem: ExpenseItem): string {
+    return expenseItem.participants.length > 0
+      ? expenseItem.participants.join(', ')
+      : '-';
+  }
+
   trackByResult(_index: number, result: SettlementResult): string {
     return `${result.debtor}-${result.creditor}`;
   }
@@ -922,7 +931,7 @@ export class SplitComponent {
   private buildShareMessage(): string {
     const appLink = this.getShareAppLink();
     const expenseLines = this.expenseItems.map((item) =>
-      `• ${item.description}: ${this.formatCurrency(item.amount)} (${this.t('sharePaidBy')}: ${item.paidBy})`
+      `• ${item.description}: ${this.formatCurrency(item.amount)} (${this.t('sharePaidBy')}: ${item.paidBy} | ${this.t('shareParticipants')}: ${this.formatExpenseParticipants(item)})`
     );
 
     const lines: string[] = [
