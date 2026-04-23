@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 
 interface ExpenseItem {
   id: number;
@@ -107,6 +107,24 @@ interface TranslationMap {
   shareGeneratedAt: string;
   shareOpenApp: string;
   whatsappOpened: string;
+  summaryCopied: string;
+  copySummary: string;
+  clipboardUnavailable: string;
+  splitModeAll: string;
+  splitModeCustom: string;
+  splitAllHelp: string;
+  splitCustomHelp: string;
+  workflowStepParticipants: string;
+  workflowStepExpenses: string;
+  workflowStepResults: string;
+  workflowParticipantsHelp: string;
+  workflowExpensesHelp: string;
+  workflowResultsHelp: string;
+  continueToExpenses: string;
+  backToParticipants: string;
+  showStepGuide: string;
+  hideStepGuide: string;
+  currentStepLabel: string;
 }
 
 interface AppSnapshot {
@@ -116,7 +134,10 @@ interface AppSnapshot {
   newExpenseDescription: string;
   newExpenseAmount: number | null;
   newExpensePaidBy: string;
+  splitMode: 'all' | 'custom';
   selectedParticipants: string[];
+  workflowStage: 'participants' | 'expenses' | 'results';
+  hasUnlockedExpenses: boolean;
   nextExpenseId: number;
   totalExpense: number;
   averageSpent: number;
@@ -132,61 +153,61 @@ export class SplitComponent {
   private readonly languageStorageKey = 'split-language';
   private readonly translations: Record<LanguageCode, TranslationMap> = {
     es: {
-      appSubtitle: 'Sumá personas, cargá gastos y resolvé quién le paga a quién en un toque.',
-      participants: 'Participantes',
-      participantsHelp: 'Agregalos una sola vez y listo. Después elegís quién participa en cada gasto.',
-      addPersonLabel: 'Agregar Persona:',
+      appSubtitle: 'sumá personas, cargá gastos y resolvé quién le paga a quién en un toque.',
+      participants: 'personas',
+      participantsHelp: 'sumalas una sola vez y listo; después elegís quién entra en cada gasto.',
+      addPersonLabel: 'Agregar personas:',
       addButton: 'Agregar',
       personPlaceholder: 'Ej: Juan',
-      noParticipantsYet: 'Todavía no cargaste participantes.',
-      addExpense: 'Agregar Gasto',
-      addExpenseHelp: 'Completá los datos y marcá quiénes comparten ese gasto.',
-      needPersonFirst: 'Primero agregá al menos una persona para empezar.',
+      noParticipantsYet: 'todavía no sumaste personas.',
+      addExpense: 'sumar gasto',
+      addExpenseHelp: 'completá los datos y marcá quiénes comparten ese gasto.',
+      needPersonFirst: 'primero sumá al menos una persona para empezar.',
       expenseDescriptionLabel: 'Descripción del gasto:',
       expenseDescriptionPlaceholder: 'Ej: Cena, Nafta, Uber',
       totalAmountLabel: 'Monto total:',
       amountPlaceholder: 'Ej: 15000',
       whoPaidLabel: '¿Quién pagó?',
       selectPlaceholder: 'Seleccionar...',
-      whoParticipates: '¿Quiénes participan en este gasto?',
-      participantHint: 'Tocá cada nombre para incluirlo o quitarlo del gasto.',
+      whoParticipates: '¿Quiénes entran en este gasto?',
+      participantHint: 'tocá cada nombre para sumarlo o sacarlo de este gasto.',
       selectAll: 'Seleccionar todos',
       clearSelection: 'Borrar selección',
-      selected: 'Seleccionados',
+      selected: 'seleccionados',
       selectedFirstHint: '(los seleccionados aparecen primero)',
       payerNotIncluded: 'pagó, pero no está incluido en el reparto.',
       ready: 'Listo',
-      includedParticipants: 'participante(s) incluidos.',
-      addExpenseButton: 'Agregar Gasto',
-      clearAll: 'Limpiar Todo',
+      includedParticipants: 'persona(s) incluidas.',
+      addExpenseButton: 'sumar gasto',
+      clearAll: 'limpiar todo',
       clearAllTitle: 'Borra participantes y gastos',
-      shareWhatsapp: 'Compartir por WhatsApp',
-      registeredExpenses: 'Gastos Registrados',
+      shareWhatsapp: 'compartir por WhatsApp',
+      registeredExpenses: 'gastos cargados',
       description: 'Descripción',
       amount: 'Monto',
       paidBy: 'Pagado por',
-      participantsColumn: 'Participantes',
+      participantsColumn: 'personas',
       perPerson: 'Por persona',
-      actions: 'Acciones',
+      actions: 'acciones',
       deleteExpense: 'Eliminar',
       deleteParticipantTitle: 'Eliminar participante',
       deleteExpenseTitle: 'Eliminar gasto',
-      results: 'Resultados',
+      results: 'resultados',
       info: 'Información',
       value: 'Valor',
       totalExpense: 'Gasto Total:',
       averagePerPerson: 'Promedio por persona:',
       owesTo: 'le debe pagar',
       allSettled: '✅ Todo saldado. No hay pagos pendientes.',
-      enterValidName: 'Por favor, ingresa un nombre válido',
+      enterValidName: 'por favor, ingresá un nombre válido',
       personAlreadyExists: 'Esta persona ya está en la lista',
       noExpensesToShare: 'No hay gastos para compartir',
       enterExpenseDescription: 'Por favor, ingresa una descripción del gasto',
       enterValidAmount: 'Por favor, ingresa un monto válido',
-      selectWhoPaid: 'Por favor, selecciona quién pagó',
-      addParticipantsToSplit: 'Por favor, agrega participantes para dividir el gasto',
+      selectWhoPaid: 'por favor, seleccioná quién pagó',
+      addParticipantsToSplit: 'por favor, sumá personas para dividir el gasto',
       shareHeader: '💸 dividimos? - Resumen',
-      shareParticipants: '👥 Participantes cargados',
+      shareParticipants: '👥 personas cargadas',
       shareExpensesLoaded: '🧾 Gastos cargados',
       shareTotal: '💰 Total',
       shareAverage: '📊 Promedio por persona',
@@ -200,7 +221,7 @@ export class SplitComponent {
       shareTransferConnector: 'd/.',
       shareFooter: '📲 Hecho con dividimos?',
       shareTo: 'a',
-      languageAria: 'Cambiar idioma',
+      languageAria: 'cambiar idioma',
       clearSelectionTitle: 'Desmarcar todas las personas',
       splitAllTitle: 'Si elegís Todos, el gasto se divide entre todas las personas cargadas',
       languageSpanish: 'Español',
@@ -220,17 +241,35 @@ export class SplitComponent {
       nothingToClear: 'No hay datos para limpiar',
       shareGeneratedAt: '🕒 Generado',
       shareOpenApp: '🌐 Probar app',
-      whatsappOpened: 'WhatsApp abierto'
+      whatsappOpened: 'WhatsApp abierto',
+      summaryCopied: 'Resumen copiado al portapapeles',
+      copySummary: 'Copiar resumen',
+      clipboardUnavailable: 'No se pudo copiar automáticamente. Copiá el texto manualmente.',
+      splitModeAll: 'dividir entre todos',
+      splitModeCustom: 'elegir personas',
+      splitAllHelp: 'este gasto se divide en partes iguales entre todas las personas cargadas.',
+      splitCustomHelp: 'elegí quiénes entran en este gasto.',
+      workflowStepParticipants: 'paso 1: personas',
+      workflowStepExpenses: 'paso 2: gastos',
+      workflowStepResults: 'paso 3: resultados',
+      workflowParticipantsHelp: 'sumá primero a todo tu grupo; podés cargar varios nombres seguidos.',
+      workflowExpensesHelp: 'cargá cada gasto y elegí si va para todos o solo para algunas personas.',
+      workflowResultsHelp: 'acá ves el resumen final y quién le paga a quién.',
+      continueToExpenses: 'seguir a gastos',
+      backToParticipants: 'volver a personas',
+      showStepGuide: 'ver guía de pasos',
+      hideStepGuide: 'ocultar guía de pasos',
+      currentStepLabel: 'paso actual'
     },
     en: {
       appSubtitle: 'Add people, enter expenses, and quickly see who owes whom.',
-      participants: 'Participants',
+      participants: 'people',
       participantsHelp: 'Add them once and you are done. Then choose who is included in each expense.',
-      addPersonLabel: 'Add Person:',
+      addPersonLabel: 'Add person:',
       addButton: 'Add',
       personPlaceholder: 'Ex: John',
       noParticipantsYet: 'You have not added participants yet.',
-      addExpense: 'Add Expense',
+      addExpense: 'add expense',
       addExpenseHelp: 'Fill in the details and mark who shares this expense.',
       needPersonFirst: 'Add at least one person first to start.',
       expenseDescriptionLabel: 'Expense description:',
@@ -239,7 +278,7 @@ export class SplitComponent {
       amountPlaceholder: 'Ex: 15000',
       whoPaidLabel: 'Who paid?',
       selectPlaceholder: 'Select...',
-      whoParticipates: 'Who participates in this expense?',
+      whoParticipates: 'Who is included in this expense?',
       participantHint: 'Tap each name to include or remove it from this expense.',
       selectAll: 'Select all',
       clearSelection: 'Clear selection',
@@ -256,7 +295,7 @@ export class SplitComponent {
       description: 'Description',
       amount: 'Amount',
       paidBy: 'Paid by',
-      participantsColumn: 'Participants',
+      participantsColumn: 'people',
       perPerson: 'Per person',
       actions: 'Actions',
       deleteExpense: 'Delete',
@@ -311,7 +350,25 @@ export class SplitComponent {
       nothingToClear: 'There is no data to clear',
       shareGeneratedAt: '🕒 Generated',
       shareOpenApp: '🌐 Try app',
-      whatsappOpened: 'WhatsApp opened'
+      whatsappOpened: 'WhatsApp opened',
+      summaryCopied: 'Summary copied to clipboard',
+      copySummary: 'Copy summary',
+      clipboardUnavailable: 'Could not copy automatically. Please copy the text manually.',
+      splitModeAll: 'split equally',
+      splitModeCustom: 'choose people',
+      splitAllHelp: 'The expense will be divided equally among all registered participants.',
+      splitCustomHelp: 'Choose who takes part in this expense.',
+      workflowStepParticipants: 'Step 1: Participants',
+      workflowStepExpenses: 'Step 2: Expenses',
+      workflowStepResults: 'Step 3: Results',
+      workflowParticipantsHelp: 'Add all people first. You can quickly add several without leaving this section.',
+      workflowExpensesHelp: 'Add each expense and decide whether to split equally or only among selected people.',
+      workflowResultsHelp: 'Here you can see the final summary and who pays whom.',
+      continueToExpenses: 'Continue to expenses',
+      backToParticipants: 'Keep adding participants',
+      showStepGuide: 'Show step guide',
+      hideStepGuide: 'Hide step guide',
+      currentStepLabel: 'Current step'
     }
   };
 
@@ -332,8 +389,18 @@ export class SplitComponent {
   newExpenseDescription: string = '';
   newExpenseAmount: number | null = null;
   newExpensePaidBy: string = '';
+  splitMode: 'all' | 'custom' = 'all';
   selectedParticipants: string[] = [];
   nextExpenseId = 1;
+  workflowStage: 'participants' | 'expenses' | 'results' = 'participants';
+  hasUnlockedExpenses = false;
+  showWorkflowGuide = false;
+
+  @ViewChild('newPersonInput')
+  private newPersonInput?: ElementRef<HTMLInputElement>;
+
+  @ViewChild('expenseDescriptionInput')
+  private expenseDescriptionInput?: ElementRef<HTMLInputElement>;
 
   constructor() {
     this.initializeLanguage();
@@ -376,7 +443,7 @@ export class SplitComponent {
       return;
     }
 
-    if (!this.isExpenseFormValid()) {
+    if (!this.canSubmitExpense()) {
       return;
     }
 
@@ -399,11 +466,16 @@ export class SplitComponent {
 
     this.people.push(cleanPersonName);
     this.newPersonName = '';
+    this.workflowStage = 'participants';
     this.showNotice(this.t('personAdded'), 'success');
 
     if (this.selectedParticipants.length === 0) {
       this.selectAllParticipants();
     }
+
+    setTimeout(() => {
+      this.newPersonInput?.nativeElement.focus();
+    }, 0);
   }
 
   removePerson(person: string): void {
@@ -413,10 +485,20 @@ export class SplitComponent {
 
     this.saveSnapshotForUndo();
     this.people = this.people.filter((currentPerson) => currentPerson !== person);
+    this.selectedParticipants = this.selectedParticipants.filter((participant) => participant !== person);
+    if (this.newExpensePaidBy === person) {
+      this.newExpensePaidBy = '';
+    }
     this.expenseItems = this.expenseItems.filter((item) =>
       item.paidBy !== person && !item.participants.includes(person)
     );
     this.calculateAdvancedShares();
+
+    if (this.people.length === 0) {
+      this.workflowStage = 'participants';
+      this.hasUnlockedExpenses = false;
+    }
+
     this.showNotice(this.t('personRemoved'), 'warning', true);
   }
 
@@ -451,6 +533,61 @@ export class SplitComponent {
     }
   }
 
+  setSplitMode(mode: 'all' | 'custom'): void {
+    this.splitMode = mode;
+
+    if (this.people.length === 0) {
+      return;
+    }
+
+    // Keep custom mode easy to use by starting from everyone selected.
+    if (mode === 'all' || this.selectedParticipants.length === 0) {
+      this.selectAllParticipants();
+    }
+  }
+
+  setWorkflowStage(stage: 'participants' | 'expenses' | 'results'): void {
+    if (stage !== 'participants' && this.people.length === 0) {
+      return;
+    }
+
+    if (stage === 'expenses' && !this.canAccessExpenses()) {
+      return;
+    }
+
+    if (stage === 'results' && !this.canAccessResults()) {
+      return;
+    }
+
+    this.workflowStage = stage;
+    this.showWorkflowGuide = false;
+
+    if (stage === 'participants') {
+      setTimeout(() => {
+        this.newPersonInput?.nativeElement.focus();
+      }, 0);
+    }
+
+    if (stage === 'expenses') {
+      setTimeout(() => {
+        this.expenseDescriptionInput?.nativeElement.focus();
+      }, 0);
+    }
+  }
+
+  continueToExpenses(): void {
+    if (this.people.length === 0) {
+      return;
+    }
+
+    this.hasUnlockedExpenses = true;
+    this.setWorkflowStage('expenses');
+  }
+
+  toggleWorkflowGuide(): void {
+    this.showWorkflowGuide = !this.showWorkflowGuide;
+  }
+
   areAllSelected(): boolean {
     return this.people.length > 0 && this.selectedParticipants.length === this.people.length;
   }
@@ -476,58 +613,48 @@ export class SplitComponent {
       alert(this.t('noExpensesToShare'));
       return;
     }
-
-    const generatedAt = new Date().toLocaleString(this.currentLanguage === 'es' ? 'es-AR' : 'en-US', {
-      day: '2-digit',
-      month: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-    const appLink = this.getShareAppLink();
-
-    const headerLines = [
-      '🟣 Dividimos?',
-      `${this.t('shareParticipants')}: ${this.people.length}`,
-      `${this.t('shareExpensesLoaded')}: ${this.expenseItems.length}`,
-      `${this.t('shareTotal')}: ${this.formatCurrency(this.totalExpense)}`,
-      `${this.t('shareAverage')}: ${this.formatCurrency(this.averageSpent)}`
-    ];
-
-    const expensesLines = [
-      '',
-      this.t('shareDetailTitle'),
-      ...this.expenseItems.map((item, index) =>
-        `${index + 1}) ${item.description} - ${this.formatCurrency(item.amount)}\n   ${this.t('sharePaidBy')}: ${item.paidBy} | 👥 ${item.participants.join(', ')}`
-      )
-    ];
-
-    const transfersLines = [''];
-
-    if (this.results.length > 0) {
-      transfersLines.push(this.t('shareTransfersTitle'));
-      this.results.forEach((result, index) => {
-        if (this.currentLanguage === 'es') {
-          transfersLines.push(`${index + 1}. ${result.debtor} le debe pagar a ${result.creditor}: ${this.formatCurrency(result.amount)}`);
-        } else {
-          transfersLines.push(`${index + 1}. ${result.debtor} ${this.t('shareTransferConnector')} ${result.creditor}: ${this.formatCurrency(result.amount)}`);
-        }
-      });
-    } else {
-      transfersLines.push(this.t('shareAllSettled'));
-      transfersLines.push(this.t('shareNoTransfers'));
-    }
-
-    const footerLines = [
-      '',
-      this.t('shareFooter'),
-      ...(appLink ? [`${this.t('shareOpenApp')}: ${appLink}`] : [])
-    ];
-    const message = [...headerLines, ...expensesLines, ...transfersLines, ...footerLines].join('\n');
+    const message = this.buildShareMessage();
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
     this.showNotice(this.t('whatsappOpened'), 'success');
+  }
+
+  async copySummary(): Promise<void> {
+    if (this.expenseItems.length === 0) {
+      alert(this.t('noExpensesToShare'));
+      return;
+    }
+
+    const message = this.buildShareMessage();
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(message);
+        this.showNotice(this.t('summaryCopied'), 'success');
+        return;
+      }
+
+      throw new Error('Clipboard API unavailable');
+    } catch {
+      const textArea = document.createElement('textarea');
+      textArea.value = message;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      const copied = document.execCommand('copy');
+      document.body.removeChild(textArea);
+
+      if (copied) {
+        this.showNotice(this.t('summaryCopied'), 'success');
+      } else {
+        alert(this.t('clipboardUnavailable'));
+      }
+    }
   }
 
   addExpenseItem(): void {
@@ -546,11 +673,9 @@ export class SplitComponent {
       return;
     }
 
-    if (this.selectedParticipants.length === 0) {
+    if (this.splitMode === 'all') {
       this.selectAllParticipants();
-    }
-
-    if (this.selectedParticipants.length === 0) {
+    } else if (this.splitMode === 'custom' && this.selectedParticipants.length === 0) {
       alert(this.t('addParticipantsToSplit'));
       return;
     }
@@ -571,6 +696,7 @@ export class SplitComponent {
     this.selectAllParticipants();
 
     this.calculateAdvancedShares();
+    this.hasUnlockedExpenses = true;
     this.showNotice(this.t('expenseAdded'), 'success');
   }
 
@@ -582,6 +708,11 @@ export class SplitComponent {
     this.saveSnapshotForUndo();
     this.expenseItems = this.expenseItems.filter((item) => item.id !== expenseId);
     this.calculateAdvancedShares();
+
+    if (this.expenseItems.length === 0) {
+      this.workflowStage = this.people.length > 0 ? 'expenses' : 'participants';
+    }
+
     this.showNotice(this.t('expenseRemoved'), 'warning', true);
   }
 
@@ -591,25 +722,32 @@ export class SplitComponent {
       return;
     }
 
-    const balances = this.createZeroBalances(this.people);
-
-    this.totalExpense = 0;
+    const balancesInCents = this.createZeroBalances(this.people);
+    let totalExpenseInCents = 0;
 
     this.expenseItems.forEach((expense) => {
-      this.totalExpense += expense.amount;
-      const sharePerPerson = expense.amount / expense.participants.length;
+      const validParticipants = expense.participants.filter((participant) => this.people.includes(participant));
+      if (validParticipants.length === 0 || !this.people.includes(expense.paidBy)) {
+        return;
+      }
 
-      balances[expense.paidBy] += expense.amount;
+      const amountInCents = this.toCents(expense.amount);
+      totalExpenseInCents += amountInCents;
+      balancesInCents[expense.paidBy] += amountInCents;
 
-      expense.participants.forEach((participant) => {
-        balances[participant] -= sharePerPerson;
+      const baseShare = Math.floor(amountInCents / validParticipants.length);
+      const remainder = amountInCents % validParticipants.length;
+
+      validParticipants.forEach((participant, index) => {
+        const participantShare = baseShare + (index < remainder ? 1 : 0);
+        balancesInCents[participant] -= participantShare;
       });
     });
 
-    const { debts, credits } = this.splitBalances(balances);
-
-    this.results = this.buildTransfers(debts, credits, 0.01);
-    this.averageSpent = this.totalExpense / this.people.length;
+    const { debts, credits } = this.splitBalances(balancesInCents);
+    this.results = this.buildTransfers(debts, credits, 1);
+    this.totalExpense = this.fromCents(totalExpenseInCents);
+    this.averageSpent = this.people.length > 0 ? this.fromCents(Math.round(totalExpenseInCents / this.people.length)) : 0;
   }
 
   clearAll(): void {
@@ -629,8 +767,11 @@ export class SplitComponent {
     this.newExpenseDescription = '';
     this.newExpenseAmount = null;
     this.newExpensePaidBy = '';
+    this.splitMode = 'all';
     this.selectedParticipants = [];
     this.nextExpenseId = 1;
+    this.workflowStage = 'participants';
+    this.hasUnlockedExpenses = false;
 
     this.resetResults();
     this.showNotice(this.t('allCleared'), 'warning', true);
@@ -642,6 +783,50 @@ export class SplitComponent {
       && !!this.newExpenseAmount
       && this.newExpenseAmount > 0
       && !!this.newExpensePaidBy;
+  }
+
+  canSubmitExpense(): boolean {
+    if (!this.isExpenseFormValid()) {
+      return false;
+    }
+
+    return this.splitMode === 'all' || this.selectedParticipants.length > 0;
+  }
+
+  isStageActive(stage: 'participants' | 'expenses' | 'results'): boolean {
+    return this.workflowStage === stage;
+  }
+
+  isStageDone(stage: 'participants' | 'expenses' | 'results'): boolean {
+    if (stage === 'participants') {
+      return this.people.length > 0;
+    }
+
+    if (stage === 'expenses') {
+      return this.expenseItems.length > 0;
+    }
+
+    return this.results.length > 0 || this.expenseItems.length > 0;
+  }
+
+  canAccessExpenses(): boolean {
+    return this.people.length > 0 && this.hasUnlockedExpenses;
+  }
+
+  canAccessResults(): boolean {
+    return this.expenseItems.length > 0 && this.hasUnlockedExpenses;
+  }
+
+  getCurrentStepTitle(): string {
+    if (this.workflowStage === 'participants') {
+      return this.t('workflowStepParticipants');
+    }
+
+    if (this.workflowStage === 'expenses') {
+      return this.t('workflowStepExpenses');
+    }
+
+    return this.t('workflowStepResults');
   }
 
   trackByPerson(_index: number, person: string): string {
@@ -695,7 +880,7 @@ export class SplitComponent {
         if (debtor !== creditor && remainingDebts[debtor] > 0 && remainingCredits[creditor] > 0) {
           const amount = Math.min(remainingDebts[debtor], remainingCredits[creditor]);
           if (amount > minTransfer) {
-            transferResults.push({ debtor, creditor, amount });
+            transferResults.push({ debtor, creditor, amount: this.fromCents(amount) });
             remainingDebts[debtor] -= amount;
             remainingCredits[creditor] -= amount;
           }
@@ -708,6 +893,67 @@ export class SplitComponent {
 
   private formatCurrency(amount: number): string {
     return `$${amount.toFixed(2)}`;
+  }
+
+  private toCents(amount: number): number {
+    return Math.round(amount * 100);
+  }
+
+  private fromCents(cents: number): number {
+    return Number((cents / 100).toFixed(2));
+  }
+
+  private buildShareMessage(): string {
+    const generatedAt = new Date().toLocaleString(this.currentLanguage === 'es' ? 'es-AR' : 'en-US', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    const appLink = this.getShareAppLink();
+
+    const lines: string[] = [
+      this.t('shareHeader'),
+      `${this.t('shareParticipants')}: ${this.people.length}`,
+      `${this.t('shareExpensesLoaded')}: ${this.expenseItems.length}`,
+      `${this.t('shareTotal')}: ${this.formatCurrency(this.totalExpense)}`,
+      `${this.t('shareAverage')}: ${this.formatCurrency(this.averageSpent)}`,
+      `${this.t('shareGeneratedAt')}: ${generatedAt}`,
+      '',
+      this.t('shareDetailTitle')
+    ];
+
+    this.expenseItems.forEach((item, index) => {
+      const perPersonAmount = item.participants.length > 0 ? item.amount / item.participants.length : 0;
+      lines.push(`${index + 1}. 🧾 ${item.description} — ${this.formatCurrency(item.amount)}`);
+      lines.push(`   👤 ${this.t('sharePaidBy')}: ${item.paidBy}`);
+      lines.push(`   👥 ${item.participants.join(', ')}`);
+      lines.push(`   ➗ ${this.t('perPerson')}: ${this.formatCurrency(perPersonAmount)}`);
+    });
+
+    lines.push('');
+    lines.push(this.t('shareTransfersTitle'));
+
+    if (this.results.length > 0) {
+      this.results.forEach((result, index) => {
+        if (this.currentLanguage === 'es') {
+          lines.push(`${index + 1}. 🔁 ${result.debtor} ${this.t('owesTo')} ${this.formatCurrency(result.amount)} ${this.t('shareTo')} ${result.creditor}`);
+        } else {
+          lines.push(`${index + 1}. 🔁 ${result.debtor} ${this.t('owesTo')} ${this.formatCurrency(result.amount)} ${this.t('shareTo')} ${result.creditor}`);
+        }
+      });
+    } else {
+      lines.push(this.t('shareAllSettled'));
+      lines.push(this.t('shareNoTransfers'));
+    }
+
+    lines.push('');
+    lines.push(this.t('shareFooter'));
+    if (appLink) {
+      lines.push(`${this.t('shareOpenApp')}: ${appLink}`);
+    }
+
+    return lines.join('\n');
   }
 
   private getShareAppLink(): string {
@@ -744,7 +990,10 @@ export class SplitComponent {
       newExpenseDescription: this.newExpenseDescription,
       newExpenseAmount: this.newExpenseAmount,
       newExpensePaidBy: this.newExpensePaidBy,
+      splitMode: this.splitMode,
       selectedParticipants: [...this.selectedParticipants],
+      workflowStage: this.workflowStage,
+      hasUnlockedExpenses: this.hasUnlockedExpenses,
       nextExpenseId: this.nextExpenseId,
       totalExpense: this.totalExpense,
       averageSpent: this.averageSpent,
@@ -759,7 +1008,10 @@ export class SplitComponent {
     this.newExpenseDescription = snapshot.newExpenseDescription;
     this.newExpenseAmount = snapshot.newExpenseAmount;
     this.newExpensePaidBy = snapshot.newExpensePaidBy;
+    this.splitMode = snapshot.splitMode;
     this.selectedParticipants = [...snapshot.selectedParticipants];
+    this.workflowStage = snapshot.workflowStage;
+    this.hasUnlockedExpenses = snapshot.hasUnlockedExpenses;
     this.nextExpenseId = snapshot.nextExpenseId;
     this.totalExpense = snapshot.totalExpense;
     this.averageSpent = snapshot.averageSpent;

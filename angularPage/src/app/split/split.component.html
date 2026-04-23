@@ -1,4 +1,4 @@
-<div class="container mt-5 advanced-mode">
+<div class="container-fluid advanced-mode">
     <div class="ux-notice" *ngIf="uiNotice" [class.notice-success]="uiNoticeType === 'success'" [class.notice-warning]="uiNoticeType === 'warning'" [class.notice-info]="uiNoticeType === 'info'">
         <span>{{ uiNotice }}</span>
         <div class="ux-notice-actions">
@@ -16,114 +16,149 @@
         <span class="brand-name">dividimos?</span>
     </h1>
     <p class="page-subtitle text-center mb-4">{{ t('appSubtitle') }}</p>
+
+    <div class="workflow-strip" role="button" tabindex="0" (click)="toggleWorkflowGuide()" [attr.aria-expanded]="showWorkflowGuide">
+        <div class="workflow-strip-steps" aria-hidden="true">
+            <span class="strip-step" [class.active]="isStageActive('participants')" [class.done]="isStageDone('participants')">1</span>
+            <span class="strip-step" [class.active]="isStageActive('expenses')" [class.done]="isStageDone('expenses')">2</span>
+            <span class="strip-step" [class.active]="isStageActive('results')" [class.done]="isStageDone('results')">3</span>
+        </div>
+        <span class="workflow-strip-title">{{ getCurrentStepTitle() }}</span>
+    </div>
+
+    <div class="workflow-steps" aria-label="Workflow" *ngIf="showWorkflowGuide">
+        <button type="button" class="workflow-step" [class.active]="isStageActive('participants')" [class.done]="isStageDone('participants')" (click)="setWorkflowStage('participants')">
+            <span>{{ t('workflowStepParticipants') }}</span>
+            <small>{{ t('workflowParticipantsHelp') }}</small>
+        </button>
+        <button type="button" class="workflow-step" [class.active]="isStageActive('expenses')" [class.done]="isStageDone('expenses')" (click)="setWorkflowStage('expenses')" [disabled]="!canAccessExpenses()">
+            <span>{{ t('workflowStepExpenses') }}</span>
+            <small>{{ t('workflowExpensesHelp') }}</small>
+        </button>
+        <button type="button" class="workflow-step" [class.active]="isStageActive('results')" [class.done]="isStageDone('results')" (click)="setWorkflowStage('results')" [disabled]="!canAccessResults()">
+            <span>{{ t('workflowStepResults') }}</span>
+            <small>{{ t('workflowResultsHelp') }}</small>
+        </button>
+    </div>
+
     <div class="quick-stats" *ngIf="people.length > 0 || expenseItems.length > 0">
         <span class="stat-pill"><strong>{{ people.length }}</strong> {{ t('participants') }}</span>
         <span class="stat-pill"><strong>{{ expenseItems.length }}</strong> {{ t('registeredExpenses') }}</span>
     </div>
 
-    <div class="row g-3">
-        <div class="col-md-4">
-            <div class="participants-section">
-                <h4 class="section-title">{{ t('participants') }}</h4>
-                <p class="muted-help">{{ t('participantsHelp') }}</p>
+    <div class="row g-3 justify-content-center">
+        <div class="col-12 col-lg-6" *ngIf="isStageActive('participants')">
+            <div class="participants-section mb-3" [class.stage-focus]="isStageActive('participants')">
                 <form (ngSubmit)="addPerson()">
-                    <div class="mb-3">
-                        <label for="newPersonName" class="form-label">{{ t('addPersonLabel') }}</label>
-                        <div class="input-group">
-                            <input type="text" id="newPersonName" class="form-control" [placeholder]="t('personPlaceholder')" [(ngModel)]="newPersonName" name="newPersonName" [attr.aria-label]="t('participants')">
-                            <button type="submit" class="btn btn-outline-primary" [title]="t('addPersonLabel')">
+                    <div class="mb-0">
+                        <label for="newPersonName" class="form-label mb-1 fw-bold">{{ t('addPersonLabel') }}</label>
+                        <div class="add-person-row">
+                            <input #newPersonInput type="text" id="newPersonName" class="form-control flex-grow-1" [placeholder]="t('personPlaceholder')" [(ngModel)]="newPersonName" name="newPersonName" [attr.aria-label]="t('participants')">
+                            <button type="submit" class="btn btn-primary add-person-btn" [title]="t('addPersonLabel')">
                                 <i class="fas fa-plus me-1"></i>{{ t('addButton') }}
                             </button>
                         </div>
                     </div>
                 </form>
 
-                <div *ngIf="people.length === 0" class="empty-state text-muted">{{ t('noParticipantsYet') }}</div>
-
-                <ul class="list-group" *ngIf="people.length > 0">
-                    <li class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let person of people; trackBy: trackByPerson">
+                <div class="mt-3 d-flex flex-wrap gap-2" *ngIf="people.length > 0">
+                    <span class="badge bg-secondary d-flex align-items-center" *ngFor="let person of people; trackBy: trackByPerson">
                         {{ person }}
-                        <button class="btn btn-outline-danger btn-sm" (click)="removePerson(person)" [title]="t('deleteParticipantTitle')">×</button>
-                    </li>
-                </ul>
+                        <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" style="font-size: 0.5rem;" (click)="removePerson(person)" [title]="t('deleteParticipantTitle')"></button>
+                    </span>
+                </div>
+
+                <div class="participants-footer" *ngIf="people.length > 0">
+                    <button type="button" class="btn btn-outline-light participants-next" (click)="continueToExpenses()">
+                        {{ t('continueToExpenses') }}
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-8">
-            <div class="expense-form">
-                <h4 class="section-title">{{ t('addExpense') }}</h4>
-                <p class="muted-help">{{ t('addExpenseHelp') }}</p>
-
-                <div *ngIf="people.length === 0" class="alert alert-info">{{ t('needPersonFirst') }}</div>
-
-                <form *ngIf="people.length > 0" (ngSubmit)="addExpenseItem()">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="expenseDescription" class="form-label">{{ t('expenseDescriptionLabel') }}</label>
-                                <input type="text" id="expenseDescription" class="form-control" [placeholder]="t('expenseDescriptionPlaceholder')" [(ngModel)]="newExpenseDescription" name="expenseDescription" [attr.aria-label]="t('expenseDescriptionLabel')">
-                            </div>
+        <div class="col-12" *ngIf="canAccessExpenses() && isStageActive('expenses')">
+            <div class="expense-form" [class.stage-focus]="isStageActive('expenses')">
+                <form (ngSubmit)="addExpenseItem()">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-5">
+                            <label for="expenseDescription" class="form-label small fw-bold mb-1">{{ t('expenseDescriptionLabel') }}</label>
+                            <input #expenseDescriptionInput type="text" id="expenseDescription" class="form-control form-control-sm" [placeholder]="t('expenseDescriptionPlaceholder')" [(ngModel)]="newExpenseDescription" name="expenseDescription" [attr.aria-label]="t('expenseDescriptionLabel')">
                         </div>
                         <div class="col-md-3">
-                            <div class="mb-3">
-                                <label for="expenseAmount" class="form-label">{{ t('totalAmountLabel') }}</label>
-                                <input type="number" id="expenseAmount" class="form-control" [placeholder]="t('amountPlaceholder')" step="0.01" inputmode="decimal" [(ngModel)]="newExpenseAmount" name="expenseAmount" [attr.aria-label]="t('totalAmountLabel')">
-                            </div>
+                            <label for="expenseAmount" class="form-label small fw-bold mb-1">{{ t('totalAmountLabel') }}</label>
+                            <input type="number" id="expenseAmount" class="form-control form-control-sm" [placeholder]="t('amountPlaceholder')" step="0.01" inputmode="decimal" [(ngModel)]="newExpenseAmount" name="expenseAmount" [attr.aria-label]="t('totalAmountLabel')">
                         </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <label for="expensePaidBy" class="form-label">{{ t('whoPaidLabel') }}</label>
-                                <select id="expensePaidBy" class="form-select" [(ngModel)]="newExpensePaidBy" (ngModelChange)="onPaidByChange()" name="expensePaidBy">
-                                    <option value="">{{ t('selectPlaceholder') }}</option>
-                                    <option *ngFor="let person of people; trackBy: trackByPerson" [value]="person">{{ person }}</option>
-                                </select>
-                            </div>
+                        <div class="col-md-4">
+                            <label for="expensePaidBy" class="form-label small fw-bold mb-1">{{ t('whoPaidLabel') }}</label>
+                            <select id="expensePaidBy" class="form-select form-select-sm" [(ngModel)]="newExpensePaidBy" (ngModelChange)="onPaidByChange()" name="expensePaidBy">
+                                <option value="">{{ t('selectPlaceholder') }}</option>
+                                <option *ngFor="let person of people; trackBy: trackByPerson" [value]="person">{{ person }}</option>
+                            </select>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" [title]="t('splitAllTitle')">{{ t('whoParticipates') }}</label>
-                        <p class="selection-help mb-2">{{ t('participantHint') }}</p>
-                        <div class="mb-2 participant-actions">
-                            <button type="button" class="btn" (click)="selectAllParticipants()" [class.btn-success]="areAllSelected()" [class.btn-outline-success]="!areAllSelected()" [class.is-active]="areAllSelected()">
-                                <i class="fas fa-users"></i> {{ t('selectAll') }}
+                        <label class="form-label small fw-bold mb-1" [title]="t('splitAllTitle')">{{ t('whoParticipates') }}</label>
+
+                        <div class="split-mode-grid mt-1 mb-2">
+                            <button type="button" class="split-mode-option" [class.active]="splitMode === 'all'" (click)="setSplitMode('all')" [attr.aria-pressed]="splitMode === 'all'" [title]="t('splitAllTitle')">
+                                <span class="mode-title">{{ t('splitModeAll') }}</span>
                             </button>
-                            <button type="button" class="btn btn-outline-secondary" (click)="deselectAllParticipants()" [class.is-active]="areNoneSelected()" [title]="t('clearSelectionTitle')">
-                                <i class="fas fa-times"></i> {{ t('clearSelection') }}
-                            </button>
-                        </div>
-                        <div class="selection-summary">
-                            <span>{{ t('selected') }}: <strong>{{ selectedParticipants.length }}</strong> / {{ people.length }}</span>
-                        </div>
-                        <div class="participant-chip-grid">
-                            <button
-                                type="button"
-                                class="participant-chip"
-                                *ngFor="let person of getPeopleForSelection(); trackBy: trackByPerson"
-                                [class.selected]="isParticipantSelected(person)"
-                                [attr.aria-pressed]="isParticipantSelected(person)"
-                                (click)="toggleParticipant(person)">
-                                <span class="participant-name">{{ person }}</span>
-                                <span class="participant-check" *ngIf="isParticipantSelected(person)">✓</span>
+                            <button type="button" class="split-mode-option" [class.active]="splitMode === 'custom'" (click)="setSplitMode('custom')" [attr.aria-pressed]="splitMode === 'custom'">
+                                <span class="mode-title">{{ t('splitModeCustom') }}</span>
                             </button>
                         </div>
-                        <small class="text-warning d-block mt-1" *ngIf="newExpensePaidBy && !isPayerIncludedInParticipants()">
-                            ⚠️ {{ newExpensePaidBy }} {{ t('payerNotIncluded') }}
-                        </small>
-                        <small class="text-muted" *ngIf="selectedParticipants.length > 0">
-                            {{ t('ready') }}: {{ selectedParticipants.length }} {{ t('includedParticipants') }}
-                        </small>
+                        <p class="split-mode-help mb-0">{{ splitMode === 'all' ? t('splitAllHelp') : t('splitCustomHelp') }}</p>
+
+                        <div *ngIf="splitMode === 'custom'" class="custom-participants-box mt-3">
+                            <p class="selection-help mb-2">{{ t('participantHint') }}</p>
+                            <div class="mb-2 participant-actions">
+                                <button type="button" class="btn" (click)="selectAllParticipants()" [class.btn-success]="areAllSelected()" [class.btn-outline-success]="!areAllSelected()" [class.is-active]="areAllSelected()">
+                                    <i class="fas fa-users"></i> {{ t('selectAll') }}
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" (click)="deselectAllParticipants()" [class.is-active]="areNoneSelected()" [title]="t('clearSelectionTitle')">
+                                    <i class="fas fa-times"></i> {{ t('clearSelection') }}
+                                </button>
+                            </div>
+                            <div class="selection-summary mb-2">
+                                <span>{{ t('selected') }}: <strong>{{ selectedParticipants.length }}</strong> / {{ people.length }}</span>
+                            </div>
+                            <div class="participant-chip-grid">
+                                <button
+                                    type="button"
+                                    class="participant-chip"
+                                    *ngFor="let person of getPeopleForSelection(); trackBy: trackByPerson"
+                                    [class.selected]="isParticipantSelected(person)"
+                                    [attr.aria-pressed]="isParticipantSelected(person)"
+                                    (click)="toggleParticipant(person)">
+                                    <span class="participant-name">{{ person }}</span>
+                                    <span class="participant-check" *ngIf="isParticipantSelected(person)">✓</span>
+                                </button>
+                            </div>
+                            <small class="text-warning d-block mt-2" *ngIf="newExpensePaidBy && !isPayerIncludedInParticipants()">
+                                ⚠️ {{ newExpensePaidBy }} {{ t('payerNotIncluded') }}
+                            </small>
+                            <small class="text-muted d-block mt-1" *ngIf="selectedParticipants.length > 0">
+                                {{ t('ready') }}: {{ selectedParticipants.length }} {{ t('includedParticipants') }}
+                            </small>
+                        </div>
                     </div>
 
                     <div class="actions-row">
-                        <button type="submit" class="btn btn-success btn-add-expense" [disabled]="!newExpenseDescription.trim() || !newExpenseAmount || newExpenseAmount <= 0 || !newExpensePaidBy">
+                        <button type="submit" class="btn btn-success btn-add-expense" [disabled]="!canSubmitExpense()">
                             <i class="fas fa-plus-circle me-1"></i>{{ t('addExpenseButton') }}
                         </button>
                     </div>
 
                     <div class="secondary-actions">
+                        <button type="button" class="btn btn-outline-light btn-sm-action" (click)="setWorkflowStage('participants')">
+                            <i class="fas fa-arrow-left me-1"></i>{{ t('backToParticipants') }}
+                        </button>
                         <button type="button" class="btn btn-outline-danger btn-sm-action" (click)="clearAll()" [title]="t('clearAllTitle')">
                             <i class="fas fa-trash me-1"></i>{{ t('clearAll') }}
+                        </button>
+                        <button type="button" class="btn btn-outline-info btn-sm-action" (click)="copySummary()" *ngIf="expenseItems.length > 0">
+                            <i class="fas fa-copy"></i> {{ t('copySummary') }}
                         </button>
                         <button type="button" class="btn btn-outline-primary btn-sm-action" (click)="shareWhatsApp()" *ngIf="expenseItems.length > 0">
                             <i class="fab fa-whatsapp"></i> {{ t('shareWhatsapp') }}
@@ -134,8 +169,8 @@
         </div>
     </div>
 
-    <div class="row mt-4" *ngIf="expenseItems.length > 0">
-        <div class="col-12">
+    <div class="row mt-4 justify-content-center" *ngIf="expenseItems.length > 0 && isStageActive('results')" [class.results-focus]="isStageActive('results')">
+        <div class="col-md-12">
             <h4 class="section-title">{{ t('registeredExpenses') }}</h4>
             <div class="table-responsive">
                 <table class="table table-striped">
@@ -168,13 +203,13 @@
         </div>
     </div>
 
-    <div class="row mt-4" *ngIf="expenseItems.length > 0">
+    <div class="row mt-4" *ngIf="expenseItems.length > 0 && isStageActive('results')" [class.results-focus]="isStageActive('results')">
         <div class="col-12 d-flex justify-content-between align-items-center results-header">
             <h4 class="section-title mb-0">{{ t('results') }}</h4>
         </div>
         <div class="col-12">
             <div class="mt-3">
-                <table class="table table-dark table-striped">
+                                <table class="table table-striped">
                     <thead>
                         <tr>
                             <th scope="col">{{ t('info') }}</th>
@@ -192,8 +227,8 @@
                         </tr>
 
                         <tr *ngFor="let result of results; trackBy: trackByResult">
-                            <td>{{ result.debtor }}</td>
-                            <td>{{ t('owesTo') }} ${{ result.amount.toFixed(2) }} {{ t('shareTo') }} {{ result.creditor }}</td>
+                            <td><strong>{{ result.debtor }}</strong></td>
+                            <td>🔁 {{ result.debtor }} {{ t('owesTo') }} ${{ result.amount.toFixed(2) }} {{ t('shareTo') }} <strong>{{ result.creditor }}</strong></td>
                         </tr>
 
                         <tr *ngIf="results.length === 0 && expenseItems.length > 0">
