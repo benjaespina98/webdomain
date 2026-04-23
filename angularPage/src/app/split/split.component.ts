@@ -125,6 +125,10 @@ interface TranslationMap {
   showStepGuide: string;
   hideStepGuide: string;
   currentStepLabel: string;
+  viewResults: string;
+  reviewExpenses: string;
+  readyToCalculate: string;
+  addExpenseToContinue: string;
 }
 
 interface AppSnapshot {
@@ -259,7 +263,11 @@ export class SplitComponent {
       backToParticipants: 'volver a personas',
       showStepGuide: 'ver guía de pasos',
       hideStepGuide: 'ocultar guía de pasos',
-      currentStepLabel: 'paso actual'
+      currentStepLabel: 'paso actual',
+      viewResults: 'calcular / ver resultados',
+      reviewExpenses: 'seguir cargando gastos',
+      readyToCalculate: 'Ya cargaste gastos. Ahora podés calcular y ver resultados.',
+      addExpenseToContinue: 'Cargá al menos un gasto para pasar al paso 3.'
     },
     en: {
       appSubtitle: 'Add people, enter expenses, and quickly see who owes whom.',
@@ -368,7 +376,11 @@ export class SplitComponent {
       backToParticipants: 'Keep adding participants',
       showStepGuide: 'Show step guide',
       hideStepGuide: 'Hide step guide',
-      currentStepLabel: 'Current step'
+      currentStepLabel: 'Current step',
+      viewResults: 'calculate / view results',
+      reviewExpenses: 'keep adding expenses',
+      readyToCalculate: 'You already added expenses. You can now calculate and view results.',
+      addExpenseToContinue: 'Add at least one expense to continue to step 3.'
     }
   };
 
@@ -582,6 +594,15 @@ export class SplitComponent {
 
     this.hasUnlockedExpenses = true;
     this.setWorkflowStage('expenses');
+  }
+
+  continueToResults(): void {
+    if (!this.canAccessResults()) {
+      return;
+    }
+
+    this.calculateAdvancedShares();
+    this.setWorkflowStage('results');
   }
 
   toggleWorkflowGuide(): void {

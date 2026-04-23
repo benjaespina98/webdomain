@@ -12,14 +12,14 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-.container.advanced-mode {
+.container-fluid.advanced-mode {
     position: relative;
     width: min(96vw, 1380px);
     margin: clamp(0.9rem, 3vh, 2rem) auto 0;
     padding-bottom: 1.5rem;
 }
 
-.container.advanced-mode::before {
+.container-fluid.advanced-mode::before {
     content: '';
     position: fixed;
     border-radius: 999px;
@@ -28,7 +28,7 @@
     z-index: -1;
 }
 
-.container.advanced-mode::before {
+.container-fluid.advanced-mode::before {
     width: 320px;
     height: 320px;
     right: -80px;
@@ -388,7 +388,7 @@
 }
 
 @media (max-width: 767px) {
-    .container.advanced-mode {
+    .container-fluid.advanced-mode {
         width: min(100vw, 100%);
         margin-top: 0.8rem !important;
         padding-left: 0.75rem;
@@ -418,6 +418,7 @@
         align-items: flex-start;
         gap: 0.55rem;
     }
+
 }
 
 @media (max-width: 460px) {
