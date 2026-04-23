@@ -124,6 +124,10 @@
     margin-bottom: 0.5rem;
 }
 
+.results-share-actions-bottom {
+    justify-content: flex-end;
+}
+
 .results-focus {
     animation: results-reveal 260ms ease-out;
 }
@@ -300,6 +304,10 @@
 
     .results-share-actions {
         gap: 0.5rem;
+    }
+
+    .results-share-actions-bottom {
+        justify-content: stretch;
     }
 
     .results-share-actions .btn {

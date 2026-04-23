@@ -178,14 +178,6 @@
     <div class="row mt-4 justify-content-center" *ngIf="expenseItems.length > 0 && isStageActive('results')" [class.results-focus]="isStageActive('results')">
         <div class="col-12 col-xl-10 d-flex justify-content-between align-items-center results-header">
             <h4 class="section-title mb-0">{{ t('results') }}</h4>
-            <div class="secondary-actions results-share-actions">
-                <button type="button" class="btn btn-outline-info btn-sm-action btn-copy-summary" [class.copy-done]="isCopySummaryDone" (click)="copySummary()">
-                    <i class="fas" [ngClass]="isCopySummaryDone ? 'fa-check' : 'fa-copy'"></i> {{ isCopySummaryDone ? t('copySummaryDone') : t('copySummary') }}
-                </button>
-                <button type="button" class="btn btn-outline-success btn-sm-action" (click)="shareWhatsApp()">
-                    <i class="fab fa-whatsapp"></i> {{ t('shareWhatsapp') }}
-                </button>
-            </div>
         </div>
         <div class="col-12 col-xl-10">
             <div class="results-grid mt-3">
@@ -225,6 +217,15 @@
             <div class="secondary-actions mt-3">
                 <button type="button" class="btn btn-outline-danger btn-sm-action" (click)="clearAll()" [title]="t('clearAllTitle')">
                     <i class="fas fa-trash me-1"></i>{{ t('clearAll') }}
+                </button>
+            </div>
+
+            <div class="secondary-actions mt-3 results-share-actions results-share-actions-bottom">
+                <button type="button" class="btn btn-outline-info btn-sm-action btn-copy-summary" [class.copy-done]="isCopySummaryDone" (click)="copySummary()">
+                    <i class="fas" [ngClass]="isCopySummaryDone ? 'fa-check' : 'fa-copy'"></i> {{ isCopySummaryDone ? t('copySummaryDone') : t('copySummary') }}
+                </button>
+                <button type="button" class="btn btn-outline-success btn-sm-action" (click)="shareWhatsApp()">
+                    <i class="fab fa-whatsapp"></i> {{ t('shareWhatsapp') }}
                 </button>
             </div>
         </div>
