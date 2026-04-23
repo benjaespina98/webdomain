@@ -191,7 +191,34 @@
                 </div>
             </div>
 
-            <div class="table-responsive mt-3 payments-table" *ngIf="results.length > 0">
+            <div class="results-block-title mt-3" *ngIf="expenseItems.length > 0">
+                <span>{{ t('shareDetailTitle') }}</span>
+            </div>
+
+            <div class="table-responsive mt-2 payments-table" *ngIf="expenseItems.length > 0">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">{{ t('shareDetailTitle') }}</th>
+                            <th scope="col">{{ t('amount') }}</th>
+                            <th scope="col">{{ t('paidBy') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
+                            <td><strong>{{ item.description }}</strong></td>
+                            <td>${{ item.amount.toFixed(2) }}</td>
+                            <td>{{ item.paidBy }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="results-block-title mt-3" *ngIf="results.length > 0">
+                <span>{{ t('shareTransfersTitle') }}</span>
+            </div>
+
+            <div class="table-responsive mt-2 payments-table" *ngIf="results.length > 0">
                 <table class="table table-striped">
                     <thead>
                         <tr>
