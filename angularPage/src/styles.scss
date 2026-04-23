@@ -176,6 +176,7 @@ app-split .workflow-content-row {
 	width: min(100%, 1080px);
 	margin-left: auto;
 	margin-right: auto;
+	margin-top: clamp(1rem, 4vh, 2rem);
 }
 
 app-split .stage-focus {
@@ -398,6 +399,8 @@ app-split .stage-helper {
 
 app-split .participants-section {
 	margin-bottom: 0;
+	padding-top: clamp(1rem, 2.8vw, 1.35rem);
+	padding-bottom: clamp(1rem, 2.8vw, 1.35rem);
 }
 
 app-split .advanced-mode .form-label {
@@ -568,17 +571,22 @@ app-split .add-person-row {
 	grid-template-columns: minmax(0, 1fr) auto;
 	gap: 0.72rem;
 	align-items: center;
-	margin-top: 0.35rem;
+	margin-top: 0.65rem;
 }
 
 app-split .add-person-btn {
-	min-width: 126px;
-	min-height: 2.65rem;
+	min-width: 140px;
+	min-height: 3rem;
 	border-radius: 0.85rem;
 	border: 1px solid rgba(139, 92, 246, 0.55);
 	background: linear-gradient(120deg, #7c3aed 0%, #6d28d9 100%);
 	font-weight: 600;
 	font-size: clamp(0.82rem, 1.6vw, 0.9rem);
+}
+
+app-split .add-person-row .form-control-lg {
+	min-height: 3rem;
+	font-size: 1rem;
 }
 
 app-split .add-person-btn:hover {
