@@ -18,28 +18,13 @@
     <p class="page-subtitle text-center mb-4">{{ t('appSubtitle') }}</p>
 
     <div class="workflow-shell">
-        <div class="workflow-strip" role="button" tabindex="0" (click)="toggleWorkflowGuide()" [attr.aria-expanded]="showWorkflowGuide">
+        <div class="workflow-strip" aria-label="Workflow">
             <div class="workflow-strip-steps" aria-hidden="true">
                 <span class="strip-step" [class.active]="isStageActive('participants')" [class.done]="isStageDone('participants')">1</span>
                 <span class="strip-step" [class.active]="isStageActive('expenses')" [class.done]="isStageDone('expenses')">2</span>
                 <span class="strip-step" [class.active]="isStageActive('results')" [class.done]="isStageDone('results')">3</span>
             </div>
             <span class="workflow-strip-title">{{ getCurrentStepTitle() }}</span>
-        </div>
-
-        <div class="workflow-steps" aria-label="Workflow" *ngIf="showWorkflowGuide">
-            <button type="button" class="workflow-step" [class.active]="isStageActive('participants')" [class.done]="isStageDone('participants')" (click)="setWorkflowStage('participants')">
-                <span>{{ t('workflowStepParticipants') }}</span>
-                <small>{{ t('workflowParticipantsHelp') }}</small>
-            </button>
-            <button type="button" class="workflow-step" [class.active]="isStageActive('expenses')" [class.done]="isStageDone('expenses')" (click)="setWorkflowStage('expenses')" [disabled]="!canAccessExpenses()">
-                <span>{{ t('workflowStepExpenses') }}</span>
-                <small>{{ t('workflowExpensesHelp') }}</small>
-            </button>
-            <button type="button" class="workflow-step" [class.active]="isStageActive('results')" [class.done]="isStageDone('results')" (click)="setWorkflowStage('results')" [disabled]="!canAccessResults()">
-                <span>{{ t('workflowStepResults') }}</span>
-                <small>{{ t('workflowResultsHelp') }}</small>
-            </button>
         </div>
     </div>
 
@@ -113,17 +98,9 @@
                         <p class="split-mode-help mb-0">{{ splitMode === 'all' ? t('splitAllHelp') : t('splitCustomHelp') }}</p>
 
                         <div *ngIf="splitMode === 'custom'" class="custom-participants-box mt-3">
-                            <p class="selection-help mb-2">{{ t('participantHint') }}</p>
-                            <div class="mb-2 participant-actions">
-                                <button type="button" class="btn" (click)="selectAllParticipants()" [class.btn-success]="areAllSelected()" [class.btn-outline-success]="!areAllSelected()" [class.is-active]="areAllSelected()">
-                                    <i class="fas fa-users"></i> {{ t('selectAll') }}
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary" (click)="deselectAllParticipants()" [class.is-active]="areNoneSelected()" [title]="t('clearSelectionTitle')">
-                                    <i class="fas fa-times"></i> {{ t('clearSelection') }}
-                                </button>
-                            </div>
-                            <div class="selection-summary mb-2">
-                                <span>{{ t('selected') }}: <strong>{{ selectedParticipants.length }}</strong> / {{ people.length }}</span>
+                            <div class="participant-actions mb-2">
+                                <button type="button" class="btn btn-link btn-compact-action" (click)="selectAllParticipants()">{{ t('selectAll') }}</button>
+                                <button type="button" class="btn btn-link btn-compact-action" (click)="deselectAllParticipants()" [title]="t('clearSelectionTitle')">{{ t('clearSelection') }}</button>
                             </div>
                             <div class="participant-chip-grid">
                                 <button
@@ -138,10 +115,7 @@
                                 </button>
                             </div>
                             <small class="text-warning d-block mt-2" *ngIf="newExpensePaidBy && !isPayerIncludedInParticipants()">
-                                ⚠️ {{ newExpensePaidBy }} {{ t('payerNotIncluded') }}
-                            </small>
-                            <small class="text-muted d-block mt-1" *ngIf="selectedParticipants.length > 0">
-                                {{ t('ready') }}: {{ selectedParticipants.length }} {{ t('includedParticipants') }}
+                                {{ newExpensePaidBy }} {{ t('payerNotIncluded') }}
                             </small>
                         </div>
                     </div>
@@ -153,16 +127,37 @@
                     </div>
 
                     <div class="results-cta" *ngIf="isStageActive('expenses')">
-                        <p class="results-cta-help mb-2" *ngIf="expenseItems.length === 0">{{ t('addExpenseToContinue') }}</p>
-                        <p class="results-cta-help mb-2" *ngIf="expenseItems.length > 0">{{ t('readyToCalculate') }}</p>
+                        <div class="step-divider" aria-hidden="true"></div>
                         <div class="results-cta-actions">
-                            <button type="button" class="btn btn-outline-light btn-sm-action" (click)="setWorkflowStage('expenses')" *ngIf="expenseItems.length > 0">
-                                <i class="fas fa-pen me-1"></i>{{ t('reviewExpenses') }}
-                            </button>
                             <button type="button" class="btn btn-primary btn-sm-action btn-results" (click)="continueToResults()" [disabled]="expenseItems.length === 0">
                                 <i class="fas fa-calculator me-1"></i>{{ t('viewResults') }}
                             </button>
                         </div>
+                    </div>
+
+                    <div class="table-responsive compact-expenses" *ngIf="expenseItems.length > 0">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>{{ t('description') }}</th>
+                                    <th>{{ t('amount') }}</th>
+                                    <th>{{ t('paidBy') }}</th>
+                                    <th>{{ t('actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
+                                    <td><strong>{{ item.description }}</strong></td>
+                                    <td>${{ item.amount.toFixed(2) }}</td>
+                                    <td>{{ item.paidBy }}</td>
+                                    <td>
+                                        <button class="btn btn-outline-danger btn-sm" (click)="removeExpenseItem(item.id)" [title]="t('deleteExpenseTitle')">
+                                            {{ t('deleteExpense') }}
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
 
                     <div class="secondary-actions">
@@ -179,45 +174,11 @@
     </div>
 
     <div class="row mt-4 justify-content-center" *ngIf="expenseItems.length > 0 && isStageActive('results')" [class.results-focus]="isStageActive('results')">
-        <div class="col-12 col-xl-10">
-            <h4 class="section-title">{{ t('registeredExpenses') }}</h4>
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>{{ t('description') }}</th>
-                            <th>{{ t('amount') }}</th>
-                            <th>{{ t('paidBy') }}</th>
-                            <th>{{ t('participantsColumn') }}</th>
-                            <th>{{ t('perPerson') }}</th>
-                            <th>{{ t('actions') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
-                            <td><strong>{{ item.description }}</strong></td>
-                            <td>${{ item.amount.toFixed(2) }}</td>
-                            <td>{{ item.paidBy }}</td>
-                            <td>{{ item.participants.join(', ') }}</td>
-                            <td>${{ (item.amount / item.participants.length).toFixed(2) }}</td>
-                            <td>
-                                <button class="btn btn-outline-danger btn-sm" (click)="removeExpenseItem(item.id)" [title]="t('deleteExpenseTitle')">
-                                    {{ t('deleteExpense') }}
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mt-4 justify-content-center" *ngIf="expenseItems.length > 0 && isStageActive('results')" [class.results-focus]="isStageActive('results')">
         <div class="col-12 col-xl-10 d-flex justify-content-between align-items-center results-header">
             <h4 class="section-title mb-0">{{ t('results') }}</h4>
             <div class="secondary-actions results-share-actions">
-                <button type="button" class="btn btn-outline-info btn-sm-action" (click)="copySummary()">
-                    <i class="fas fa-copy"></i> {{ t('copySummary') }}
+                <button type="button" class="btn btn-outline-info btn-sm-action btn-copy-summary" [class.copy-done]="isCopySummaryDone" (click)="copySummary()">
+                    <i class="fas" [ngClass]="isCopySummaryDone ? 'fa-check' : 'fa-copy'"></i> {{ isCopySummaryDone ? t('copySummaryDone') : t('copySummary') }}
                 </button>
                 <button type="button" class="btn btn-outline-success btn-sm-action" (click)="shareWhatsApp()">
                     <i class="fab fa-whatsapp"></i> {{ t('shareWhatsapp') }}
@@ -225,36 +186,44 @@
             </div>
         </div>
         <div class="col-12 col-xl-10">
-            <div class="mt-3">
-                                <table class="table table-striped">
+            <div class="results-grid mt-3">
+                <div class="result-kpi">
+                    <span class="kpi-label">{{ t('totalExpense') }}</span>
+                    <strong class="kpi-value">$ {{ totalExpense.toFixed(2) }}</strong>
+                </div>
+                <div class="result-kpi">
+                    <span class="kpi-label">{{ t('averagePerPerson') }}</span>
+                    <strong class="kpi-value">$ {{ averageSpent.toFixed(2) }}</strong>
+                </div>
+            </div>
+
+            <div class="table-responsive mt-3 payments-table" *ngIf="results.length > 0">
+                <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th scope="col">{{ t('info') }}</th>
-                            <th scope="col">{{ t('value') }}</th>
+                            <th scope="col">{{ t('description') }}</th>
+                            <th scope="col">{{ t('paymentLabel') }}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>{{ t('totalExpense') }}</td>
-                            <td>$ {{ totalExpense.toFixed(2) }}</td>
-                        </tr>
-                        <tr>
-                            <td>{{ t('averagePerPerson') }}</td>
-                            <td>$ {{ averageSpent.toFixed(2) }}</td>
-                        </tr>
-
                         <tr *ngFor="let result of results; trackBy: trackByResult">
-                            <td><strong>{{ result.debtor }}</strong></td>
-                            <td>🔁 {{ result.debtor }} {{ t('owesTo') }} ${{ result.amount.toFixed(2) }} {{ t('shareTo') }} <strong>{{ result.creditor }}</strong></td>
-                        </tr>
-
-                        <tr *ngIf="results.length === 0 && expenseItems.length > 0">
-                            <td colspan="2" class="text-center text-success">
-                                <strong>{{ t('allSettled') }}</strong>
+                            <td class="settlement-text">
+                                <strong>{{ result.debtor }}</strong> {{ t('owesToInline') }} <strong>{{ result.creditor }}</strong>
                             </td>
+                            <td><strong>${{ result.amount.toFixed(2) }}</strong></td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="result-empty" *ngIf="results.length === 0 && expenseItems.length > 0">
+                <strong>{{ t('allSettled') }}</strong>
+            </div>
+
+            <div class="secondary-actions mt-3">
+                <button type="button" class="btn btn-outline-danger btn-sm-action" (click)="clearAll()" [title]="t('clearAllTitle')">
+                    <i class="fas fa-trash me-1"></i>{{ t('clearAll') }}
+                </button>
             </div>
         </div>
     </div>
