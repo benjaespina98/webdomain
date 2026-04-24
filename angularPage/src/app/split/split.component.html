@@ -150,11 +150,11 @@
                             </thead>
                             <tbody>
                                 <tr *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
-                                    <td><strong>{{ item.description }}</strong></td>
-                                    <td>${{ item.amount.toFixed(2) }}</td>
-                                    <td>{{ item.paidBy }}</td>
-                                    <td>{{ formatExpenseParticipants(item) }}</td>
-                                    <td>
+                                    <td [attr.data-label]="t('description')"><strong>{{ item.description }}</strong></td>
+                                    <td [attr.data-label]="t('amount')">${{ item.amount.toFixed(2) }}</td>
+                                    <td [attr.data-label]="t('paidBy')"><strong>{{ item.paidBy }}</strong></td>
+                                    <td [attr.data-label]="t('participantsColumn')" class="expense-participants-text">{{ formatExpenseParticipants(item) }}</td>
+                                    <td [attr.data-label]="t('actions')">
                                         <button type="button" class="btn btn-outline-danger btn-sm" (click)="removeExpenseItem(item.id)" [title]="t('deleteExpenseTitle')">
                                             {{ t('deleteExpense') }}
                                         </button>
@@ -209,10 +209,10 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
-                            <td><strong>{{ item.description }}</strong></td>
-                            <td>${{ item.amount.toFixed(2) }}</td>
-                            <td>{{ item.paidBy }}</td>
-                            <td>{{ formatExpenseParticipants(item) }}</td>
+                            <td [attr.data-label]="t('detail')"><strong>{{ item.description }}</strong></td>
+                            <td [attr.data-label]="t('amount')">${{ item.amount.toFixed(2) }}</td>
+                            <td [attr.data-label]="t('paidBy')"><strong>{{ item.paidBy }}</strong></td>
+                            <td [attr.data-label]="t('participantsColumn')" class="expense-participants-text">{{ formatExpenseParticipants(item) }}</td>
                         </tr>
                     </tbody>
                 </table>

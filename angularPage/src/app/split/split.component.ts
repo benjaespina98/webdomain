@@ -53,6 +53,7 @@ interface TranslationMap {
   amount: string;
   paidBy: string;
   participantsColumn: string;
+  allParticipants: string;
   perPerson: string;
   actions: string;
   deleteExpense: string;
@@ -192,7 +193,8 @@ export class SplitComponent {
       description: 'Descripción',
       amount: 'Monto',
       paidBy: 'Pagado por',
-      participantsColumn: 'personas',
+      participantsColumn: 'Participantes',
+      allParticipants: 'Todos',
       perPerson: 'Por persona',
       actions: 'Acciones',
       deleteExpense: 'Eliminar',
@@ -305,7 +307,8 @@ export class SplitComponent {
       description: 'Description',
       amount: 'Amount',
       paidBy: 'Paid by',
-      participantsColumn: 'people',
+      participantsColumn: 'Participants',
+      allParticipants: 'All',
       perPerson: 'Per person',
       actions: 'Actions',
       deleteExpense: 'Delete',
@@ -857,9 +860,21 @@ export class SplitComponent {
   }
 
   formatExpenseParticipants(expenseItem: ExpenseItem): string {
-    return expenseItem.participants.length > 0
-      ? expenseItem.participants.join(', ')
-      : '-';
+    if (expenseItem.participants.length === 0) {
+      return '-';
+    }
+
+    if (this.people.length > 0 && this.areAllPeopleIncluded(expenseItem.participants)) {
+      return this.t('allParticipants');
+    }
+
+    return expenseItem.participants.join(', ');
+  }
+
+  private areAllPeopleIncluded(participants: string[]): boolean {
+    return this.people.length > 0
+      && participants.length === this.people.length
+      && this.people.every((person) => participants.includes(person));
   }
 
   trackByResult(_index: number, result: SettlementResult): string {
