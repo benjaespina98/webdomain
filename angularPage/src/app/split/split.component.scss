@@ -1,15 +1,8 @@
 :host {
-    --border-soft: rgba(148, 163, 184, 0.26);
     --text-main: #e2e8f0;
-    --text-muted: #94a3b8;
-    --brand-a: #8b5cf6;
-    --brand-b: #7c3aed;
-    --brand-c: #a78bfa;
-    --glow: 0 10px 24px rgba(15, 23, 42, 0.28);
     --font-xs: clamp(0.74rem, 1.4vw, 0.8rem);
     --font-sm: clamp(0.82rem, 1.6vw, 0.9rem);
     --font-md: clamp(0.9rem, 1.8vw, 0.98rem);
-    --font-lg: clamp(1rem, 2.2vw, 1.12rem);
 
     display: block;
     color: var(--text-main);
@@ -89,37 +82,9 @@
     margin-top: 0.14rem;
 }
 
-.payments-table .table tbody td {
-    font-size: 0.9rem;
-}
-
-.expense-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-    line-height: 1.2;
-}
-
-.expense-meta-label {
-    color: #94a3b8;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.expense-meta-value {
-    color: #f8fafc;
-    font-size: 0.9rem;
-}
-
 .expense-participants-text {
     color: #cbd5e1;
     word-break: break-word;
-}
-
-.advanced-mode .table tbody td .expense-meta strong,
-.advanced-mode .table tbody td .expense-meta-value {
-    font-weight: 700;
 }
 
 .payments-table .table {
@@ -176,21 +141,6 @@
     justify-content: flex-end;
 }
 
-.results-focus {
-    animation: results-reveal 260ms ease-out;
-}
-
-@keyframes results-reveal {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 .btn-copy-summary {
     transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
@@ -208,9 +158,6 @@
     box-shadow: 0 6px 14px rgba(15, 23, 42, 0.2);
     overflow-x: auto;
     overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(139, 92, 246, 0.7) rgba(15, 23, 42, 0.35);
 }
 
 .advanced-mode .table {
@@ -278,15 +225,6 @@
     background: linear-gradient(90deg, rgba(148, 163, 184, 0.04), rgba(148, 163, 184, 0.35), rgba(148, 163, 184, 0.04));
 }
 
-.results-cta-actions .btn-results {
-    width: 100%;
-}
-
-.advanced-mode .table .btn.btn-sm {
-    border-radius: 0.65rem;
-    font-size: var(--font-xs);
-}
-
 @media (max-width: 767px) {
     .container-fluid.advanced-mode {
         width: min(100vw, 100%);
@@ -323,13 +261,10 @@
         font-size: 16px;
     }
 
-    .compact-expenses .table {
-        min-width: 100%;
-        table-layout: auto;
-    }
-
+    .compact-expenses .table,
     .payments-table .table {
         min-width: 100%;
+        table-layout: auto;
     }
 
     .payments-table .col-payment {
@@ -369,12 +304,6 @@
         gap: 0.55rem;
     }
 
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .results-focus {
-        animation: none;
-    }
 }
 
 @media (max-width: 460px) {
@@ -465,5 +394,3 @@
     }
 }
 
-@media (max-width: 420px) {
-}
