@@ -137,7 +137,7 @@
                         </div>
                     </div>
 
-                    <div class="table-responsive compact-expenses" *ngIf="expenseItems.length > 0">
+                    <div class="table-responsive compact-expenses desktop-table" *ngIf="expenseItems.length > 0">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -162,6 +162,30 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <div class="mobile-cards" *ngIf="expenseItems.length > 0">
+                        <article class="mobile-record-card" *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
+                            <div class="mobile-row">
+                                <span class="mobile-label">{{ t('description') }}</span>
+                                <strong class="mobile-value">{{ item.description }}</strong>
+                            </div>
+                            <div class="mobile-row">
+                                <span class="mobile-label">{{ t('amount') }}</span>
+                                <span class="mobile-value">${{ item.amount.toFixed(2) }}</span>
+                            </div>
+                            <div class="mobile-row">
+                                <span class="mobile-label">{{ t('paidBy') }}</span>
+                                <strong class="mobile-value">{{ item.paidBy }}</strong>
+                            </div>
+                            <div class="mobile-row">
+                                <span class="mobile-label">{{ t('participantsColumn') }}</span>
+                                <span class="mobile-value mobile-wrap">{{ formatExpenseParticipants(item) }}</span>
+                            </div>
+                            <button type="button" class="btn btn-outline-danger btn-sm mobile-delete-btn" (click)="removeExpenseItem(item.id)" [title]="t('deleteExpenseTitle')">
+                                {{ t('deleteExpense') }}
+                            </button>
+                        </article>
                     </div>
 
                     <div class="secondary-actions">
@@ -197,7 +221,7 @@
                 <span>{{ t('shareDetailTitle') }}</span>
             </div>
 
-            <div class="table-responsive mt-2 payments-table" *ngIf="expenseItems.length > 0">
+            <div class="table-responsive mt-2 payments-table desktop-table" *ngIf="expenseItems.length > 0">
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -218,11 +242,32 @@
                 </table>
             </div>
 
+            <div class="mobile-cards" *ngIf="expenseItems.length > 0">
+                <article class="mobile-record-card" *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
+                    <div class="mobile-row">
+                        <span class="mobile-label">{{ t('detail') }}</span>
+                        <strong class="mobile-value">{{ item.description }}</strong>
+                    </div>
+                    <div class="mobile-row">
+                        <span class="mobile-label">{{ t('amount') }}</span>
+                        <span class="mobile-value">${{ item.amount.toFixed(2) }}</span>
+                    </div>
+                    <div class="mobile-row">
+                        <span class="mobile-label">{{ t('paidBy') }}</span>
+                        <strong class="mobile-value">{{ item.paidBy }}</strong>
+                    </div>
+                    <div class="mobile-row">
+                        <span class="mobile-label">{{ t('participantsColumn') }}</span>
+                        <span class="mobile-value mobile-wrap">{{ formatExpenseParticipants(item) }}</span>
+                    </div>
+                </article>
+            </div>
+
             <div class="results-block-title mt-3" *ngIf="results.length > 0">
                 <span>{{ t('shareTransfersTitle') }}</span>
             </div>
 
-            <div class="table-responsive mt-2 payments-table" *ngIf="results.length > 0">
+            <div class="table-responsive mt-2 payments-table desktop-table" *ngIf="results.length > 0">
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -239,6 +284,23 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="mobile-cards" *ngIf="results.length > 0">
+                <article class="mobile-record-card mobile-transfer-card" *ngFor="let result of results; trackBy: trackByResult">
+                    <div class="mobile-row">
+                        <span class="mobile-label">{{ t('debtorLabel') }}</span>
+                        <strong class="mobile-value">{{ result.debtor }}</strong>
+                    </div>
+                    <div class="mobile-row">
+                        <span class="mobile-label">{{ t('creditorLabel') }}</span>
+                        <strong class="mobile-value">{{ result.creditor }}</strong>
+                    </div>
+                    <div class="mobile-row">
+                        <span class="mobile-label">{{ t('paymentLabel') }}</span>
+                        <strong class="mobile-value">${{ result.amount.toFixed(2) }}</strong>
+                    </div>
+                </article>
             </div>
 
             <div class="result-empty" *ngIf="results.length === 0 && expenseItems.length > 0">

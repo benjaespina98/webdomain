@@ -10,6 +10,7 @@ import { filter } from 'rxjs/operators';
 })
 export class AppComponent {
   private readonly subscriptions = new Subscription();
+  private isReloadingForUpdate = false;
 
   constructor(private readonly swUpdate: SwUpdate) {
     this.initializeAutoUpdates();
@@ -30,6 +31,17 @@ export class AppComponent {
         this.activateAndReload();
       });
 
+    const versionFailedSubscription = this.swUpdate.versionUpdates
+      .pipe(filter((event) => event.type === 'VERSION_INSTALLATION_FAILED'))
+      .subscribe((event) => {
+        console.error('SW version installation failed', event);
+      });
+
+    const unrecoverableSubscription = this.swUpdate.unrecoverable.subscribe((event) => {
+      console.error('SW unrecoverable state', event.reason);
+      this.safeReload();
+    });
+
     const periodicCheckSubscription = interval(60_000).subscribe(() => {
       this.checkForUpdates();
     });
@@ -44,6 +56,8 @@ export class AppComponent {
     });
 
     this.subscriptions.add(versionReadySubscription);
+    this.subscriptions.add(versionFailedSubscription);
+    this.subscriptions.add(unrecoverableSubscription);
     this.subscriptions.add(periodicCheckSubscription);
     this.subscriptions.add(triggerEventsSubscription);
 
@@ -57,12 +71,29 @@ export class AppComponent {
   }
 
   private activateAndReload(): void {
+    if (this.isReloadingForUpdate) {
+      return;
+    }
+
+    this.isReloadingForUpdate = true;
+
     void this.swUpdate.activateUpdate()
       .then(() => {
-        document.location.reload();
+        this.safeReload();
       })
       .catch((error) => {
+        this.isReloadingForUpdate = false;
         console.error('SW update activation failed', error);
       });
+  }
+
+  private safeReload(): void {
+    if (this.isReloadingForUpdate) {
+      document.location.reload();
+      return;
+    }
+
+    this.isReloadingForUpdate = true;
+    document.location.reload();
   }
 }
