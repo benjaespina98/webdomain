@@ -1,0 +1,295 @@
+<div class="landing-container">
+  <!-- Top Language Switcher -->
+  <div class="language-switch">
+    <button type="button" class="lang-btn" [class.active]="currentLanguage === 'es'" (click)="setLanguage('es')">ES</button>
+    <button type="button" class="lang-btn" [class.active]="currentLanguage === 'en'" (click)="setLanguage('en')">EN</button>
+  </div>
+
+  <!-- Hero Section -->
+  <header class="hero-section">
+    <div class="logo-area">
+      <img src="assets/icons/icon-180x180.png" alt="dividimos? logo" class="hero-logo">
+      <span class="hero-brand">dividimos?</span>
+    </div>
+    
+    <div *ngIf="currentLanguage === 'es'">
+      <h1 class="hero-title">Nunca más hagas cuentas después de un <span class="accent-text">asado, una cena o una salida</span></h1>
+      <p class="hero-subtitle">dividimos? calcula automáticamente quién le debe a quién. Sin registrarte, sin descargar nada y en pocos segundos.</p>
+      <div class="hero-ctas">
+        <a routerLink="/app" class="btn btn-cta-primary"><i class="fas fa-calculator me-2"></i>Dividir gastos ahora</a>
+      </div>
+    </div>
+
+    <div *ngIf="currentLanguage === 'en'">
+      <h1 class="hero-title">Stop doing the math after a <span class="accent-text">BBQ, dinner, or night out</span></h1>
+      <p class="hero-subtitle">dividimos? automatically calculates who owes who. No sign-up, nothing to download, and it takes seconds.</p>
+      <div class="hero-ctas">
+        <a routerLink="/app" class="btn btn-cta-primary"><i class="fas fa-calculator me-2"></i>Split expenses now</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- What is dividimos? -->
+  <section class="section what-is-section">
+    <div class="what-is-card reveal">
+      <h2 class="section-title" *ngIf="currentLanguage === 'es'">¿Qué es dividimos?</h2>
+      <h2 class="section-title" *ngIf="currentLanguage === 'en'">What is dividimos?</h2>
+
+      <ul class="what-is-list" *ngIf="currentLanguage === 'es'">
+        <li><i class="fas fa-check accent-icon"></i>Está pensada para resolver gastos grupales puntuales, no para llevar una contabilidad permanente.</li>
+        <li><i class="fas fa-check accent-icon"></i>No necesitás crear una cuenta ni registrarte con un email.</li>
+        <li><i class="fas fa-check accent-icon"></i>No guardamos tu información en ningún servidor.</li>
+        <li><i class="fas fa-check accent-icon"></i>Funciona completamente en tu navegador, incluso sin conexión.</li>
+        <li><i class="fas fa-check accent-icon"></i>Al terminar, compartís el resultado con un único enlace por WhatsApp.</li>
+      </ul>
+
+      <ul class="what-is-list" *ngIf="currentLanguage === 'en'">
+        <li><i class="fas fa-check accent-icon"></i>Built to settle one-off group expenses, not to keep permanent accounting.</li>
+        <li><i class="fas fa-check accent-icon"></i>No account or email sign-up required.</li>
+        <li><i class="fas fa-check accent-icon"></i>We don't store your information on any server.</li>
+        <li><i class="fas fa-check accent-icon"></i>Runs entirely in your browser, even offline.</li>
+        <li><i class="fas fa-check accent-icon"></i>When you're done, share the result with a single WhatsApp link.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Product Preview Mockup -->
+  <section class="section preview-section">
+    <div class="preview-mockup-wrap reveal">
+    <div class="preview-mockup">
+      <div class="preview-mockup-bar">
+        <span class="preview-dot"></span>
+        <span class="preview-dot"></span>
+        <span class="preview-dot"></span>
+        <span class="preview-mockup-url">dividimos.vercel.app/app</span>
+      </div>
+      <div class="preview-mockup-body">
+        <div class="preview-strip">
+          <span class="preview-step done">1</span>
+          <span class="preview-step done">2</span>
+          <span class="preview-step active">3</span>
+          <span class="preview-strip-title" *ngIf="currentLanguage === 'es'">Resultados</span>
+          <span class="preview-strip-title" *ngIf="currentLanguage === 'en'">Results</span>
+        </div>
+
+        <div class="preview-chips">
+          <span class="preview-chip">Ana</span>
+          <span class="preview-chip">Bruno</span>
+          <span class="preview-chip">Luca</span>
+        </div>
+
+        <div class="preview-kpis">
+          <div class="preview-kpi">
+            <span class="preview-kpi-label" *ngIf="currentLanguage === 'es'">Total gastado</span>
+            <span class="preview-kpi-label" *ngIf="currentLanguage === 'en'">Total spent</span>
+            <strong class="preview-kpi-value">$ 326,00</strong>
+          </div>
+          <div class="preview-kpi">
+            <span class="preview-kpi-label" *ngIf="currentLanguage === 'es'">Promedio por persona</span>
+            <span class="preview-kpi-label" *ngIf="currentLanguage === 'en'">Average per person</span>
+            <strong class="preview-kpi-value">$ 108,67</strong>
+          </div>
+        </div>
+
+        <div class="preview-row preview-row-header">
+          <span *ngIf="currentLanguage === 'es'">Transferencia sugerida</span>
+          <span *ngIf="currentLanguage === 'en'">Suggested transfer</span>
+        </div>
+        <div class="preview-settlement">
+          <span *ngIf="currentLanguage === 'es'"><strong>Bruno</strong> le debe a <strong>Ana</strong></span>
+          <span *ngIf="currentLanguage === 'en'"><strong>Bruno</strong> owes <strong>Ana</strong></span>
+          <strong class="preview-settlement-amount">$ 108,00</strong>
+        </div>
+
+        <div class="preview-share-actions">
+          <span class="preview-share-btn"><i class="fas fa-copy me-1"></i><span *ngIf="currentLanguage === 'es'">Copiar resumen</span><span *ngIf="currentLanguage === 'en'">Copy summary</span></span>
+          <span class="preview-share-btn preview-share-whatsapp"><i class="fab fa-whatsapp me-1"></i><span *ngIf="currentLanguage === 'es'">Compartir por WhatsApp</span><span *ngIf="currentLanguage === 'en'">Share on WhatsApp</span></span>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- Benefits Section -->
+  <section class="section benefits-section">
+    <h2 class="section-title" *ngIf="currentLanguage === 'es'">¿Por qué usar dividimos?</h2>
+    <h2 class="section-title" *ngIf="currentLanguage === 'en'">Why use dividimos?</h2>
+    
+    <div class="grid-benefits">
+      <div class="benefit-card reveal" *ngIf="currentLanguage === 'es'">
+        <i class="fas fa-bolt benefit-icon"></i>
+        <h3>Instantáneo</h3>
+        <p>Entrás, cargás y resolvés. Sin crear cuentas, contraseñas ni verificar emails.</p>
+      </div>
+      <div class="benefit-card reveal" *ngIf="currentLanguage === 'en'">
+        <i class="fas fa-bolt benefit-icon"></i>
+        <h3>Instant Setup</h3>
+        <p>Open, enter, and solve. No signup, no passwords, and no email verification.</p>
+      </div>
+
+      <div class="benefit-card reveal" *ngIf="currentLanguage === 'es'">
+        <i class="fas fa-wifi-slash benefit-icon"></i>
+        <h3>Funciona Offline</h3>
+        <p>Pensado para viajes o salidas al aire libre donde la señal de internet suele fallar.</p>
+      </div>
+      <div class="benefit-card reveal" *ngIf="currentLanguage === 'en'">
+        <i class="fas fa-wifi-slash benefit-icon"></i>
+        <h3>Offline Support</h3>
+        <p>Perfect for trips or outdoor hangouts where internet connection is unreliable.</p>
+      </div>
+
+      <div class="benefit-card reveal" *ngIf="currentLanguage === 'es'">
+        <i class="fas fa-lock benefit-icon"></i>
+        <h3>Privado y Seguro</h3>
+        <p>Tus datos son tuyos y se quedan guardados localmente solo en tu navegador.</p>
+      </div>
+      <div class="benefit-card reveal" *ngIf="currentLanguage === 'en'">
+        <i class="fas fa-lock benefit-icon"></i>
+        <h3>Private & Secure</h3>
+        <p>Your data stays on your device. We do not store your private details on servers.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="section workflow-section">
+    <h2 class="section-title" *ngIf="currentLanguage === 'es'">Cómo funciona</h2>
+    <h2 class="section-title" *ngIf="currentLanguage === 'en'">How it works</h2>
+    
+    <div class="workflow-steps workflow-steps-4">
+      <div class="step-item reveal">
+        <span class="step-num">1</span>
+        <h4 *ngIf="currentLanguage === 'es'">Agregás a los participantes</h4>
+        <p *ngIf="currentLanguage === 'es'">Sumá a las personas que van a compartir los gastos del grupo.</p>
+        <h4 *ngIf="currentLanguage === 'en'">Add the participants</h4>
+        <p *ngIf="currentLanguage === 'en'">Add the people who are going to share the group's expenses.</p>
+      </div>
+
+      <div class="step-item reveal">
+        <span class="step-num">2</span>
+        <h4 *ngIf="currentLanguage === 'es'">Cargás los gastos</h4>
+        <p *ngIf="currentLanguage === 'es'">A medida que ocurren: durante el asado, la cena o la salida.</p>
+        <h4 *ngIf="currentLanguage === 'en'">Add the expenses</h4>
+        <p *ngIf="currentLanguage === 'en'">As they happen: during the BBQ, the dinner, or the night out.</p>
+      </div>
+
+      <div class="step-item reveal">
+        <span class="step-num">3</span>
+        <h4 *ngIf="currentLanguage === 'es'">La app calcula todo</h4>
+        <p *ngIf="currentLanguage === 'es'">Calculamos automáticamente quién le debe a quién, sin que hagas cuentas.</p>
+        <h4 *ngIf="currentLanguage === 'en'">The app does the math</h4>
+        <p *ngIf="currentLanguage === 'en'">We automatically calculate who owes who, no manual math needed.</p>
+      </div>
+
+      <div class="step-item reveal">
+        <span class="step-num">4</span>
+        <h4 *ngIf="currentLanguage === 'es'">Compartís el resultado</h4>
+        <p *ngIf="currentLanguage === 'es'">Un único enlace por WhatsApp para que todos vean exactamente lo mismo.</p>
+        <h4 *ngIf="currentLanguage === 'en'">Share the result</h4>
+        <p *ngIf="currentLanguage === 'en'">One single WhatsApp link so everyone sees the exact same result.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Use Cases Section -->
+  <section class="section cases-section">
+    <h2 class="section-title" *ngIf="currentLanguage === 'es'">Casos de uso ideales</h2>
+    <h2 class="section-title" *ngIf="currentLanguage === 'en'">Ideal Use Cases</h2>
+    
+    <div class="grid-cases grid-cases-5">
+      <div class="case-card reveal" *ngIf="currentLanguage === 'es'">
+        <i class="fas fa-fire-burner case-icon"></i>
+        <h4>Asados y comidas</h4>
+        <p>Dividí la carne, las bebidas y todo lo que se compró entre los que estuvieron.</p>
+      </div>
+      <div class="case-card reveal" *ngIf="currentLanguage === 'en'">
+        <i class="fas fa-fire-burner case-icon"></i>
+        <h4>BBQs & meals</h4>
+        <p>Split the food, drinks, and everything bought among everyone who was there.</p>
+      </div>
+
+      <div class="case-card reveal" *ngIf="currentLanguage === 'es'">
+        <i class="fas fa-champagne-glasses case-icon"></i>
+        <h4>Salidas con amigos</h4>
+        <p>Bares, cenas o juntadas donde uno paga y después se acomodan las cuentas.</p>
+      </div>
+      <div class="case-card reveal" *ngIf="currentLanguage === 'en'">
+        <i class="fas fa-champagne-glasses case-icon"></i>
+        <h4>Nights out with friends</h4>
+        <p>Bars, dinners, or get-togethers where one pays and everyone settles up later.</p>
+      </div>
+
+      <div class="case-card reveal" *ngIf="currentLanguage === 'es'">
+        <i class="fas fa-cake-candles case-icon"></i>
+        <h4>Cumpleaños</h4>
+        <p>Organizá la torta, la decoración y el regalo grupal sin perder de vista quién puso qué.</p>
+      </div>
+      <div class="case-card reveal" *ngIf="currentLanguage === 'en'">
+        <i class="fas fa-cake-candles case-icon"></i>
+        <h4>Birthdays</h4>
+        <p>Sort out the cake, decorations, and group gift without losing track of who paid what.</p>
+      </div>
+
+      <div class="case-card reveal" *ngIf="currentLanguage === 'es'">
+        <i class="fas fa-gift case-icon"></i>
+        <h4>Regalos grupales</h4>
+        <p>Cuando varios amigos juntan plata para comprar un regalo y después hay que repartir cuánto puso cada uno.</p>
+      </div>
+      <div class="case-card reveal" *ngIf="currentLanguage === 'en'">
+        <i class="fas fa-gift case-icon"></i>
+        <h4>Group gifts</h4>
+        <p>When a group of friends chips in to buy a gift and then needs to split exactly how much each one owes.</p>
+      </div>
+
+      <div class="case-card reveal" *ngIf="currentLanguage === 'es'">
+        <i class="fas fa-plane case-icon"></i>
+        <h4>Viajes de fin de semana</h4>
+        <p>No es para administrar meses de gastos: es para cerrar las cuentas de ese viaje puntual.</p>
+      </div>
+      <div class="case-card reveal" *ngIf="currentLanguage === 'en'">
+        <i class="fas fa-plane case-icon"></i>
+        <h4>Weekend trips</h4>
+        <p>Not for managing months of expenses — just for closing the books on that one trip.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why no account needed -->
+  <section class="section no-account-section">
+    <h2 class="section-title" *ngIf="currentLanguage === 'es'">¿Por qué no necesitás crear una cuenta?</h2>
+    <h2 class="section-title" *ngIf="currentLanguage === 'en'">Why don't you need to create an account?</h2>
+
+    <div class="no-account-card reveal">
+      <ul class="what-is-list" *ngIf="currentLanguage === 'es'">
+        <li><i class="fas fa-desktop accent-icon"></i>Mientras trabajás, todo se guarda localmente en tu navegador.</li>
+        <li><i class="fas fa-clock-rotate-left accent-icon"></i>Si cerrás la página, podés volver más tarde y seguir donde lo dejaste.</li>
+        <li><i class="fas fa-link accent-icon"></i>Cuando terminás, compartís un enlace que contiene toda la información necesaria para reconstruir el resultado en el navegador de otra persona.</li>
+        <li><i class="fas fa-shield-halved accent-icon"></i>No hay backend ni base de datos: por eso la app es simple, rápida y privada.</li>
+      </ul>
+
+      <ul class="what-is-list" *ngIf="currentLanguage === 'en'">
+        <li><i class="fas fa-desktop accent-icon"></i>While you're working, everything is saved locally in your browser.</li>
+        <li><i class="fas fa-clock-rotate-left accent-icon"></i>If you close the page, you can come back later and pick up where you left off.</li>
+        <li><i class="fas fa-link accent-icon"></i>When you're done, you share a link that contains everything needed to rebuild the result in someone else's browser.</li>
+        <li><i class="fas fa-shield-halved accent-icon"></i>There's no backend or database, which keeps the app simple, fast, and private.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Final CTA Section -->
+  <section class="final-cta-section reveal">
+    <div *ngIf="currentLanguage === 'es'">
+      <h2>¿Listo para saber quién le debe a quién?</h2>
+      <a routerLink="/app" class="btn btn-cta-primary mt-3"><i class="fas fa-check-circle me-2"></i>Empezar gratis</a>
+    </div>
+    <div *ngIf="currentLanguage === 'en'">
+      <h2>Ready to find out who owes who?</h2>
+      <a routerLink="/app" class="btn btn-cta-primary mt-3"><i class="fas fa-check-circle me-2"></i>Start for free</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <p>&copy; 2026 dividimos?. <span *ngIf="currentLanguage === 'es'">Hecho con 💜 para el mundo.</span><span *ngIf="currentLanguage === 'en'">Built with 💜 for the world.</span></p>
+  </footer>
+</div>

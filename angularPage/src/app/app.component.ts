@@ -1,7 +1,10 @@
 import { Component, OnDestroy } from '@angular/core';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { Subscription, interval, merge, fromEvent } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { AnalyticsService } from './services/analytics.service';
+import { SeoService } from './services/seo.service';
 
 @Component({
   selector: 'app-root',
@@ -12,8 +15,36 @@ export class AppComponent {
   private readonly subscriptions = new Subscription();
   private isReloadingForUpdate = false;
 
-  constructor(private readonly swUpdate: SwUpdate) {
+  constructor(
+    private readonly swUpdate: SwUpdate,
+    private readonly analyticsService: AnalyticsService,
+    private readonly seoService: SeoService,
+    private readonly router: Router,
+    private readonly activatedRoute: ActivatedRoute
+  ) {
+    this.analyticsService.init();
+    this.analyticsService.track('app_opened');
     this.initializeAutoUpdates();
+    this.initializeSeoTracking();
+  }
+
+  private initializeSeoTracking(): void {
+    const routeChangeSubscription = this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(() => {
+        let route = this.activatedRoute.snapshot;
+        while (route.firstChild) {
+          route = route.firstChild;
+        }
+
+        const { title, description } = route.data as { title?: string; description?: string };
+        if (title && description) {
+          const path = route.url.map((segment) => segment.path).join('/');
+          this.seoService.update({ title, description }, path ? `/${path}` : '/');
+        }
+      });
+
+    this.subscriptions.add(routeChangeSubscription);
   }
 
   ngOnDestroy(): void {

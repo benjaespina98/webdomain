@@ -1,4 +1,7 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
+import { PersistenceService, AppState } from '../services/persistence.service';
+import { ShareService } from '../services/share.service';
+import { AnalyticsService } from '../services/analytics.service';
 
 interface ExpenseItem {
   id: number;
@@ -21,14 +24,10 @@ interface TranslationMap {
   detail: string;
   appSubtitle: string;
   participants: string;
-  participantsHelp: string;
   addPersonLabel: string;
   addButton: string;
   personPlaceholder: string;
   noParticipantsYet: string;
-  addExpense: string;
-  addExpenseHelp: string;
-  needPersonFirst: string;
   expenseDescriptionLabel: string;
   expenseDescriptionPlaceholder: string;
   totalAmountLabel: string;
@@ -36,14 +35,9 @@ interface TranslationMap {
   whoPaidLabel: string;
   selectPlaceholder: string;
   whoParticipates: string;
-  participantHint: string;
   selectAll: string;
   clearSelection: string;
-  selected: string;
-  selectedFirstHint: string;
   payerNotIncluded: string;
-  ready: string;
-  includedParticipants: string;
   addExpenseButton: string;
   clearAll: string;
   clearAllTitle: string;
@@ -54,14 +48,12 @@ interface TranslationMap {
   paidBy: string;
   participantsColumn: string;
   allParticipants: string;
-  perPerson: string;
   actions: string;
   deleteExpense: string;
   deleteParticipantTitle: string;
   deleteExpenseTitle: string;
   results: string;
   info: string;
-  value: string;
   totalExpense: string;
   averagePerPerson: string;
   owesToInline: string;
@@ -73,18 +65,16 @@ interface TranslationMap {
   enterValidAmount: string;
   selectWhoPaid: string;
   addParticipantsToSplit: string;
-  shareHeader: string;
   shareTotal: string;
   shareDetailTitle: string;
-  sharePaidBy: string;
-  shareParticipants: string;
-  shareAndMoreExpenses: string;
   shareTransfersTitle: string;
-  shareAndMoreTransfers: string;
   shareAllSettled: string;
-  shareNoTransfers: string;
-  shareTransferConnector: string;
-  shareFooter: string;
+  shareSummaryTitle: string;
+  shareAmong: string;
+  shareReceives: string;
+  shareFromConnector: string;
+  shareOpenLinkPrompt: string;
+  shareGeneratedWith: string;
   languageAria: string;
   clearSelectionTitle: string;
   splitAllTitle: string;
@@ -107,6 +97,8 @@ interface TranslationMap {
   summaryCopied: string;
   copySummary: string;
   copySummaryDone: string;
+  copyLink: string;
+  linkCopied: string;
   clipboardUnavailable: string;
   splitModeAll: string;
   splitModeCustom: string;
@@ -115,21 +107,21 @@ interface TranslationMap {
   workflowStepParticipants: string;
   workflowStepExpenses: string;
   workflowStepResults: string;
-  workflowParticipantsHelp: string;
-  workflowExpensesHelp: string;
-  workflowResultsHelp: string;
   continueToExpenses: string;
   backToParticipants: string;
-  showStepGuide: string;
-  hideStepGuide: string;
-  currentStepLabel: string;
+  backToExpenses: string;
   viewResults: string;
-  reviewExpenses: string;
   readyToCalculate: string;
   addExpenseToContinue: string;
   debtorLabel: string;
   creditorLabel: string;
   paymentLabel: string;
+  confirmAction: string;
+  cancelAction: string;
+  editingExpenseBanner: string;
+  saveChangesButton: string;
+  editExpense: string;
+  expenseEdited: string;
 }
 
 interface AppSnapshot {
@@ -154,7 +146,7 @@ interface AppSnapshot {
   templateUrl: './split.component.html',
   styleUrls: ['./split.component.scss']
 })
-export class SplitComponent {
+export class SplitComponent implements OnInit {
   private readonly languageStorageKey = 'split-language';
   private readonly publicAppUrl = 'https://dividimos.vercel.app/';
   private readonly translations: Record<LanguageCode, TranslationMap> = {
@@ -162,14 +154,10 @@ export class SplitComponent {
       detail: 'Detalle',
       appSubtitle: 'sumá personas, cargá gastos y resolvé quién le paga a quién en un toque.',
       participants: 'Personas',
-      participantsHelp: 'sumalas una sola vez y listo; después elegís quién entra en cada gasto.',
       addPersonLabel: 'Agregar personas:',
       addButton: 'Agregar',
       personPlaceholder: 'Ej: Juan',
       noParticipantsYet: 'todavía no sumaste personas.',
-      addExpense: 'Sumar gasto',
-      addExpenseHelp: 'completá los datos y marcá quiénes comparten ese gasto.',
-      needPersonFirst: 'primero sumá al menos una persona para empezar.',
       expenseDescriptionLabel: 'Descripción del gasto:',
       expenseDescriptionPlaceholder: 'Ej: Cena, Nafta, Uber',
       totalAmountLabel: 'Monto total:',
@@ -177,14 +165,9 @@ export class SplitComponent {
       whoPaidLabel: '¿Quién pagó?',
       selectPlaceholder: 'Seleccionar...',
       whoParticipates: '¿Quiénes entran en este gasto?',
-      participantHint: 'tocá cada nombre para sumarlo o sacarlo de este gasto.',
       selectAll: 'Seleccionar todos',
       clearSelection: 'Borrar selección',
-      selected: 'seleccionados',
-      selectedFirstHint: '(los seleccionados aparecen primero)',
       payerNotIncluded: 'pagó, pero no está incluido en el reparto.',
-      ready: 'Listo',
-      includedParticipants: 'persona(s) incluidas.',
       addExpenseButton: 'Sumar gasto',
       clearAll: 'Limpiar todo',
       clearAllTitle: 'Borra participantes y gastos',
@@ -195,14 +178,12 @@ export class SplitComponent {
       paidBy: 'Pagado por',
       participantsColumn: 'Participantes',
       allParticipants: 'Todos',
-      perPerson: 'Por persona',
       actions: 'Acciones',
       deleteExpense: 'Eliminar',
       deleteParticipantTitle: 'Eliminar participante',
       deleteExpenseTitle: 'Eliminar gasto',
       results: 'Resultados',
       info: 'Información',
-      value: 'Valor',
       totalExpense: 'Gasto Total:',
       averagePerPerson: 'Promedio por persona:',
       owesToInline: 'le debe a',
@@ -214,18 +195,16 @@ export class SplitComponent {
       enterValidAmount: 'Por favor, ingresa un monto válido',
       selectWhoPaid: 'por favor, seleccioná quién pagó',
       addParticipantsToSplit: 'por favor, sumá personas para dividir el gasto',
-      shareHeader: 'dividimos? | Resumen',
       shareTotal: 'Total',
       shareDetailTitle: 'Detalle de gastos',
-      sharePaidBy: 'Pagó',
-      shareParticipants: 'Participan',
-      shareAndMoreExpenses: '… y {count} gasto(s) más',
       shareTransfersTitle: 'Pagos sugeridos',
-      shareAndMoreTransfers: '… y {count} transferencia(s) más',
-      shareAllSettled: 'Todo saldado',
-      shareNoTransfers: 'No hay transferencias pendientes.',
-      shareTransferConnector: 'd/.',
-      shareFooter: 'Hecho con dividimos?',
+      shareAllSettled: 'Todo saldado, no quedan pagos pendientes.',
+      shareSummaryTitle: 'Resumen de gastos',
+      shareAmong: 'entre',
+      shareReceives: 'recibe',
+      shareFromConnector: 'de',
+      shareOpenLinkPrompt: 'Abrí este enlace para ver el detalle completo:',
+      shareGeneratedWith: 'Generado con dividimos?',
       languageAria: 'cambiar idioma',
       clearSelectionTitle: 'Desmarcar todas las personas',
       splitAllTitle: 'Si elegís Todos, el gasto se divide entre todas las personas cargadas',
@@ -248,6 +227,8 @@ export class SplitComponent {
       summaryCopied: 'Resumen copiado al portapapeles',
       copySummary: 'Copiar resumen',
       copySummaryDone: 'Copiado',
+      copyLink: 'Copiar enlace',
+      linkCopied: 'Enlace copiado al portapapeles',
       clipboardUnavailable: 'No se pudo copiar automáticamente. Copiá el texto manualmente.',
       splitModeAll: 'Dividir entre todos',
       splitModeCustom: 'Elegir personas',
@@ -256,34 +237,30 @@ export class SplitComponent {
       workflowStepParticipants: 'Paso 1: Personas',
       workflowStepExpenses: 'Paso 2: Gastos',
       workflowStepResults: 'Paso 3: Resultados',
-      workflowParticipantsHelp: 'agregá solo los nombres de las personas.',
-      workflowExpensesHelp: 'cargá gasto, monto y quién pagó. Elegí personas solo si no participan todos.',
-      workflowResultsHelp: 'revisá cuánto paga cada persona y compartí el resumen.',
       continueToExpenses: 'Seguir a gastos',
       backToParticipants: 'Volver a personas',
-      showStepGuide: 'ver guía de pasos',
-      hideStepGuide: 'ocultar guía de pasos',
-      currentStepLabel: 'paso actual',
+      backToExpenses: 'Volver a gastos',
       viewResults: 'Calcular / Ver resultados',
-      reviewExpenses: 'Seguir cargando gastos',
       readyToCalculate: 'Ya podés calcular el resultado.',
       addExpenseToContinue: 'Cargá al menos un gasto para pasar al paso 3.',
       debtorLabel: 'Debe',
       creditorLabel: 'Recibe',
-      paymentLabel: 'Monto'
+      paymentLabel: 'Monto',
+      confirmAction: 'Confirmar',
+      cancelAction: 'Cancelar',
+      editingExpenseBanner: 'Editando gasto',
+      saveChangesButton: 'Guardar cambios',
+      editExpense: 'Editar',
+      expenseEdited: 'Gasto modificado'
     },
     en: {
       detail: 'Detail',
       appSubtitle: 'Add people, enter expenses, and quickly see who owes whom.',
       participants: 'people',
-      participantsHelp: 'Add them once and you are done. Then choose who is included in each expense.',
       addPersonLabel: 'Add person:',
       addButton: 'Add',
       personPlaceholder: 'Ex: John',
       noParticipantsYet: 'You have not added participants yet.',
-      addExpense: 'Add expense',
-      addExpenseHelp: 'Fill in the details and mark who shares this expense.',
-      needPersonFirst: 'Add at least one person first to start.',
       expenseDescriptionLabel: 'Expense description:',
       expenseDescriptionPlaceholder: 'Ex: Dinner, Fuel, Uber',
       totalAmountLabel: 'Total amount:',
@@ -291,14 +268,9 @@ export class SplitComponent {
       whoPaidLabel: 'Who paid?',
       selectPlaceholder: 'Select...',
       whoParticipates: 'Who is included in this expense?',
-      participantHint: 'Tap each name to include or remove it from this expense.',
       selectAll: 'Select all',
       clearSelection: 'Clear selection',
-      selected: 'Selected',
-      selectedFirstHint: '(selected participants appear first)',
       payerNotIncluded: 'paid, but is not included in the split.',
-      ready: 'Ready',
-      includedParticipants: 'participant(s) included.',
       addExpenseButton: 'Add Expense',
       clearAll: 'Clear All',
       clearAllTitle: 'Deletes participants and expenses',
@@ -309,14 +281,12 @@ export class SplitComponent {
       paidBy: 'Paid by',
       participantsColumn: 'Participants',
       allParticipants: 'All',
-      perPerson: 'Per person',
       actions: 'Actions',
       deleteExpense: 'Delete',
       deleteParticipantTitle: 'Delete participant',
       deleteExpenseTitle: 'Delete expense',
       results: 'Results',
       info: 'Information',
-      value: 'Value',
       totalExpense: 'Total Expense:',
       averagePerPerson: 'Average per person:',
       owesToInline: 'owes',
@@ -328,18 +298,16 @@ export class SplitComponent {
       enterValidAmount: 'Please enter a valid amount',
       selectWhoPaid: 'Please select who paid',
       addParticipantsToSplit: 'Please add participants to split the expense',
-      shareHeader: 'dividimos? | Summary',
       shareTotal: 'Total',
       shareDetailTitle: 'Expense details',
-      sharePaidBy: 'Paid by',
-      shareParticipants: 'Participants',
-      shareAndMoreExpenses: '… and {count} more expense(s)',
       shareTransfersTitle: 'Suggested payments',
-      shareAndMoreTransfers: '… and {count} more transfer(s)',
-      shareAllSettled: 'All settled',
-      shareNoTransfers: 'There are no pending transfers.',
-      shareTransferConnector: 'to',
-      shareFooter: 'Built with dividimos?',
+      shareAllSettled: 'Everything is settled, no pending payments.',
+      shareSummaryTitle: 'Expense summary',
+      shareAmong: 'among',
+      shareReceives: 'receives',
+      shareFromConnector: 'from',
+      shareOpenLinkPrompt: 'Open this link to see the full detail:',
+      shareGeneratedWith: 'Generated with dividimos?',
       languageAria: 'Change language',
       clearSelectionTitle: 'Uncheck all people',
       splitAllTitle: 'If you choose All, the expense is split across all loaded people',
@@ -362,6 +330,8 @@ export class SplitComponent {
       summaryCopied: 'Summary copied to clipboard',
       copySummary: 'Copy summary',
       copySummaryDone: 'Copied',
+      copyLink: 'Copy link',
+      linkCopied: 'Link copied to clipboard',
       clipboardUnavailable: 'Could not copy automatically. Please copy the text manually.',
       splitModeAll: 'Split equally',
       splitModeCustom: 'Choose people',
@@ -370,21 +340,21 @@ export class SplitComponent {
       workflowStepParticipants: 'Step 1: Participants',
       workflowStepExpenses: 'Step 2: Expenses',
       workflowStepResults: 'Step 3: Results',
-      workflowParticipantsHelp: 'Add only the people names.',
-      workflowExpensesHelp: 'Add expense, amount, and who paid. Pick people only if not everyone is included.',
-      workflowResultsHelp: 'Review who pays whom and share the summary.',
       continueToExpenses: 'Continue to expenses',
       backToParticipants: 'Back to participants',
-      showStepGuide: 'Show step guide',
-      hideStepGuide: 'Hide step guide',
-      currentStepLabel: 'Current step',
+      backToExpenses: 'Back to expenses',
       viewResults: 'Calculate / View results',
-      reviewExpenses: 'Keep adding expenses',
       readyToCalculate: 'You can now calculate the result.',
       addExpenseToContinue: 'Add at least one expense to continue to step 3.',
       debtorLabel: 'Pays',
       creditorLabel: 'Receives',
-      paymentLabel: 'Amount'
+      paymentLabel: 'Amount',
+      confirmAction: 'Confirm',
+      cancelAction: 'Cancel',
+      editingExpenseBanner: 'Editing expense',
+      saveChangesButton: 'Save changes',
+      editExpense: 'Edit',
+      expenseEdited: 'Expense updated'
     }
   };
 
@@ -393,9 +363,11 @@ export class SplitComponent {
   uiNoticeType: 'success' | 'info' | 'warning' = 'info';
   canUndoLastAction = false;
   isCopySummaryDone = false;
+  isCopyLinkDone = false;
   private lastSnapshot: AppSnapshot | null = null;
   private noticeTimer: ReturnType<typeof setTimeout> | null = null;
   private copyFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
+  private copyLinkFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
 
   totalExpense = 0;
   averageSpent = 0;
@@ -412,10 +384,59 @@ export class SplitComponent {
   nextExpenseId = 1;
   workflowStage: 'participants' | 'expenses' | 'results' = 'participants';
   hasUnlockedExpenses = false;
-  showWorkflowGuide = false;
+  editingExpenseId: number | null = null;
+  pendingConfirm: { message: string; action: () => void } | null = null;
 
-  constructor() {
+  constructor(
+    private readonly persistenceService: PersistenceService,
+    private readonly shareService: ShareService,
+    private readonly analyticsService: AnalyticsService
+  ) {
     this.initializeLanguage();
+  }
+
+  ngOnInit(): void {
+    this.restorePersistedState();
+  }
+
+  private restorePersistedState(): void {
+    const saved = this.persistenceService.loadState();
+    if (!saved) {
+      return;
+    }
+
+    this.people = [...saved.people];
+    this.expenseItems = [...saved.expenseItems];
+    this.newPersonName = saved.newPersonName;
+    this.newExpenseDescription = saved.newExpenseDescription;
+    this.newExpenseAmount = saved.newExpenseAmount;
+    this.newExpensePaidBy = saved.newExpensePaidBy;
+    this.splitMode = saved.splitMode;
+    this.selectedParticipants = [...saved.selectedParticipants];
+    this.nextExpenseId = saved.nextExpenseId;
+    this.workflowStage = saved.workflowStage;
+    this.hasUnlockedExpenses = saved.hasUnlockedExpenses;
+
+    this.calculateAdvancedShares();
+  }
+
+  private persistCurrentState(): void {
+    const state: Omit<AppState, 'schemaVersion'> = {
+      people: this.people,
+      expenseItems: this.expenseItems,
+      newPersonName: this.newPersonName,
+      newExpenseDescription: this.newExpenseDescription,
+      newExpenseAmount: this.newExpenseAmount,
+      newExpensePaidBy: this.newExpensePaidBy,
+      splitMode: this.splitMode,
+      selectedParticipants: this.selectedParticipants,
+      nextExpenseId: this.nextExpenseId,
+      workflowStage: this.workflowStage,
+      hasUnlockedExpenses: this.hasUnlockedExpenses,
+      currentLanguage: this.currentLanguage
+    };
+
+    this.persistenceService.saveState(state);
   }
 
   t(key: keyof TranslationMap): string {
@@ -425,8 +446,10 @@ export class SplitComponent {
   setLanguage(language: LanguageCode): void {
     this.currentLanguage = language;
     localStorage.setItem(this.languageStorageKey, language);
+    document.documentElement.setAttribute('lang', language);
     const languageMessage = language === 'es' ? this.t('languageChangedEs') : this.t('languageChangedEn');
     this.showNotice(languageMessage, 'info');
+    this.persistCurrentState();
   }
 
   dismissNotice(): void {
@@ -467,12 +490,12 @@ export class SplitComponent {
     const cleanPersonName = this.newPersonName.trim();
 
     if (!cleanPersonName) {
-      alert(this.t('enterValidName'));
+      this.showNotice(this.t('enterValidName'), 'warning');
       return;
     }
 
     if (this.people.includes(cleanPersonName)) {
-      alert(this.t('personAlreadyExists'));
+      this.showNotice(this.t('personAlreadyExists'), 'warning');
       return;
     }
 
@@ -484,30 +507,31 @@ export class SplitComponent {
     if (this.selectedParticipants.length === 0) {
       this.selectAllParticipants();
     }
+
+    this.persistCurrentState();
+    this.analyticsService.track('participant_added');
   }
 
   removePerson(person: string): void {
-    if (!confirm(this.t('confirmRemovePerson'))) {
-      return;
-    }
+    this.showConfirm(this.t('confirmRemovePerson'), () => {
+      this.saveSnapshotForUndo();
+      this.people = this.people.filter((currentPerson) => currentPerson !== person);
+      this.selectedParticipants = this.selectedParticipants.filter((participant) => participant !== person);
+      if (this.newExpensePaidBy === person) {
+        this.newExpensePaidBy = '';
+      }
+      this.expenseItems = this.expenseItems.filter((item) =>
+        item.paidBy !== person && !item.participants.includes(person)
+      );
+      this.calculateAdvancedShares();
 
-    this.saveSnapshotForUndo();
-    this.people = this.people.filter((currentPerson) => currentPerson !== person);
-    this.selectedParticipants = this.selectedParticipants.filter((participant) => participant !== person);
-    if (this.newExpensePaidBy === person) {
-      this.newExpensePaidBy = '';
-    }
-    this.expenseItems = this.expenseItems.filter((item) =>
-      item.paidBy !== person && !item.participants.includes(person)
-    );
-    this.calculateAdvancedShares();
+      if (this.people.length === 0) {
+        this.workflowStage = 'participants';
+        this.hasUnlockedExpenses = false;
+      }
 
-    if (this.people.length === 0) {
-      this.workflowStage = 'participants';
-      this.hasUnlockedExpenses = false;
-    }
-
-    this.showNotice(this.t('personRemoved'), 'warning', true);
+      this.showNotice(this.t('personRemoved'), 'warning', true);
+    });
   }
 
   toggleParticipant(person: string): void {
@@ -586,22 +610,7 @@ export class SplitComponent {
 
     this.calculateAdvancedShares();
     this.setWorkflowStage('results');
-  }
-
-  toggleWorkflowGuide(): void {
-    this.showWorkflowGuide = !this.showWorkflowGuide;
-  }
-
-  areAllSelected(): boolean {
-    return this.people.length > 0 && this.selectedParticipants.length === this.people.length;
-  }
-
-  areNoneSelected(): boolean {
-    return this.selectedParticipants.length === 0;
-  }
-
-  getPeopleForSelection(): string[] {
-    return this.people;
+    this.analyticsService.track('results_generated');
   }
 
   isPayerIncludedInParticipants(): boolean {
@@ -614,7 +623,7 @@ export class SplitComponent {
 
   shareWhatsApp(): void {
     if (this.expenseItems.length === 0) {
-      alert(this.t('noExpensesToShare'));
+      this.showNotice(this.t('noExpensesToShare'), 'warning');
       return;
     }
     const message = this.buildShareMessage();
@@ -623,28 +632,54 @@ export class SplitComponent {
     const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
     this.showNotice(this.t('whatsappOpened'), 'success');
+    this.analyticsService.track('share_clicked');
   }
 
   async copySummary(): Promise<void> {
     if (this.expenseItems.length === 0) {
-      alert(this.t('noExpensesToShare'));
+      this.showNotice(this.t('noExpensesToShare'), 'warning');
       return;
     }
 
-    const message = this.buildShareMessage();
+    const copied = await this.copyTextToClipboard(this.buildShareMessage());
 
+    if (copied) {
+      this.triggerCopyFeedback('summary');
+      this.showNotice(this.t('summaryCopied'), 'success');
+      this.analyticsService.track('summary_copied');
+    } else {
+      this.showNotice(this.t('clipboardUnavailable'), 'warning');
+    }
+  }
+
+  async copyShareLink(): Promise<void> {
+    if (this.expenseItems.length === 0) {
+      this.showNotice(this.t('noExpensesToShare'), 'warning');
+      return;
+    }
+
+    const copied = await this.copyTextToClipboard(this.getShareAppLink());
+
+    if (copied) {
+      this.triggerCopyFeedback('link');
+      this.showNotice(this.t('linkCopied'), 'success');
+      this.analyticsService.track('summary_copied');
+    } else {
+      this.showNotice(this.t('clipboardUnavailable'), 'warning');
+    }
+  }
+
+  private async copyTextToClipboard(text: string): Promise<boolean> {
     try {
       if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(message);
-        this.triggerCopyFeedback();
-        this.showNotice(this.t('summaryCopied'), 'success');
-        return;
+        await navigator.clipboard.writeText(text);
+        return true;
       }
 
       throw new Error('Clipboard API unavailable');
     } catch {
       const textArea = document.createElement('textarea');
-      textArea.value = message;
+      textArea.value = text;
       textArea.style.position = 'fixed';
       textArea.style.opacity = '0';
       document.body.appendChild(textArea);
@@ -657,90 +692,156 @@ export class SplitComponent {
 
       const copied = document.execCommand('copy');
       document.body.removeChild(textArea);
-
-      if (copied) {
-        this.triggerCopyFeedback();
-        this.showNotice(this.t('summaryCopied'), 'success');
-      } else {
-        alert(this.t('clipboardUnavailable'));
-      }
+      return copied;
     }
   }
 
-  private triggerCopyFeedback(): void {
-    this.isCopySummaryDone = true;
-    if (this.copyFeedbackTimer) {
-      clearTimeout(this.copyFeedbackTimer);
+  private triggerCopyFeedback(target: 'summary' | 'link'): void {
+    if (target === 'summary') {
+      this.isCopySummaryDone = true;
+      if (this.copyFeedbackTimer) {
+        clearTimeout(this.copyFeedbackTimer);
+      }
+
+      this.copyFeedbackTimer = setTimeout(() => {
+        this.isCopySummaryDone = false;
+        this.copyFeedbackTimer = null;
+      }, 1800);
+      return;
     }
 
-    this.copyFeedbackTimer = setTimeout(() => {
-      this.isCopySummaryDone = false;
-      this.copyFeedbackTimer = null;
+    this.isCopyLinkDone = true;
+    if (this.copyLinkFeedbackTimer) {
+      clearTimeout(this.copyLinkFeedbackTimer);
+    }
+
+    this.copyLinkFeedbackTimer = setTimeout(() => {
+      this.isCopyLinkDone = false;
+      this.copyLinkFeedbackTimer = null;
     }, 1800);
   }
 
   addExpenseItem(): void {
     if (!this.newExpenseDescription.trim()) {
-      alert(this.t('enterExpenseDescription'));
+      this.showNotice(this.t('enterExpenseDescription'), 'warning');
       return;
     }
     
     if (this.newExpenseAmount === null || this.newExpenseAmount <= 0) {
-      alert(this.t('enterValidAmount'));
+      this.showNotice(this.t('enterValidAmount'), 'warning');
       return;
     }
 
     if (!this.newExpensePaidBy) {
-      alert(this.t('selectWhoPaid'));
+      this.showNotice(this.t('selectWhoPaid'), 'warning');
       return;
     }
 
     if (this.splitMode === 'all') {
       this.selectAllParticipants();
     } else if (this.splitMode === 'custom' && this.selectedParticipants.length === 0) {
-      alert(this.t('addParticipantsToSplit'));
+      this.showNotice(this.t('addParticipantsToSplit'), 'warning');
       return;
     }
 
-    const newExpense: ExpenseItem = {
-      id: this.nextExpenseId++,
-      description: this.newExpenseDescription.trim(),
-      amount: this.newExpenseAmount,
-      paidBy: this.newExpensePaidBy,
-      participants: [...this.selectedParticipants]
-    };
-
-    this.expenseItems.push(newExpense);
+    if (this.editingExpenseId !== null) {
+      this.saveSnapshotForUndo();
+      const index = this.expenseItems.findIndex(item => item.id === this.editingExpenseId);
+      if (index !== -1) {
+        this.expenseItems[index] = {
+          id: this.editingExpenseId,
+          description: this.newExpenseDescription.trim(),
+          amount: this.newExpenseAmount,
+          paidBy: this.newExpensePaidBy,
+          participants: [...this.selectedParticipants]
+        };
+        this.showNotice(this.t('expenseEdited'), 'success');
+      }
+      this.editingExpenseId = null;
+    } else {
+      const newExpense: ExpenseItem = {
+        id: this.nextExpenseId++,
+        description: this.newExpenseDescription.trim(),
+        amount: this.newExpenseAmount,
+        paidBy: this.newExpensePaidBy,
+        participants: [...this.selectedParticipants]
+      };
+      this.expenseItems.push(newExpense);
+      this.showNotice(this.t('expenseAdded'), 'success');
+      this.analyticsService.track('expense_added');
+    }
 
     this.newExpenseDescription = '';
     this.newExpenseAmount = null;
     this.newExpensePaidBy = '';
     this.selectAllParticipants();
+    this.splitMode = 'all';
 
     this.calculateAdvancedShares();
     this.hasUnlockedExpenses = true;
-    this.showNotice(this.t('expenseAdded'), 'success');
   }
 
   removeExpenseItem(expenseId: number): void {
-    if (!confirm(this.t('confirmRemoveExpense'))) {
-      return;
+    this.showConfirm(this.t('confirmRemoveExpense'), () => {
+      this.saveSnapshotForUndo();
+      this.expenseItems = this.expenseItems.filter((item) => item.id !== expenseId);
+      this.calculateAdvancedShares();
+
+      if (this.expenseItems.length === 0) {
+        this.workflowStage = this.people.length > 0 ? 'expenses' : 'participants';
+      }
+
+      if (this.editingExpenseId === expenseId) {
+        this.cancelExpenseEdit();
+      }
+
+      this.showNotice(this.t('expenseRemoved'), 'warning', true);
+    });
+  }
+
+  startExpenseEdit(item: ExpenseItem): void {
+    this.editingExpenseId = item.id;
+    this.newExpenseDescription = item.description;
+    this.newExpenseAmount = item.amount;
+    this.newExpensePaidBy = item.paidBy;
+    this.selectedParticipants = [...item.participants];
+    
+    const areAllIncluded = this.people.length > 0 &&
+      item.participants.length === this.people.length &&
+      this.people.every(p => item.participants.includes(p));
+    this.splitMode = areAllIncluded ? 'all' : 'custom';
+
+    document.getElementById('expenseDescription')?.focus();
+  }
+
+  cancelExpenseEdit(): void {
+    this.editingExpenseId = null;
+    this.newExpenseDescription = '';
+    this.newExpenseAmount = null;
+    this.newExpensePaidBy = '';
+    this.selectAllParticipants();
+    this.splitMode = 'all';
+  }
+
+  showConfirm(message: string, action: () => void): void {
+    this.pendingConfirm = { message, action };
+  }
+
+  acceptConfirm(): void {
+    if (this.pendingConfirm) {
+      this.pendingConfirm.action();
+      this.pendingConfirm = null;
     }
+  }
 
-    this.saveSnapshotForUndo();
-    this.expenseItems = this.expenseItems.filter((item) => item.id !== expenseId);
-    this.calculateAdvancedShares();
-
-    if (this.expenseItems.length === 0) {
-      this.workflowStage = this.people.length > 0 ? 'expenses' : 'participants';
-    }
-
-    this.showNotice(this.t('expenseRemoved'), 'warning', true);
+  cancelConfirm(): void {
+    this.pendingConfirm = null;
   }
 
   calculateAdvancedShares(): void {
     if (this.people.length === 0 || this.expenseItems.length === 0) {
       this.resetResults();
+      this.persistCurrentState();
       return;
     }
 
@@ -770,6 +871,7 @@ export class SplitComponent {
     this.results = this.buildTransfers(debts, credits);
     this.totalExpense = this.fromCents(totalExpenseInCents);
     this.averageSpent = this.people.length > 0 ? this.fromCents(Math.round(totalExpenseInCents / this.people.length)) : 0;
+    this.persistCurrentState();
   }
 
   clearAll(): void {
@@ -778,25 +880,26 @@ export class SplitComponent {
       return;
     }
 
-    if (!confirm(this.t('confirmClearAll'))) {
-      return;
-    }
+    this.showConfirm(this.t('confirmClearAll'), () => {
+      this.saveSnapshotForUndo();
+      this.people = [];
+      this.expenseItems = [];
+      this.newPersonName = '';
+      this.newExpenseDescription = '';
+      this.newExpenseAmount = null;
+      this.newExpensePaidBy = '';
+      this.splitMode = 'all';
+      this.selectedParticipants = [];
+      this.nextExpenseId = 1;
+      this.workflowStage = 'participants';
+      this.hasUnlockedExpenses = false;
+      this.editingExpenseId = null;
 
-    this.saveSnapshotForUndo();
-    this.people = [];
-    this.expenseItems = [];
-    this.newPersonName = '';
-    this.newExpenseDescription = '';
-    this.newExpenseAmount = null;
-    this.newExpensePaidBy = '';
-    this.splitMode = 'all';
-    this.selectedParticipants = [];
-    this.nextExpenseId = 1;
-    this.workflowStage = 'participants';
-    this.hasUnlockedExpenses = false;
-
-    this.resetResults();
-    this.showNotice(this.t('allCleared'), 'warning', true);
+      this.resetResults();
+      this.persistenceService.clearState();
+      this.showNotice(this.t('allCleared'), 'warning', true);
+      this.analyticsService.track('session_cleared');
+    });
   }
 
   private isExpenseFormValid(): boolean {
@@ -945,38 +1048,53 @@ export class SplitComponent {
 
   private buildShareMessage(): string {
     const appLink = this.getShareAppLink();
-    const expenseLines = this.expenseItems.map((item) =>
-      `• ${item.description}: ${this.formatCurrency(item.amount)} (${this.t('sharePaidBy')}: ${item.paidBy} | ${this.t('shareParticipants')}: ${this.formatExpenseParticipants(item)})`
-    );
 
     const lines: string[] = [
-      'dividimos? 💸',
+      '🧾 dividimos?',
       '',
-      `👥 ${this.people.length} ${this.t('participants')}`,
-      '🧾 Gastos:',
-      ...expenseLines,
-      `💰 ${this.t('shareTotal')}: ${this.formatCurrency(this.totalExpense)}`,
-      `🧮 ${this.t('averagePerPerson')} ${this.formatCurrency(this.averageSpent)}`,
-      '',
-      '🔁 Transferencias:'
+      this.t('shareSummaryTitle'),
+      `${this.t('shareTotal')}: ${this.formatCurrency(this.totalExpense)} ${this.t('shareAmong')} ${this.people.length} ${this.t('participants').toLowerCase()}`,
+      ''
     ];
 
     if (this.results.length > 0) {
       this.results.forEach((result) => {
-        lines.push(`• ${result.debtor} ${this.t('owesToInline')} ${result.creditor}: ${this.formatCurrency(result.amount)}`);
+        lines.push(`${result.creditor} → ${this.t('shareReceives')} ${this.formatCurrency(result.amount)} ${this.t('shareFromConnector')} ${result.debtor}`);
       });
     } else {
       lines.push(this.t('shareAllSettled'));
     }
 
     lines.push('');
-    lines.push(`Hecho con --> ${appLink}`);
+    lines.push(this.t('shareOpenLinkPrompt'));
+    lines.push(appLink);
+    lines.push('');
+    lines.push(this.t('shareGeneratedWith'));
 
     return lines.join('\n');
   }
 
   private getShareAppLink(): string {
-    return this.publicAppUrl;
+    const state: Omit<AppState, 'schemaVersion'> = {
+      people: this.people,
+      expenseItems: this.expenseItems,
+      newPersonName: '',
+      newExpenseDescription: '',
+      newExpenseAmount: null,
+      newExpensePaidBy: '',
+      splitMode: 'all',
+      selectedParticipants: this.selectedParticipants,
+      nextExpenseId: this.nextExpenseId,
+      workflowStage: this.workflowStage,
+      hasUnlockedExpenses: this.hasUnlockedExpenses,
+      currentLanguage: this.currentLanguage
+    };
+
+    try {
+      return this.shareService.buildShareUrl(state);
+    } catch {
+      return this.publicAppUrl;
+    }
   }
 
   private showNotice(message: string, type: 'success' | 'info' | 'warning', enableUndo = false): void {
@@ -1036,10 +1154,12 @@ export class SplitComponent {
 
     if (savedLanguage === 'es' || savedLanguage === 'en') {
       this.currentLanguage = savedLanguage;
+      document.documentElement.setAttribute('lang', savedLanguage);
       return;
     }
 
     this.currentLanguage = this.detectDeviceLanguage();
+    document.documentElement.setAttribute('lang', this.currentLanguage);
   }
 
   private detectDeviceLanguage(): LanguageCode {

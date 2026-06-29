@@ -5,12 +5,16 @@ import { FormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SplitComponent } from './split/split.component';
+import { LandingComponent } from './landing/landing.component';
+import { ShareComponent } from './share/share.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 
 @NgModule({
   declarations: [
     AppComponent,
     SplitComponent,
+    LandingComponent,
+    ShareComponent,
   ],
   imports: [
     BrowserModule,
