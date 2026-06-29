@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { SwUpdate } from '@angular/service-worker';
 import { EMPTY } from 'rxjs';
@@ -15,7 +16,10 @@ describe('AppComponent', () => {
   };
 
   beforeEach(() => TestBed.configureTestingModule({
-    imports: [FormsModule, RouterTestingModule],
+    imports: [
+      FormsModule,
+      RouterTestingModule.withRoutes([{ path: '', component: SplitComponent }])
+    ],
     declarations: [AppComponent, SplitComponent],
     providers: [{ provide: SwUpdate, useValue: swUpdateMock }]
   }));
@@ -26,8 +30,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render split component', () => {
+  it('should render the routed component through router-outlet', async () => {
     const fixture = TestBed.createComponent(AppComponent);
+    const router = TestBed.inject(Router);
+    await router.navigate(['']);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('app-split')).toBeTruthy();

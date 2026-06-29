@@ -11,7 +11,7 @@ import { SeoService } from './services/seo.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnDestroy {
   private readonly subscriptions = new Subscription();
   private isReloadingForUpdate = false;
 

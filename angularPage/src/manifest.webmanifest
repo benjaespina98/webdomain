@@ -1,9 +1,12 @@
 {
-  "name": "dividimos?",
+  "name": "dividimos? - Divide gastos grupales",
   "short_name": "dividimos?",
-  "theme_color": "#1976d2",
-  "background_color": "#fafafa",
+  "description": "Dividí gastos grupales de forma rápida, simple y privada. Sin registro, sin servidores.",
+  "theme_color": "#020617",
+  "background_color": "#020617",
   "display": "standalone",
+  "orientation": "portrait-primary",
+  "lang": "es",
   "scope": "./",
   "start_url": "./",
   "icons": [
@@ -33,17 +36,3 @@
     }
   ]
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

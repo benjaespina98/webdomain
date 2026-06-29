@@ -1,11 +1,25 @@
 import { Injectable } from '@angular/core';
 import * as LZString from 'lz-string';
 
+export interface ShareExpenseDto {
+  i: number;
+  d: string;
+  a: number;
+  b: string;
+  r: string[];
+}
+
+export interface SharePayload {
+  p: string[];
+  e: ShareExpenseDto[];
+  l: 'es' | 'en';
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ShareService {
-  private readonly schemaVersion = 1;
+  private readonly schemaVersion = 2;
 
   encodeState(state: unknown): string {
     const payload = JSON.stringify({ schemaVersion: this.schemaVersion, state });

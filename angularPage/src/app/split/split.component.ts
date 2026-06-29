@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { PersistenceService, AppState } from '../services/persistence.service';
-import { ShareService } from '../services/share.service';
+import { ShareService, SharePayload } from '../services/share.service';
 import { AnalyticsService } from '../services/analytics.service';
 
 interface ExpenseItem {
@@ -69,6 +69,7 @@ interface TranslationMap {
   shareDetailTitle: string;
   shareTransfersTitle: string;
   shareAllSettled: string;
+  shareIntro: string;
   shareSummaryTitle: string;
   shareAmong: string;
   shareReceives: string;
@@ -88,16 +89,15 @@ interface TranslationMap {
   expenseRemoved: string;
   allCleared: string;
   undo: string;
+  dismissNotice: string;
   undoApplied: string;
   confirmClearAll: string;
   confirmRemovePerson: string;
   confirmRemoveExpense: string;
   nothingToClear: string;
   whatsappOpened: string;
-  summaryCopied: string;
-  copySummary: string;
-  copySummaryDone: string;
   copyLink: string;
+  copyDone: string;
   linkCopied: string;
   clipboardUnavailable: string;
   splitModeAll: string;
@@ -199,12 +199,13 @@ export class SplitComponent implements OnInit {
       shareDetailTitle: 'Detalle de gastos',
       shareTransfersTitle: 'Pagos sugeridos',
       shareAllSettled: 'Todo saldado, no quedan pagos pendientes.',
+      shareIntro: 'Así quedaron repartidos los gastos del grupo:',
       shareSummaryTitle: 'Resumen de gastos',
       shareAmong: 'entre',
       shareReceives: 'recibe',
       shareFromConnector: 'de',
-      shareOpenLinkPrompt: 'Abrí este enlace para ver el detalle completo:',
-      shareGeneratedWith: 'Generado con dividimos?',
+      shareOpenLinkPrompt: 'Mirá el detalle completo acá →',
+      shareGeneratedWith: 'Calculado con dividimos?',
       languageAria: 'cambiar idioma',
       clearSelectionTitle: 'Desmarcar todas las personas',
       splitAllTitle: 'Si elegís Todos, el gasto se divide entre todas las personas cargadas',
@@ -218,16 +219,15 @@ export class SplitComponent implements OnInit {
       expenseRemoved: 'Gasto eliminado',
       allCleared: 'Se limpió toda la información',
       undo: 'Deshacer',
+      dismissNotice: 'Cerrar aviso',
       undoApplied: 'Cambio deshecho',
       confirmClearAll: '¿Seguro que querés borrar participantes y gastos?',
       confirmRemovePerson: '¿Eliminar este participante y sus gastos relacionados?',
       confirmRemoveExpense: '¿Eliminar este gasto?',
       nothingToClear: 'No hay datos para limpiar',
       whatsappOpened: 'WhatsApp abierto',
-      summaryCopied: 'Resumen copiado al portapapeles',
-      copySummary: 'Copiar resumen',
-      copySummaryDone: 'Copiado',
       copyLink: 'Copiar enlace',
+      copyDone: 'Copiado',
       linkCopied: 'Enlace copiado al portapapeles',
       clipboardUnavailable: 'No se pudo copiar automáticamente. Copiá el texto manualmente.',
       splitModeAll: 'Dividir entre todos',
@@ -302,12 +302,13 @@ export class SplitComponent implements OnInit {
       shareDetailTitle: 'Expense details',
       shareTransfersTitle: 'Suggested payments',
       shareAllSettled: 'Everything is settled, no pending payments.',
+      shareIntro: "Here's how the group's expenses were split:",
       shareSummaryTitle: 'Expense summary',
       shareAmong: 'among',
       shareReceives: 'receives',
       shareFromConnector: 'from',
-      shareOpenLinkPrompt: 'Open this link to see the full detail:',
-      shareGeneratedWith: 'Generated with dividimos?',
+      shareOpenLinkPrompt: 'See the full detail here →',
+      shareGeneratedWith: 'Calculated with dividimos?',
       languageAria: 'Change language',
       clearSelectionTitle: 'Uncheck all people',
       splitAllTitle: 'If you choose All, the expense is split across all loaded people',
@@ -321,16 +322,15 @@ export class SplitComponent implements OnInit {
       expenseRemoved: 'Expense deleted',
       allCleared: 'All information has been cleared',
       undo: 'Undo',
+      dismissNotice: 'Dismiss notification',
       undoApplied: 'Change undone',
       confirmClearAll: 'Are you sure you want to delete participants and expenses?',
       confirmRemovePerson: 'Delete this participant and related expenses?',
       confirmRemoveExpense: 'Delete this expense?',
       nothingToClear: 'There is no data to clear',
       whatsappOpened: 'WhatsApp opened',
-      summaryCopied: 'Summary copied to clipboard',
-      copySummary: 'Copy summary',
-      copySummaryDone: 'Copied',
       copyLink: 'Copy link',
+      copyDone: 'Copied',
       linkCopied: 'Link copied to clipboard',
       clipboardUnavailable: 'Could not copy automatically. Please copy the text manually.',
       splitModeAll: 'Split equally',
@@ -362,11 +362,9 @@ export class SplitComponent implements OnInit {
   uiNotice = '';
   uiNoticeType: 'success' | 'info' | 'warning' = 'info';
   canUndoLastAction = false;
-  isCopySummaryDone = false;
   isCopyLinkDone = false;
   private lastSnapshot: AppSnapshot | null = null;
   private noticeTimer: ReturnType<typeof setTimeout> | null = null;
-  private copyFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
   private copyLinkFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
 
   totalExpense = 0;
@@ -416,6 +414,12 @@ export class SplitComponent implements OnInit {
     this.nextExpenseId = saved.nextExpenseId;
     this.workflowStage = saved.workflowStage;
     this.hasUnlockedExpenses = saved.hasUnlockedExpenses;
+
+    if (saved.currentLanguage === 'es' || saved.currentLanguage === 'en') {
+      this.currentLanguage = saved.currentLanguage;
+      localStorage.setItem(this.languageStorageKey, this.currentLanguage);
+      document.documentElement.setAttribute('lang', this.currentLanguage);
+    }
 
     this.calculateAdvancedShares();
   }
@@ -630,26 +634,17 @@ export class SplitComponent implements OnInit {
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
-    window.open(whatsappUrl, '_blank');
+
+    const link = document.createElement('a');
+    link.href = whatsappUrl;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
     this.showNotice(this.t('whatsappOpened'), 'success');
     this.analyticsService.track('share_clicked');
-  }
-
-  async copySummary(): Promise<void> {
-    if (this.expenseItems.length === 0) {
-      this.showNotice(this.t('noExpensesToShare'), 'warning');
-      return;
-    }
-
-    const copied = await this.copyTextToClipboard(this.buildShareMessage());
-
-    if (copied) {
-      this.triggerCopyFeedback('summary');
-      this.showNotice(this.t('summaryCopied'), 'success');
-      this.analyticsService.track('summary_copied');
-    } else {
-      this.showNotice(this.t('clipboardUnavailable'), 'warning');
-    }
   }
 
   async copyShareLink(): Promise<void> {
@@ -661,7 +656,7 @@ export class SplitComponent implements OnInit {
     const copied = await this.copyTextToClipboard(this.getShareAppLink());
 
     if (copied) {
-      this.triggerCopyFeedback('link');
+      this.triggerCopyFeedback();
       this.showNotice(this.t('linkCopied'), 'success');
       this.analyticsService.track('summary_copied');
     } else {
@@ -696,20 +691,7 @@ export class SplitComponent implements OnInit {
     }
   }
 
-  private triggerCopyFeedback(target: 'summary' | 'link'): void {
-    if (target === 'summary') {
-      this.isCopySummaryDone = true;
-      if (this.copyFeedbackTimer) {
-        clearTimeout(this.copyFeedbackTimer);
-      }
-
-      this.copyFeedbackTimer = setTimeout(() => {
-        this.isCopySummaryDone = false;
-        this.copyFeedbackTimer = null;
-      }, 1800);
-      return;
-    }
-
+  private triggerCopyFeedback(): void {
     this.isCopyLinkDone = true;
     if (this.copyLinkFeedbackTimer) {
       clearTimeout(this.copyLinkFeedbackTimer);
@@ -1052,6 +1034,8 @@ export class SplitComponent implements OnInit {
     const lines: string[] = [
       '🧾 dividimos?',
       '',
+      this.t('shareIntro'),
+      '',
       this.t('shareSummaryTitle'),
       `${this.t('shareTotal')}: ${this.formatCurrency(this.totalExpense)} ${this.t('shareAmong')} ${this.people.length} ${this.t('participants').toLowerCase()}`,
       ''
@@ -1066,32 +1050,27 @@ export class SplitComponent implements OnInit {
     }
 
     lines.push('');
-    lines.push(this.t('shareOpenLinkPrompt'));
+    lines.push(`${this.t('shareGeneratedWith')} ${this.t('shareOpenLinkPrompt')}`);
     lines.push(appLink);
-    lines.push('');
-    lines.push(this.t('shareGeneratedWith'));
 
     return lines.join('\n');
   }
 
   private getShareAppLink(): string {
-    const state: Omit<AppState, 'schemaVersion'> = {
-      people: this.people,
-      expenseItems: this.expenseItems,
-      newPersonName: '',
-      newExpenseDescription: '',
-      newExpenseAmount: null,
-      newExpensePaidBy: '',
-      splitMode: 'all',
-      selectedParticipants: this.selectedParticipants,
-      nextExpenseId: this.nextExpenseId,
-      workflowStage: this.workflowStage,
-      hasUnlockedExpenses: this.hasUnlockedExpenses,
-      currentLanguage: this.currentLanguage
+    const payload: SharePayload = {
+      p: this.people,
+      e: this.expenseItems.map((item) => ({
+        i: item.id,
+        d: item.description,
+        a: item.amount,
+        b: item.paidBy,
+        r: item.participants
+      })),
+      l: this.currentLanguage
     };
 
     try {
-      return this.shareService.buildShareUrl(state);
+      return this.shareService.buildShareUrl(payload);
     } catch {
       return this.publicAppUrl;
     }
