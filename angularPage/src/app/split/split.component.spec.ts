@@ -21,7 +21,7 @@ describe('SplitComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should generate a WhatsApp summary with totals, average, and suggested transfers', () => {
+  it('should generate a WhatsApp summary with totals and suggested transfers', () => {
     component.currentLanguage = 'es';
     component.people = ['Pepe', 'Juan', 'Ana'];
     component.expenseItems = Array.from({ length: 10 }, (_, index) => ({
@@ -39,27 +39,24 @@ describe('SplitComponent', () => {
       amount: 100 + index
     }));
 
-    const openSpy = spyOn(window, 'open').and.stub();
+    const clickSpy = spyOn(HTMLAnchorElement.prototype, 'click');
 
     component.shareWhatsApp();
 
-    expect(openSpy).toHaveBeenCalledTimes(1);
-    const openedUrl = openSpy.calls.mostRecent().args[0] as string;
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+    const openedUrl = (clickSpy.calls.mostRecent().object as HTMLAnchorElement).href;
     const message = decodeURIComponent(openedUrl.split('text=')[1]);
 
-    expect(message).toContain('dividimos? 💸');
-    expect(message).toContain('👥 3 Personas');
-    expect(message).toContain('🧾 Gastos:');
-    expect(message).toContain('• Gasto 10: $1090.00 (Pagó: Juan | Participan: Pepe, Juan, Ana)');
-    expect(message).toContain('💰 Total: $10450.00');
-    expect(message).toContain('🧮 Promedio por persona: $3483.33');
-    expect(message).toContain('🔁 Transferencias:');
-    expect(message).toContain('• Deudor 1 le debe a Acreedor 1: $100.00');
-    expect(message).toContain('• Deudor 9 le debe a Acreedor 9: $108.00');
-    expect(message).toContain('Hecho con --> https://dividimos.vercel.app/');
+    expect(message).toContain('🧾 dividimos?');
+    expect(message).toContain('Resumen de gastos');
+    expect(message).toContain('Total: $10450.00 entre 3 personas');
+    expect(message).toContain('Acreedor 1 → recibe $100.00 de Deudor 1');
+    expect(message).toContain('Acreedor 9 → recibe $108.00 de Deudor 9');
+    expect(message).toContain('Calculado con dividimos?');
+    expect(message).toContain('/share?data=');
   });
 
-  it('should copy summary with participants included in each expense line', async () => {
+  it('should copy a short share link to the clipboard', async () => {
     component.currentLanguage = 'es';
     component.people = ['juan', 'benja', 'lucho', 'ari'];
     component.expenseItems = [
@@ -79,11 +76,11 @@ describe('SplitComponent', () => {
       configurable: true
     });
 
-    await component.copySummary();
+    await component.copyShareLink();
 
     expect(writeTextSpy).toHaveBeenCalledTimes(1);
-    const copiedMessage = writeTextSpy.calls.mostRecent().args[0] as string;
-    expect(copiedMessage).toContain('• Helado: $100.00 (Pagó: ari | Participan: benja, lucho)');
+    const copiedLink = writeTextSpy.calls.mostRecent().args[0] as string;
+    expect(copiedLink).toContain('/share?data=');
   });
 
   it('should calculate transfers correctly when only some participants share an expense', () => {

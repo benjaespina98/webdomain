@@ -1,0 +1,83 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020617" />
+      <stop offset="55%" stop-color="#0b1120" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <radialGradient id="glow1" cx="85%" cy="10%" r="55%">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="glow2" cx="8%" cy="85%" r="50%">
+      <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#a78bfa" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="brandText" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f8fafc" />
+      <stop offset="45%" stop-color="#ddd6fe" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+    <linearGradient id="pillGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed" />
+      <stop offset="100%" stop-color="#6d28d9" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <rect width="1200" height="630" fill="url(#glow1)" />
+  <rect width="1200" height="630" fill="url(#glow2)" />
+
+  <!-- App icon badge -->
+  <rect x="90" y="120" width="96" height="96" rx="24" fill="#15172b" stroke="rgba(226,232,240,0.18)" stroke-width="2" />
+  <text x="138" y="186" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700" fill="#a78bfa" text-anchor="middle">$</text>
+
+  <!-- Brand -->
+  <text x="210" y="200" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="800" fill="url(#brandText)">dividimos?</text>
+
+  <!-- Headline -->
+  <text x="90" y="320" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="800" fill="#f8fafc">Dividí gastos grupales</text>
+  <text x="90" y="386" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="800" fill="#c4b5fd">en segundos, sin registro</text>
+
+  <!-- Subtitle -->
+  <text x="90" y="440" font-family="Arial, Helvetica, sans-serif" font-size="27" fill="#94a3b8">Calculá quién le debe a quién, sin registrarte.</text>
+
+  <!-- Feature pills -->
+  <rect x="90" y="486" width="168" height="56" rx="28" fill="url(#pillGrad)" />
+  <text x="174" y="521" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#ffffff" text-anchor="middle">Sin registro</text>
+
+  <rect x="276" y="486" width="168" height="56" rx="28" fill="rgba(139,92,246,0.16)" stroke="rgba(139,92,246,0.5)" stroke-width="2" />
+  <text x="360" y="521" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#ddd6fe" text-anchor="middle">100% privado</text>
+
+  <rect x="462" y="486" width="168" height="56" rx="28" fill="rgba(139,92,246,0.16)" stroke="rgba(139,92,246,0.5)" stroke-width="2" />
+  <text x="546" y="521" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#ddd6fe" text-anchor="middle">Gratis</text>
+
+  <!-- Decorative settlement card -->
+  <g transform="translate(860, 130)">
+    <rect width="260" height="360" rx="22" fill="rgba(15,23,42,0.85)" stroke="rgba(148,163,184,0.25)" stroke-width="2" />
+    <circle cx="34" cy="34" r="7" fill="rgba(148,163,184,0.4)" />
+    <circle cx="58" cy="34" r="7" fill="rgba(148,163,184,0.4)" />
+    <circle cx="82" cy="34" r="7" fill="rgba(148,163,184,0.4)" />
+
+    <rect x="24" y="64" width="212" height="44" rx="10" fill="rgba(2,6,23,0.5)" />
+    <text x="36" y="92" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#94a3b8">Total gastado</text>
+    <text x="200" y="92" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#f8fafc" text-anchor="end">$326</text>
+
+    <rect x="24" y="120" width="212" height="44" rx="10" fill="rgba(2,6,23,0.5)" />
+    <text x="36" y="148" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#94a3b8">Por persona</text>
+    <text x="200" y="148" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#f8fafc" text-anchor="end">$108</text>
+
+    <rect x="24" y="184" width="212" height="2" fill="rgba(148,163,184,0.18)" />
+
+    <text x="24" y="220" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#94a3b8">TRANSFERENCIA SUGERIDA</text>
+
+    <rect x="24" y="236" width="212" height="62" rx="12" fill="rgba(139,92,246,0.14)" />
+    <text x="36" y="262" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#e2e8f0">Bruno le debe a Ana</text>
+    <text x="36" y="286" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="800" fill="#ddd6fe">$108,00</text>
+
+    <rect x="24" y="312" width="212" height="2" fill="rgba(148,163,184,0.18)" />
+    <rect x="24" y="328" width="212" height="2" fill="rgba(148,163,184,0.0)" />
+  </g>
+
+  <text x="600" y="600" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#64748b" text-anchor="middle">dividimos.vercel.app</text>
+</svg>

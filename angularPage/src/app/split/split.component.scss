@@ -19,18 +19,12 @@
 .container-fluid.advanced-mode::before {
     content: '';
     position: fixed;
-    border-radius: 999px;
-    filter: blur(80px);
-    pointer-events: none;
+    inset: 0;
     z-index: -1;
-}
-
-.container-fluid.advanced-mode::before {
-    width: 320px;
-    height: 320px;
-    right: -80px;
-    top: 140px;
-    background: rgba(139, 92, 246, 0.1);
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 88% 6%, rgba(139, 92, 246, 0.14) 0%, transparent 40%),
+        radial-gradient(circle at 6% 78%, rgba(167, 139, 250, 0.09) 0%, transparent 38%);
 }
 
 .compact-expenses {
@@ -226,11 +220,11 @@
 }
 
 .results-cta {
-    margin: 0.7rem 0 0.4rem;
-    padding: 0.6rem;
-    border-radius: 0.85rem;
-    border: 1px solid rgba(148, 163, 184, 0.24);
-    background: rgba(15, 23, 42, 0.42);
+    margin: 0.85rem 0 0.5rem;
+    padding: 0.85rem;
+    border-radius: 0.95rem;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    background: rgba(15, 23, 42, 0.5);
 }
 
 .results-cta-hint {

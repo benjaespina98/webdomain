@@ -1,8 +1,8 @@
 <div class="landing-container">
   <!-- Top Language Switcher -->
   <div class="language-switch">
-    <button type="button" class="lang-btn" [class.active]="currentLanguage === 'es'" (click)="setLanguage('es')">ES</button>
-    <button type="button" class="lang-btn" [class.active]="currentLanguage === 'en'" (click)="setLanguage('en')">EN</button>
+    <button type="button" class="lang-btn" [class.active]="currentLanguage === 'es'" [attr.aria-pressed]="currentLanguage === 'es'" (click)="setLanguage('es')">ES</button>
+    <button type="button" class="lang-btn" [class.active]="currentLanguage === 'en'" [attr.aria-pressed]="currentLanguage === 'en'" (click)="setLanguage('en')">EN</button>
   </div>
 
   <!-- Hero Section -->
@@ -16,7 +16,7 @@
       <h1 class="hero-title">Nunca más hagas cuentas después de un <span class="accent-text">asado, una cena o una salida</span></h1>
       <p class="hero-subtitle">dividimos? calcula automáticamente quién le debe a quién. Sin registrarte, sin descargar nada y en pocos segundos.</p>
       <div class="hero-ctas">
-        <a routerLink="/app" class="btn btn-cta-primary"><i class="fas fa-calculator me-2"></i>Dividir gastos ahora</a>
+        <a routerLink="/app" class="btn btn-cta-primary"><i class="fas fa-calculator me-2" aria-hidden="true"></i>Dividir gastos ahora</a>
       </div>
     </div>
 
@@ -24,7 +24,7 @@
       <h1 class="hero-title">Stop doing the math after a <span class="accent-text">BBQ, dinner, or night out</span></h1>
       <p class="hero-subtitle">dividimos? automatically calculates who owes who. No sign-up, nothing to download, and it takes seconds.</p>
       <div class="hero-ctas">
-        <a routerLink="/app" class="btn btn-cta-primary"><i class="fas fa-calculator me-2"></i>Split expenses now</a>
+        <a routerLink="/app" class="btn btn-cta-primary"><i class="fas fa-calculator me-2" aria-hidden="true"></i>Split expenses now</a>
       </div>
     </div>
   </header>
@@ -36,19 +36,19 @@
       <h2 class="section-title" *ngIf="currentLanguage === 'en'">What is dividimos?</h2>
 
       <ul class="what-is-list" *ngIf="currentLanguage === 'es'">
-        <li><i class="fas fa-check accent-icon"></i>Está pensada para resolver gastos grupales puntuales, no para llevar una contabilidad permanente.</li>
-        <li><i class="fas fa-check accent-icon"></i>No necesitás crear una cuenta ni registrarte con un email.</li>
-        <li><i class="fas fa-check accent-icon"></i>No guardamos tu información en ningún servidor.</li>
-        <li><i class="fas fa-check accent-icon"></i>Funciona completamente en tu navegador, incluso sin conexión.</li>
-        <li><i class="fas fa-check accent-icon"></i>Al terminar, compartís el resultado con un único enlace por WhatsApp.</li>
+        <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Está pensada para resolver gastos grupales puntuales, no para llevar una contabilidad permanente.</li>
+        <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>No necesitás crear una cuenta ni registrarte con un email.</li>
+        <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>No guardamos tu información en ningún servidor.</li>
+        <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Funciona completamente en tu navegador, incluso sin conexión.</li>
+        <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Al terminar, compartís el resultado con un único enlace por WhatsApp.</li>
       </ul>
 
       <ul class="what-is-list" *ngIf="currentLanguage === 'en'">
-        <li><i class="fas fa-check accent-icon"></i>Built to settle one-off group expenses, not to keep permanent accounting.</li>
-        <li><i class="fas fa-check accent-icon"></i>No account or email sign-up required.</li>
-        <li><i class="fas fa-check accent-icon"></i>We don't store your information on any server.</li>
-        <li><i class="fas fa-check accent-icon"></i>Runs entirely in your browser, even offline.</li>
-        <li><i class="fas fa-check accent-icon"></i>When you're done, share the result with a single WhatsApp link.</li>
+        <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Built to settle one-off group expenses, not to keep permanent accounting.</li>
+        <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>No account or email sign-up required.</li>
+        <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>We don't store your information on any server.</li>
+        <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Runs entirely in your browser, even offline.</li>
+        <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>When you're done, share the result with a single WhatsApp link.</li>
       </ul>
     </div>
   </section>
@@ -102,8 +102,8 @@
         </div>
 
         <div class="preview-share-actions">
-          <span class="preview-share-btn"><i class="fas fa-copy me-1"></i><span *ngIf="currentLanguage === 'es'">Copiar resumen</span><span *ngIf="currentLanguage === 'en'">Copy summary</span></span>
-          <span class="preview-share-btn preview-share-whatsapp"><i class="fab fa-whatsapp me-1"></i><span *ngIf="currentLanguage === 'es'">Compartir por WhatsApp</span><span *ngIf="currentLanguage === 'en'">Share on WhatsApp</span></span>
+          <span class="preview-share-btn preview-share-whatsapp"><i class="fab fa-whatsapp me-1" aria-hidden="true"></i><span *ngIf="currentLanguage === 'es'">Compartir por WhatsApp</span><span *ngIf="currentLanguage === 'en'">Share on WhatsApp</span></span>
+          <span class="preview-share-btn"><i class="fas fa-link me-1" aria-hidden="true"></i><span *ngIf="currentLanguage === 'es'">Copiar enlace</span><span *ngIf="currentLanguage === 'en'">Copy link</span></span>
         </div>
       </div>
     </div>
@@ -117,34 +117,34 @@
     
     <div class="grid-benefits">
       <div class="benefit-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-bolt benefit-icon"></i>
+        <i class="fas fa-bolt benefit-icon" aria-hidden="true"></i>
         <h3>Instantáneo</h3>
         <p>Entrás, cargás y resolvés. Sin crear cuentas, contraseñas ni verificar emails.</p>
       </div>
       <div class="benefit-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-bolt benefit-icon"></i>
+        <i class="fas fa-bolt benefit-icon" aria-hidden="true"></i>
         <h3>Instant Setup</h3>
         <p>Open, enter, and solve. No signup, no passwords, and no email verification.</p>
       </div>
 
       <div class="benefit-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-wifi-slash benefit-icon"></i>
+        <i class="fas fa-wifi-slash benefit-icon" aria-hidden="true"></i>
         <h3>Funciona Offline</h3>
         <p>Pensado para viajes o salidas al aire libre donde la señal de internet suele fallar.</p>
       </div>
       <div class="benefit-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-wifi-slash benefit-icon"></i>
+        <i class="fas fa-wifi-slash benefit-icon" aria-hidden="true"></i>
         <h3>Offline Support</h3>
         <p>Perfect for trips or outdoor hangouts where internet connection is unreliable.</p>
       </div>
 
       <div class="benefit-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-lock benefit-icon"></i>
+        <i class="fas fa-lock benefit-icon" aria-hidden="true"></i>
         <h3>Privado y Seguro</h3>
         <p>Tus datos son tuyos y se quedan guardados localmente solo en tu navegador.</p>
       </div>
       <div class="benefit-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-lock benefit-icon"></i>
+        <i class="fas fa-lock benefit-icon" aria-hidden="true"></i>
         <h3>Private & Secure</h3>
         <p>Your data stays on your device. We do not store your private details on servers.</p>
       </div>
@@ -198,56 +198,56 @@
     
     <div class="grid-cases grid-cases-5">
       <div class="case-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-fire-burner case-icon"></i>
+        <i class="fas fa-fire-burner case-icon" aria-hidden="true"></i>
         <h4>Asados y comidas</h4>
         <p>Dividí la carne, las bebidas y todo lo que se compró entre los que estuvieron.</p>
       </div>
       <div class="case-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-fire-burner case-icon"></i>
+        <i class="fas fa-fire-burner case-icon" aria-hidden="true"></i>
         <h4>BBQs & meals</h4>
         <p>Split the food, drinks, and everything bought among everyone who was there.</p>
       </div>
 
       <div class="case-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-champagne-glasses case-icon"></i>
+        <i class="fas fa-champagne-glasses case-icon" aria-hidden="true"></i>
         <h4>Salidas con amigos</h4>
         <p>Bares, cenas o juntadas donde uno paga y después se acomodan las cuentas.</p>
       </div>
       <div class="case-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-champagne-glasses case-icon"></i>
+        <i class="fas fa-champagne-glasses case-icon" aria-hidden="true"></i>
         <h4>Nights out with friends</h4>
         <p>Bars, dinners, or get-togethers where one pays and everyone settles up later.</p>
       </div>
 
       <div class="case-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-cake-candles case-icon"></i>
+        <i class="fas fa-cake-candles case-icon" aria-hidden="true"></i>
         <h4>Cumpleaños</h4>
         <p>Organizá la torta, la decoración y el regalo grupal sin perder de vista quién puso qué.</p>
       </div>
       <div class="case-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-cake-candles case-icon"></i>
+        <i class="fas fa-cake-candles case-icon" aria-hidden="true"></i>
         <h4>Birthdays</h4>
         <p>Sort out the cake, decorations, and group gift without losing track of who paid what.</p>
       </div>
 
       <div class="case-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-gift case-icon"></i>
+        <i class="fas fa-gift case-icon" aria-hidden="true"></i>
         <h4>Regalos grupales</h4>
         <p>Cuando varios amigos juntan plata para comprar un regalo y después hay que repartir cuánto puso cada uno.</p>
       </div>
       <div class="case-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-gift case-icon"></i>
+        <i class="fas fa-gift case-icon" aria-hidden="true"></i>
         <h4>Group gifts</h4>
         <p>When a group of friends chips in to buy a gift and then needs to split exactly how much each one owes.</p>
       </div>
 
       <div class="case-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-plane case-icon"></i>
+        <i class="fas fa-plane case-icon" aria-hidden="true"></i>
         <h4>Viajes de fin de semana</h4>
         <p>No es para administrar meses de gastos: es para cerrar las cuentas de ese viaje puntual.</p>
       </div>
       <div class="case-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-plane case-icon"></i>
+        <i class="fas fa-plane case-icon" aria-hidden="true"></i>
         <h4>Weekend trips</h4>
         <p>Not for managing months of expenses — just for closing the books on that one trip.</p>
       </div>
@@ -261,17 +261,17 @@
 
     <div class="no-account-card reveal">
       <ul class="what-is-list" *ngIf="currentLanguage === 'es'">
-        <li><i class="fas fa-desktop accent-icon"></i>Mientras trabajás, todo se guarda localmente en tu navegador.</li>
-        <li><i class="fas fa-clock-rotate-left accent-icon"></i>Si cerrás la página, podés volver más tarde y seguir donde lo dejaste.</li>
-        <li><i class="fas fa-link accent-icon"></i>Cuando terminás, compartís un enlace que contiene toda la información necesaria para reconstruir el resultado en el navegador de otra persona.</li>
-        <li><i class="fas fa-shield-halved accent-icon"></i>No hay backend ni base de datos: por eso la app es simple, rápida y privada.</li>
+        <li><i class="fas fa-desktop accent-icon" aria-hidden="true"></i>Mientras trabajás, todo se guarda localmente en tu navegador.</li>
+        <li><i class="fas fa-clock-rotate-left accent-icon" aria-hidden="true"></i>Si cerrás la página, podés volver más tarde y seguir donde lo dejaste.</li>
+        <li><i class="fas fa-link accent-icon" aria-hidden="true"></i>Cuando terminás, compartís un enlace que contiene toda la información necesaria para reconstruir el resultado en el navegador de otra persona.</li>
+        <li><i class="fas fa-shield-halved accent-icon" aria-hidden="true"></i>No depende de servidores externos: todo pasa en tu propio navegador, por eso es simple, rápida y privada.</li>
       </ul>
 
       <ul class="what-is-list" *ngIf="currentLanguage === 'en'">
-        <li><i class="fas fa-desktop accent-icon"></i>While you're working, everything is saved locally in your browser.</li>
-        <li><i class="fas fa-clock-rotate-left accent-icon"></i>If you close the page, you can come back later and pick up where you left off.</li>
-        <li><i class="fas fa-link accent-icon"></i>When you're done, you share a link that contains everything needed to rebuild the result in someone else's browser.</li>
-        <li><i class="fas fa-shield-halved accent-icon"></i>There's no backend or database, which keeps the app simple, fast, and private.</li>
+        <li><i class="fas fa-desktop accent-icon" aria-hidden="true"></i>While you're working, everything is saved locally in your browser.</li>
+        <li><i class="fas fa-clock-rotate-left accent-icon" aria-hidden="true"></i>If you close the page, you can come back later and pick up where you left off.</li>
+        <li><i class="fas fa-link accent-icon" aria-hidden="true"></i>When you're done, you share a link that contains everything needed to rebuild the result in someone else's browser.</li>
+        <li><i class="fas fa-shield-halved accent-icon" aria-hidden="true"></i>It doesn't rely on external servers: everything happens right in your browser, which keeps it simple, fast, and private.</li>
       </ul>
     </div>
   </section>
@@ -280,11 +280,11 @@
   <section class="final-cta-section reveal">
     <div *ngIf="currentLanguage === 'es'">
       <h2>¿Listo para saber quién le debe a quién?</h2>
-      <a routerLink="/app" class="btn btn-cta-primary mt-3"><i class="fas fa-check-circle me-2"></i>Empezar gratis</a>
+      <a routerLink="/app" class="btn btn-cta-primary mt-3"><i class="fas fa-check-circle me-2" aria-hidden="true"></i>Empezar gratis</a>
     </div>
     <div *ngIf="currentLanguage === 'en'">
       <h2>Ready to find out who owes who?</h2>
-      <a routerLink="/app" class="btn btn-cta-primary mt-3"><i class="fas fa-check-circle me-2"></i>Start for free</a>
+      <a routerLink="/app" class="btn btn-cta-primary mt-3"><i class="fas fa-check-circle me-2" aria-hidden="true"></i>Start for free</a>
     </div>
   </section>
 
