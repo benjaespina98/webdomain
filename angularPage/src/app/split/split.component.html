@@ -39,9 +39,11 @@
     <div class="workflow-shell">
         <div class="workflow-strip">
             <div class="workflow-strip-steps" aria-hidden="true">
-                <span class="strip-step" [class.active]="isStageActive('participants')" [class.done]="isStageDone('participants')">1</span>
-                <span class="strip-step" [class.active]="isStageActive('expenses')" [class.done]="isStageDone('expenses')">2</span>
-                <span class="strip-step" [class.active]="isStageActive('results')" [class.done]="isStageDone('results')">3</span>
+                <span class="strip-step" [class.active]="isStageActive('participants')" [class.done]="isStageDone('participants')" [class.step-clickable]="!isStageActive('participants') && canAccessExpenses()" (click)="onStepClick('participants')" [attr.role]="!isStageActive('participants') ? 'button' : null" [attr.tabindex]="!isStageActive('participants') ? 0 : null">1</span>
+                <span class="strip-step-connector" aria-hidden="true"></span>
+                <span class="strip-step" [class.active]="isStageActive('expenses')" [class.done]="isStageDone('expenses')" [class.step-clickable]="!isStageActive('expenses') && canAccessExpenses()" (click)="onStepClick('expenses')" [attr.role]="!isStageActive('expenses') && canAccessExpenses() ? 'button' : null" [attr.tabindex]="!isStageActive('expenses') && canAccessExpenses() ? 0 : null">2</span>
+                <span class="strip-step-connector" aria-hidden="true"></span>
+                <span class="strip-step" [class.active]="isStageActive('results')" [class.done]="isStageDone('results')" [class.step-clickable]="!isStageActive('results') && canAccessResults()" (click)="onStepClick('results')" [attr.role]="!isStageActive('results') && canAccessResults() ? 'button' : null" [attr.tabindex]="!isStageActive('results') && canAccessResults() ? 0 : null">3</span>
             </div>
             <span class="workflow-strip-title">{{ getCurrentStepTitle() }}</span>
         </div>
@@ -87,6 +89,11 @@
         </div>
 
         <div class="col-12 col-xl-10" *ngIf="canAccessExpenses() && isStageActive('expenses')">
+            <div class="step-back-row">
+                <button type="button" class="btn btn-link step-back-btn" (click)="setWorkflowStage('participants')">
+                    <i class="fas fa-arrow-left me-1" aria-hidden="true"></i>{{ t('backToParticipants') }}
+                </button>
+            </div>
             <div class="expense-form" [class.stage-focus]="isStageActive('expenses')" [class.editing-mode]="editingExpenseId !== null">
                 <!-- Editing Mode Banner -->
                 <div class="alert alert-info d-flex justify-content-between align-items-center mb-3 editing-banner" *ngIf="editingExpenseId !== null">
@@ -238,9 +245,6 @@
                     </div>
 
                     <div class="secondary-actions">
-                        <button type="button" class="btn btn-outline-light btn-sm-action" (click)="setWorkflowStage('participants')">
-                            <i class="fas fa-arrow-left me-1" aria-hidden="true"></i>{{ t('backToParticipants') }}
-                        </button>
                         <button type="button" class="btn btn-outline-danger btn-sm-action" (click)="clearAll()" [title]="t('clearAllTitle')">
                             <i class="fas fa-trash me-1" aria-hidden="true"></i>{{ t('clearAll') }}
                         </button>
@@ -251,11 +255,11 @@
     </div>
 
     <div class="row mt-4 justify-content-center" *ngIf="expenseItems.length > 0 && isStageActive('results')" [class.results-focus]="isStageActive('results')">
-        <div class="col-12 col-xl-10 d-flex justify-content-between align-items-center results-header">
-            <h4 class="section-title mb-0">{{ t('results') }}</h4>
-        </div>
         <div class="col-12 col-xl-10">
-            <div class="results-grid mt-3">
+            <h4 class="section-title mb-3">{{ t('results') }}</h4>
+
+            <!-- KPIs -->
+            <div class="results-grid mb-4">
                 <div class="result-kpi">
                     <span class="kpi-label">{{ t('totalExpense') }}</span>
                     <strong class="kpi-value">$ {{ totalExpense.toFixed(2) }}</strong>
@@ -266,111 +270,101 @@
                 </div>
             </div>
 
-            <div class="results-block-title mt-3" *ngIf="expenseItems.length > 0">
-                <span>{{ t('shareDetailTitle') }}</span>
-            </div>
-
-            <div class="table-responsive mt-2 payments-table desktop-table" *ngIf="expenseItems.length > 0">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th scope="col">{{ t('detail') }}</th>
-                            <th scope="col">{{ t('amount') }}</th>
-                            <th scope="col">{{ t('paidBy') }}</th>
-                            <th scope="col">{{ t('participantsColumn') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
-                            <td [attr.data-label]="t('detail')"><strong>{{ item.description }}</strong></td>
-                            <td [attr.data-label]="t('amount')">${{ item.amount.toFixed(2) }}</td>
-                            <td [attr.data-label]="t('paidBy')"><strong>{{ item.paidBy }}</strong></td>
-                            <td [attr.data-label]="t('participantsColumn')" class="expense-participants-text">{{ formatExpenseParticipants(item) }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="mobile-cards" *ngIf="expenseItems.length > 0">
-                <article class="mobile-record-card" *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
-                    <div class="mobile-row">
-                        <span class="mobile-label">{{ t('detail') }}</span>
-                        <strong class="mobile-value">{{ item.description }}</strong>
-                    </div>
-                    <div class="mobile-row">
-                        <span class="mobile-label">{{ t('amount') }}</span>
-                        <span class="mobile-value">${{ item.amount.toFixed(2) }}</span>
-                    </div>
-                    <div class="mobile-row">
-                        <span class="mobile-label">{{ t('paidBy') }}</span>
-                        <strong class="mobile-value">{{ item.paidBy }}</strong>
-                    </div>
-                    <div class="mobile-row">
-                        <span class="mobile-label">{{ t('participantsColumn') }}</span>
-                        <span class="mobile-value mobile-wrap">{{ formatExpenseParticipants(item) }}</span>
-                    </div>
-                </article>
-            </div>
-
-            <div class="results-block-title mt-3" *ngIf="results.length > 0">
+            <!-- Settlements hero -->
+            <div class="results-block-title mb-3">
                 <span>{{ t('shareTransfersTitle') }}</span>
             </div>
 
-            <div class="table-responsive mt-2 payments-table desktop-table" *ngIf="results.length > 0">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th scope="col" class="col-settlement">{{ t('description') }}</th>
-                            <th scope="col" class="col-payment">{{ t('paymentLabel') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let result of results; trackBy: trackByResult">
-                            <td class="settlement-text">
-                                <strong>{{ result.debtor }}</strong> {{ t('owesToInline') }} <strong>{{ result.creditor }}</strong>
-                            </td>
-                            <td class="payment-amount"><strong>${{ result.amount.toFixed(2) }}</strong></td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="settlement-cards" *ngIf="results.length > 0">
+                <div class="settlement-card" *ngFor="let result of results; trackBy: trackByResult">
+                    <div class="settlement-party debtor-party">
+                        <span class="party-avatar">{{ result.debtor[0] }}</span>
+                        <span class="party-name">{{ result.debtor }}</span>
+                    </div>
+                    <div class="settlement-middle">
+                        <span class="settlement-amount">$ {{ result.amount.toFixed(2) }}</span>
+                        <i class="fas fa-arrow-right settlement-arrow" aria-hidden="true"></i>
+                    </div>
+                    <div class="settlement-party creditor-party">
+                        <span class="party-avatar creditor-avatar">{{ result.creditor[0] }}</span>
+                        <span class="party-name">{{ result.creditor }}</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="mobile-cards" *ngIf="results.length > 0">
-                <article class="mobile-record-card mobile-transfer-card" *ngFor="let result of results; trackBy: trackByResult">
-                    <div class="mobile-row">
-                        <span class="mobile-label">{{ t('debtorLabel') }}</span>
-                        <strong class="mobile-value">{{ result.debtor }}</strong>
-                    </div>
-                    <div class="mobile-row">
-                        <span class="mobile-label">{{ t('creditorLabel') }}</span>
-                        <strong class="mobile-value">{{ result.creditor }}</strong>
-                    </div>
-                    <div class="mobile-row">
-                        <span class="mobile-label">{{ t('paymentLabel') }}</span>
-                        <strong class="mobile-value">${{ result.amount.toFixed(2) }}</strong>
-                    </div>
-                </article>
-            </div>
-
-            <div class="result-empty" *ngIf="results.length === 0 && expenseItems.length > 0">
+            <div class="result-empty" *ngIf="results.length === 0">
                 <strong>{{ t('allSettled') }}</strong>
             </div>
 
-            <div class="secondary-actions mt-3">
+            <!-- Share buttons — justo después de los resultados -->
+            <div class="results-share-primary mt-4">
+                <button type="button" class="btn btn-success btn-share-primary" (click)="shareWhatsApp()">
+                    <i class="fab fa-whatsapp me-2" aria-hidden="true"></i>{{ t('shareWhatsapp') }}
+                </button>
+                <button type="button" class="btn btn-outline-info btn-share-secondary" [class.copy-done]="isCopyLinkDone" (click)="copyShareLink()">
+                    <i class="fas me-2" [ngClass]="isCopyLinkDone ? 'fa-check' : 'fa-link'" aria-hidden="true"></i>{{ isCopyLinkDone ? t('copyDone') : t('copyLink') }}
+                </button>
+            </div>
+
+            <!-- Detalle de gastos colapsable -->
+            <div class="expense-detail-toggle mt-4">
+                <button type="button" class="btn btn-link btn-detail-toggle" (click)="toggleExpenseDetail()">
+                    <i class="fas me-1" [ngClass]="showExpenseDetail ? 'fa-chevron-up' : 'fa-chevron-down'" aria-hidden="true"></i>
+                    {{ showExpenseDetail ? t('hideExpenseDetail') : t('showExpenseDetail') }}
+                    ({{ expenseItems.length }})
+                </button>
+
+                <div *ngIf="showExpenseDetail">
+                    <div class="table-responsive compact-expenses desktop-table mt-2">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>{{ t('description') }}</th>
+                                    <th>{{ t('amount') }}</th>
+                                    <th>{{ t('paidBy') }}</th>
+                                    <th>{{ t('participantsColumn') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
+                                    <td><strong>{{ item.description }}</strong></td>
+                                    <td>${{ item.amount.toFixed(2) }}</td>
+                                    <td><strong>{{ item.paidBy }}</strong></td>
+                                    <td class="expense-participants-text">{{ formatExpenseParticipants(item) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mobile-cards mt-2">
+                        <article class="mobile-record-card" *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
+                            <div class="mobile-row">
+                                <span class="mobile-label">{{ t('description') }}</span>
+                                <strong class="mobile-value">{{ item.description }}</strong>
+                            </div>
+                            <div class="mobile-row">
+                                <span class="mobile-label">{{ t('amount') }}</span>
+                                <span class="mobile-value">${{ item.amount.toFixed(2) }}</span>
+                            </div>
+                            <div class="mobile-row">
+                                <span class="mobile-label">{{ t('paidBy') }}</span>
+                                <strong class="mobile-value">{{ item.paidBy }}</strong>
+                            </div>
+                            <div class="mobile-row">
+                                <span class="mobile-label">{{ t('participantsColumn') }}</span>
+                                <span class="mobile-value mobile-wrap">{{ formatExpenseParticipants(item) }}</span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navegación inferior -->
+            <div class="secondary-actions mt-4">
                 <button type="button" class="btn btn-outline-light btn-sm-action" (click)="setWorkflowStage('expenses')">
                     <i class="fas fa-arrow-left me-1" aria-hidden="true"></i>{{ t('backToExpenses') }}
                 </button>
                 <button type="button" class="btn btn-outline-danger btn-sm-action" (click)="clearAll()" [title]="t('clearAllTitle')">
                     <i class="fas fa-trash me-1" aria-hidden="true"></i>{{ t('clearAll') }}
-                </button>
-            </div>
-
-            <div class="secondary-actions mt-3 results-share-actions results-share-actions-bottom">
-                <button type="button" class="btn btn-outline-success btn-sm-action" (click)="shareWhatsApp()">
-                    <i class="fab fa-whatsapp" aria-hidden="true"></i> {{ t('shareWhatsapp') }}
-                </button>
-                <button type="button" class="btn btn-outline-info btn-sm-action btn-copy-summary" [class.copy-done]="isCopyLinkDone" (click)="copyShareLink()">
-                    <i class="fas" [ngClass]="isCopyLinkDone ? 'fa-check' : 'fa-link'" aria-hidden="true"></i> {{ isCopyLinkDone ? t('copyDone') : t('copyLink') }}
                 </button>
             </div>
         </div>

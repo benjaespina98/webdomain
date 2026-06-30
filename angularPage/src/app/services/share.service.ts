@@ -6,7 +6,7 @@ export interface ShareExpenseDto {
   d: string;
   a: number;
   b: string;
-  r: string[];
+  r?: string[];
 }
 
 export interface SharePayload {

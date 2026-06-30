@@ -47,11 +47,11 @@ describe('SplitComponent', () => {
     const openedUrl = (clickSpy.calls.mostRecent().object as HTMLAnchorElement).href;
     const message = decodeURIComponent(openedUrl.split('text=')[1]);
 
-    expect(message).toContain('🧾 dividimos?');
-    expect(message).toContain('Resumen de gastos');
-    expect(message).toContain('Total: $10450.00 entre 3 personas');
-    expect(message).toContain('Acreedor 1 → recibe $100.00 de Deudor 1');
-    expect(message).toContain('Acreedor 9 → recibe $108.00 de Deudor 9');
+    expect(message).toContain('🧾 *dividimos?*');
+    expect(message).toContain('👥 Pepe, Juan, Ana');
+    expect(message).toContain('💰 Total: $10450.00');
+    expect(message).toContain('Deudor 1 le paga *$100.00* a Acreedor 1');
+    expect(message).toContain('Deudor 9 le paga *$108.00* a Acreedor 9');
     expect(message).toContain('Calculado con dividimos?');
     expect(message).toContain('/share?data=');
   });

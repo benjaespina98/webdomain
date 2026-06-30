@@ -52,7 +52,7 @@ export class ShareComponent implements OnInit {
       description: item.d,
       amount: item.a,
       paidBy: item.b,
-      participants: item.r
+      participants: item.r ?? payload.p
     }));
 
     const nextExpenseId = expenseItems.reduce((max, item) => Math.max(max, item.id), 0) + 1;
