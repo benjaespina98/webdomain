@@ -56,7 +56,6 @@ interface TranslationMap {
   info: string;
   totalExpense: string;
   averagePerPerson: string;
-  owesToInline: string;
   allSettled: string;
   enterValidName: string;
   personAlreadyExists: string;
@@ -66,15 +65,8 @@ interface TranslationMap {
   selectWhoPaid: string;
   addParticipantsToSplit: string;
   shareTotal: string;
-  shareDetailTitle: string;
   shareTransfersTitle: string;
   shareAllSettled: string;
-  shareIntro: string;
-  shareSummaryTitle: string;
-  shareAmong: string;
-  shareReceives: string;
-  shareFromConnector: string;
-  shareOpenLinkPrompt: string;
   shareGeneratedWith: string;
   languageAria: string;
   clearSelectionTitle: string;
@@ -113,15 +105,17 @@ interface TranslationMap {
   viewResults: string;
   readyToCalculate: string;
   addExpenseToContinue: string;
-  debtorLabel: string;
-  creditorLabel: string;
-  paymentLabel: string;
   confirmAction: string;
   cancelAction: string;
   editingExpenseBanner: string;
   saveChangesButton: string;
   editExpense: string;
   expenseEdited: string;
+  sharePays: string;
+  shareTo: string;
+  sharePaymentsHeader: string;
+  showExpenseDetail: string;
+  hideExpenseDetail: string;
 }
 
 interface AppSnapshot {
@@ -186,7 +180,6 @@ export class SplitComponent implements OnInit {
       info: 'Información',
       totalExpense: 'Gasto Total:',
       averagePerPerson: 'Promedio por persona:',
-      owesToInline: 'le debe a',
       allSettled: '✅ Todo saldado. No hay pagos pendientes.',
       enterValidName: 'por favor, ingresá un nombre válido',
       personAlreadyExists: 'Esta persona ya está en la lista',
@@ -196,15 +189,8 @@ export class SplitComponent implements OnInit {
       selectWhoPaid: 'por favor, seleccioná quién pagó',
       addParticipantsToSplit: 'por favor, sumá personas para dividir el gasto',
       shareTotal: 'Total',
-      shareDetailTitle: 'Detalle de gastos',
       shareTransfersTitle: 'Pagos sugeridos',
       shareAllSettled: 'Todo saldado, no quedan pagos pendientes.',
-      shareIntro: 'Así quedaron repartidos los gastos del grupo:',
-      shareSummaryTitle: 'Resumen de gastos',
-      shareAmong: 'entre',
-      shareReceives: 'recibe',
-      shareFromConnector: 'de',
-      shareOpenLinkPrompt: 'Mirá el detalle completo acá →',
       shareGeneratedWith: 'Calculado con dividimos?',
       languageAria: 'cambiar idioma',
       clearSelectionTitle: 'Desmarcar todas las personas',
@@ -243,15 +229,17 @@ export class SplitComponent implements OnInit {
       viewResults: 'Calcular / Ver resultados',
       readyToCalculate: 'Ya podés calcular el resultado.',
       addExpenseToContinue: 'Cargá al menos un gasto para pasar al paso 3.',
-      debtorLabel: 'Debe',
-      creditorLabel: 'Recibe',
-      paymentLabel: 'Monto',
       confirmAction: 'Confirmar',
       cancelAction: 'Cancelar',
       editingExpenseBanner: 'Editando gasto',
       saveChangesButton: 'Guardar cambios',
       editExpense: 'Editar',
-      expenseEdited: 'Gasto modificado'
+      expenseEdited: 'Gasto modificado',
+      sharePays: 'le paga',
+      shareTo: 'a',
+      sharePaymentsHeader: 'Así queda:',
+      showExpenseDetail: 'Ver detalle de gastos',
+      hideExpenseDetail: 'Ocultar detalle'
     },
     en: {
       detail: 'Detail',
@@ -289,7 +277,6 @@ export class SplitComponent implements OnInit {
       info: 'Information',
       totalExpense: 'Total Expense:',
       averagePerPerson: 'Average per person:',
-      owesToInline: 'owes',
       allSettled: '✅ All settled. No pending payments.',
       enterValidName: 'Please enter a valid name',
       personAlreadyExists: 'This person is already in the list',
@@ -299,15 +286,8 @@ export class SplitComponent implements OnInit {
       selectWhoPaid: 'Please select who paid',
       addParticipantsToSplit: 'Please add participants to split the expense',
       shareTotal: 'Total',
-      shareDetailTitle: 'Expense details',
       shareTransfersTitle: 'Suggested payments',
       shareAllSettled: 'Everything is settled, no pending payments.',
-      shareIntro: "Here's how the group's expenses were split:",
-      shareSummaryTitle: 'Expense summary',
-      shareAmong: 'among',
-      shareReceives: 'receives',
-      shareFromConnector: 'from',
-      shareOpenLinkPrompt: 'See the full detail here →',
       shareGeneratedWith: 'Calculated with dividimos?',
       languageAria: 'Change language',
       clearSelectionTitle: 'Uncheck all people',
@@ -346,15 +326,17 @@ export class SplitComponent implements OnInit {
       viewResults: 'Calculate / View results',
       readyToCalculate: 'You can now calculate the result.',
       addExpenseToContinue: 'Add at least one expense to continue to step 3.',
-      debtorLabel: 'Pays',
-      creditorLabel: 'Receives',
-      paymentLabel: 'Amount',
       confirmAction: 'Confirm',
       cancelAction: 'Cancel',
       editingExpenseBanner: 'Editing expense',
       saveChangesButton: 'Save changes',
       editExpense: 'Edit',
-      expenseEdited: 'Expense updated'
+      expenseEdited: 'Expense updated',
+      sharePays: 'pays',
+      shareTo: 'to',
+      sharePaymentsHeader: 'Payments:',
+      showExpenseDetail: 'View expense detail',
+      hideExpenseDetail: 'Hide detail'
     }
   };
 
@@ -384,6 +366,7 @@ export class SplitComponent implements OnInit {
   hasUnlockedExpenses = false;
   editingExpenseId: number | null = null;
   pendingConfirm: { message: string; action: () => void } | null = null;
+  showExpenseDetail = false;
 
   constructor(
     private readonly persistenceService: PersistenceService,
@@ -615,6 +598,18 @@ export class SplitComponent implements OnInit {
     this.calculateAdvancedShares();
     this.setWorkflowStage('results');
     this.analyticsService.track('results_generated');
+  }
+
+  onStepClick(stage: 'participants' | 'expenses' | 'results'): void {
+    if (stage === this.workflowStage) {
+      return;
+    }
+    this.setWorkflowStage(stage);
+    this.persistCurrentState();
+  }
+
+  toggleExpenseDetail(): void {
+    this.showExpenseDetail = !this.showExpenseDetail;
   }
 
   isPayerIncludedInParticipants(): boolean {
@@ -1030,42 +1025,48 @@ export class SplitComponent implements OnInit {
 
   private buildShareMessage(): string {
     const appLink = this.getShareAppLink();
+    const peopleList = this.people.join(', ');
 
     const lines: string[] = [
-      '🧾 dividimos?',
+      '🧾 *dividimos?*',
       '',
-      this.t('shareIntro'),
-      '',
-      this.t('shareSummaryTitle'),
-      `${this.t('shareTotal')}: ${this.formatCurrency(this.totalExpense)} ${this.t('shareAmong')} ${this.people.length} ${this.t('participants').toLowerCase()}`,
+      `👥 ${peopleList}`,
+      `💰 ${this.t('shareTotal')}: ${this.formatCurrency(this.totalExpense)}`,
       ''
     ];
 
     if (this.results.length > 0) {
+      lines.push(`💸 *${this.t('sharePaymentsHeader')}*`);
       this.results.forEach((result) => {
-        lines.push(`${result.creditor} → ${this.t('shareReceives')} ${this.formatCurrency(result.amount)} ${this.t('shareFromConnector')} ${result.debtor}`);
+        lines.push(`• ${result.debtor} ${this.t('sharePays')} *${this.formatCurrency(result.amount)}* ${this.t('shareTo')} ${result.creditor}`);
       });
     } else {
-      lines.push(this.t('shareAllSettled'));
+      lines.push(`✅ *${this.t('shareAllSettled')}*`);
     }
 
     lines.push('');
-    lines.push(`${this.t('shareGeneratedWith')} ${this.t('shareOpenLinkPrompt')}`);
+    lines.push(`📲 ${this.t('shareGeneratedWith')}`);
     lines.push(appLink);
 
     return lines.join('\n');
   }
 
   private getShareAppLink(): string {
+    const allPeople = new Set(this.people);
     const payload: SharePayload = {
       p: this.people,
-      e: this.expenseItems.map((item) => ({
-        i: item.id,
-        d: item.description,
-        a: item.amount,
-        b: item.paidBy,
-        r: item.participants
-      })),
+      e: this.expenseItems.map((item) => {
+        const isAllPeople =
+          item.participants.length === this.people.length &&
+          item.participants.every((p) => allPeople.has(p));
+        return {
+          i: item.id,
+          d: item.description,
+          a: item.amount,
+          b: item.paidBy,
+          ...(isAllPeople ? {} : { r: item.participants })
+        };
+      }),
       l: this.currentLanguage
     };
 
