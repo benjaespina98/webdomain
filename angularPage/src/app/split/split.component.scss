@@ -259,6 +259,23 @@
     }
 }
 
+/* Brand logo link */
+.brand-home-link {
+    display: inline-flex;
+    align-items: center;
+    gap: inherit;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 0.5rem;
+    transition: opacity 0.18s ease;
+
+    &:hover {
+        opacity: 0.8;
+        text-decoration: none;
+        color: inherit;
+    }
+}
+
 /* Step connector */
 .workflow-strip-steps {
     display: flex;

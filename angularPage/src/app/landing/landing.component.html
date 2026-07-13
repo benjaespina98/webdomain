@@ -110,47 +110,6 @@
     </div>
   </section>
 
-  <!-- Benefits Section -->
-  <section class="section benefits-section">
-    <h2 class="section-title" *ngIf="currentLanguage === 'es'">¿Por qué usar dividimos?</h2>
-    <h2 class="section-title" *ngIf="currentLanguage === 'en'">Why use dividimos?</h2>
-    
-    <div class="grid-benefits">
-      <div class="benefit-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-bolt benefit-icon" aria-hidden="true"></i>
-        <h3>Instantáneo</h3>
-        <p>Entrás, cargás y resolvés. Sin crear cuentas, contraseñas ni verificar emails.</p>
-      </div>
-      <div class="benefit-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-bolt benefit-icon" aria-hidden="true"></i>
-        <h3>Instant Setup</h3>
-        <p>Open, enter, and solve. No signup, no passwords, and no email verification.</p>
-      </div>
-
-      <div class="benefit-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-wifi-slash benefit-icon" aria-hidden="true"></i>
-        <h3>Funciona Offline</h3>
-        <p>Pensado para viajes o salidas al aire libre donde la señal de internet suele fallar.</p>
-      </div>
-      <div class="benefit-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-wifi-slash benefit-icon" aria-hidden="true"></i>
-        <h3>Offline Support</h3>
-        <p>Perfect for trips or outdoor hangouts where internet connection is unreliable.</p>
-      </div>
-
-      <div class="benefit-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-lock benefit-icon" aria-hidden="true"></i>
-        <h3>Privado y Seguro</h3>
-        <p>Tus datos son tuyos y se quedan guardados localmente solo en tu navegador.</p>
-      </div>
-      <div class="benefit-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-lock benefit-icon" aria-hidden="true"></i>
-        <h3>Private & Secure</h3>
-        <p>Your data stays on your device. We do not store your private details on servers.</p>
-      </div>
-    </div>
-  </section>
-
   <!-- How It Works Section -->
   <section class="section workflow-section">
     <h2 class="section-title" *ngIf="currentLanguage === 'es'">Cómo funciona</h2>
@@ -191,88 +150,23 @@
     </div>
   </section>
 
-  <!-- Use Cases Section -->
-  <section class="section cases-section">
-    <h2 class="section-title" *ngIf="currentLanguage === 'es'">Casos de uso ideales</h2>
-    <h2 class="section-title" *ngIf="currentLanguage === 'en'">Ideal Use Cases</h2>
-    
-    <div class="grid-cases grid-cases-5">
-      <div class="case-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-fire-burner case-icon" aria-hidden="true"></i>
-        <h4>Asados y comidas</h4>
-        <p>Dividí la carne, las bebidas y todo lo que se compró entre los que estuvieron.</p>
-      </div>
-      <div class="case-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-fire-burner case-icon" aria-hidden="true"></i>
-        <h4>BBQs & meals</h4>
-        <p>Split the food, drinks, and everything bought among everyone who was there.</p>
-      </div>
-
-      <div class="case-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-champagne-glasses case-icon" aria-hidden="true"></i>
-        <h4>Salidas con amigos</h4>
-        <p>Bares, cenas o juntadas donde uno paga y después se acomodan las cuentas.</p>
-      </div>
-      <div class="case-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-champagne-glasses case-icon" aria-hidden="true"></i>
-        <h4>Nights out with friends</h4>
-        <p>Bars, dinners, or get-togethers where one pays and everyone settles up later.</p>
-      </div>
-
-      <div class="case-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-cake-candles case-icon" aria-hidden="true"></i>
-        <h4>Cumpleaños</h4>
-        <p>Organizá la torta, la decoración y el regalo grupal sin perder de vista quién puso qué.</p>
-      </div>
-      <div class="case-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-cake-candles case-icon" aria-hidden="true"></i>
-        <h4>Birthdays</h4>
-        <p>Sort out the cake, decorations, and group gift without losing track of who paid what.</p>
-      </div>
-
-      <div class="case-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-gift case-icon" aria-hidden="true"></i>
-        <h4>Regalos grupales</h4>
-        <p>Cuando varios amigos juntan plata para comprar un regalo y después hay que repartir cuánto puso cada uno.</p>
-      </div>
-      <div class="case-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-gift case-icon" aria-hidden="true"></i>
-        <h4>Group gifts</h4>
-        <p>When a group of friends chips in to buy a gift and then needs to split exactly how much each one owes.</p>
-      </div>
-
-      <div class="case-card reveal" *ngIf="currentLanguage === 'es'">
-        <i class="fas fa-plane case-icon" aria-hidden="true"></i>
-        <h4>Viajes de fin de semana</h4>
-        <p>No es para administrar meses de gastos: es para cerrar las cuentas de ese viaje puntual.</p>
-      </div>
-      <div class="case-card reveal" *ngIf="currentLanguage === 'en'">
-        <i class="fas fa-plane case-icon" aria-hidden="true"></i>
-        <h4>Weekend trips</h4>
-        <p>Not for managing months of expenses — just for closing the books on that one trip.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Why no account needed -->
+  <!-- Privacy pill -->
   <section class="section no-account-section">
-    <h2 class="section-title" *ngIf="currentLanguage === 'es'">¿Por qué no necesitás crear una cuenta?</h2>
-    <h2 class="section-title" *ngIf="currentLanguage === 'en'">Why don't you need to create an account?</h2>
-
     <div class="no-account-card reveal">
-      <ul class="what-is-list" *ngIf="currentLanguage === 'es'">
-        <li><i class="fas fa-desktop accent-icon" aria-hidden="true"></i>Mientras trabajás, todo se guarda localmente en tu navegador.</li>
-        <li><i class="fas fa-clock-rotate-left accent-icon" aria-hidden="true"></i>Si cerrás la página, podés volver más tarde y seguir donde lo dejaste.</li>
-        <li><i class="fas fa-link accent-icon" aria-hidden="true"></i>Cuando terminás, compartís un enlace que contiene toda la información necesaria para reconstruir el resultado en el navegador de otra persona.</li>
-        <li><i class="fas fa-shield-halved accent-icon" aria-hidden="true"></i>No depende de servidores externos: todo pasa en tu propio navegador, por eso es simple, rápida y privada.</li>
-      </ul>
-
-      <ul class="what-is-list" *ngIf="currentLanguage === 'en'">
-        <li><i class="fas fa-desktop accent-icon" aria-hidden="true"></i>While you're working, everything is saved locally in your browser.</li>
-        <li><i class="fas fa-clock-rotate-left accent-icon" aria-hidden="true"></i>If you close the page, you can come back later and pick up where you left off.</li>
-        <li><i class="fas fa-link accent-icon" aria-hidden="true"></i>When you're done, you share a link that contains everything needed to rebuild the result in someone else's browser.</li>
-        <li><i class="fas fa-shield-halved accent-icon" aria-hidden="true"></i>It doesn't rely on external servers: everything happens right in your browser, which keeps it simple, fast, and private.</li>
-      </ul>
+      <div class="no-account-inner" *ngIf="currentLanguage === 'es'">
+        <i class="fas fa-shield-halved no-account-icon" aria-hidden="true"></i>
+        <div>
+          <h3 class="no-account-title">Tus datos son tuyos</h3>
+          <p class="no-account-body">Todo se guarda en tu navegador — nada pasa por servidores. Si cerrás la página, podés volver y seguir donde lo dejaste. Al terminar, un solo link comparte el resultado con todos.</p>
+        </div>
+      </div>
+      <div class="no-account-inner" *ngIf="currentLanguage === 'en'">
+        <i class="fas fa-shield-halved no-account-icon" aria-hidden="true"></i>
+        <div>
+          <h3 class="no-account-title">Your data stays with you</h3>
+          <p class="no-account-body">Everything is saved in your browser — nothing goes through servers. Close the page and pick up where you left off. When done, one link shares the result with everyone.</p>
+        </div>
+      </div>
     </div>
   </section>
 

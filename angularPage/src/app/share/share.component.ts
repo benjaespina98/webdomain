@@ -35,9 +35,10 @@ export class ShareComponent implements OnInit {
 
   ngOnInit(): void {
     const data = this.route.snapshot.queryParamMap.get('data');
+    const version = parseInt(this.route.snapshot.queryParamMap.get('v') ?? '0', 10);
 
     if (data) {
-      const decoded = this.shareService.decodeState<SharePayload>(data);
+      const decoded = this.shareService.decodeState<SharePayload>(data, version);
       if (decoded) {
         this.persistenceService.saveState(this.toAppState(decoded));
       }
@@ -47,8 +48,8 @@ export class ShareComponent implements OnInit {
   }
 
   private toAppState(payload: SharePayload): Omit<AppState, 'schemaVersion'> {
-    const expenseItems = payload.e.map((item) => ({
-      id: item.i,
+    const expenseItems = payload.e.map((item, index) => ({
+      id: index + 1,
       description: item.d,
       amount: item.a,
       paidBy: item.b,
@@ -69,7 +70,7 @@ export class ShareComponent implements OnInit {
       nextExpenseId,
       workflowStage: 'results',
       hasUnlockedExpenses: true,
-      currentLanguage: payload.l
+      currentLanguage: this.isSpanish ? 'es' : 'en'
     };
   }
 }
