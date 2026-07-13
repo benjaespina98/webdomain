@@ -31,8 +31,10 @@
         <button type="button" class="language-btn" [class.active]="currentLanguage === 'en'" [attr.aria-pressed]="currentLanguage === 'en'" (click)="setLanguage('en')" [title]="t('languageEnglish')">EN</button>
     </div>
     <h1 class="display-4 brand-title">
-        <img class="brand-icon" src="assets/icons/icon-180x180.png" alt="dividimos? logo">
-        <span class="brand-name">dividimos?</span>
+        <a routerLink="/" class="brand-home-link" title="Volver al inicio">
+            <img class="brand-icon" src="assets/icons/icon-180x180.png" alt="dividimos? logo">
+            <span class="brand-name">dividimos?</span>
+        </a>
     </h1>
     <p class="page-subtitle text-center mb-4">{{ t('appSubtitle') }}</p>
 

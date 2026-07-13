@@ -1060,14 +1060,12 @@ export class SplitComponent implements OnInit {
           item.participants.length === this.people.length &&
           item.participants.every((p) => allPeople.has(p));
         return {
-          i: item.id,
           d: item.description,
           a: item.amount,
           b: item.paidBy,
           ...(isAllPeople ? {} : { r: item.participants })
         };
-      }),
-      l: this.currentLanguage
+      })
     };
 
     try {

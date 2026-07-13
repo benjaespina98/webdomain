@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import * as LZString from 'lz-string';
 
 export interface ShareExpenseDto {
-  i: number;
   d: string;
   a: number;
   b: string;
@@ -12,33 +11,28 @@ export interface ShareExpenseDto {
 export interface SharePayload {
   p: string[];
   e: ShareExpenseDto[];
-  l: 'es' | 'en';
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ShareService {
-  private readonly schemaVersion = 2;
+  private readonly schemaVersion = 3;
 
   encodeState(state: unknown): string {
-    const payload = JSON.stringify({ schemaVersion: this.schemaVersion, state });
-    return LZString.compressToEncodedURIComponent(payload);
+    return LZString.compressToEncodedURIComponent(JSON.stringify(state));
   }
 
-  decodeState<T>(encoded: string): T | null {
+  decodeState<T>(encoded: string, version: number): T | null {
+    if (version !== this.schemaVersion) {
+      return null;
+    }
     try {
       const json = LZString.decompressFromEncodedURIComponent(encoded);
       if (!json) {
         return null;
       }
-
-      const parsed = JSON.parse(json) as { schemaVersion: number; state: T };
-      if (!parsed || parsed.schemaVersion !== this.schemaVersion) {
-        return null;
-      }
-
-      return parsed.state;
+      return JSON.parse(json) as T;
     } catch {
       return null;
     }
@@ -46,6 +40,6 @@ export class ShareService {
 
   buildShareUrl(state: unknown): string {
     const encoded = this.encodeState(state);
-    return `${window.location.origin}/share?data=${encoded}`;
+    return `${window.location.origin}/share?data=${encoded}&v=${this.schemaVersion}`;
   }
 }
