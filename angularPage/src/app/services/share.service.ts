@@ -4,8 +4,8 @@ import * as LZString from 'lz-string';
 export interface ShareExpenseDto {
   d: string;
   a: number;
-  b: string;
-  r?: string[];
+  b: number;
+  r?: number[];
 }
 
 export interface SharePayload {
@@ -17,7 +17,7 @@ export interface SharePayload {
   providedIn: 'root'
 })
 export class ShareService {
-  private readonly schemaVersion = 3;
+  private readonly schemaVersion = 4;
 
   encodeState(state: unknown): string {
     return LZString.compressToEncodedURIComponent(JSON.stringify(state));

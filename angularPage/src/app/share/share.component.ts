@@ -52,8 +52,8 @@ export class ShareComponent implements OnInit {
       id: index + 1,
       description: item.d,
       amount: item.a,
-      paidBy: item.b,
-      participants: item.r ?? payload.p
+      paidBy: payload.p[item.b] ?? payload.p[0],
+      participants: item.r ? item.r.map((i) => payload.p[i]).filter(Boolean) : payload.p
     }));
 
     const nextExpenseId = expenseItems.reduce((max, item) => Math.max(max, item.id), 0) + 1;
