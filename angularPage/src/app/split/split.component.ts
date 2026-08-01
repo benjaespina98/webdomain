@@ -1052,18 +1052,18 @@ export class SplitComponent implements OnInit {
   }
 
   private getShareAppLink(): string {
-    const allPeople = new Set(this.people);
     const payload: SharePayload = {
       p: this.people,
       e: this.expenseItems.map((item) => {
         const isAllPeople =
           item.participants.length === this.people.length &&
-          item.participants.every((p) => allPeople.has(p));
+          item.participants.every((p) => this.people.includes(p));
+        const bIdx = Math.max(0, this.people.indexOf(item.paidBy));
         return {
           d: item.description,
           a: item.amount,
-          b: item.paidBy,
-          ...(isAllPeople ? {} : { r: item.participants })
+          b: bIdx,
+          ...(isAllPeople ? {} : { r: item.participants.map((p) => this.people.indexOf(p)).filter((i) => i >= 0) })
         };
       })
     };

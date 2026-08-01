@@ -298,26 +298,34 @@
                 <strong>{{ t('allSettled') }}</strong>
             </div>
 
-            <!-- Share buttons — justo después de los resultados -->
-            <div class="results-share-primary mt-4">
-                <button type="button" class="btn btn-success btn-share-primary" (click)="shareWhatsApp()">
-                    <i class="fab fa-whatsapp me-2" aria-hidden="true"></i>{{ t('shareWhatsapp') }}
-                </button>
-                <button type="button" class="btn btn-outline-info btn-share-secondary" [class.copy-done]="isCopyLinkDone" (click)="copyShareLink()">
-                    <i class="fas me-2" [ngClass]="isCopyLinkDone ? 'fa-check' : 'fa-link'" aria-hidden="true"></i>{{ isCopyLinkDone ? t('copyDone') : t('copyLink') }}
-                </button>
+            <!-- Share — icon circles con etiqueta -->
+            <div class="results-share-row mt-4">
+                <div class="share-icon-col">
+                    <button type="button" class="share-icon-btn share-btn-whatsapp" (click)="shareWhatsApp()" [attr.aria-label]="t('shareWhatsapp')" [title]="t('shareWhatsapp')">
+                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                    </button>
+                    <span class="share-icon-label">WhatsApp</span>
+                </div>
+                <div class="share-icon-col">
+                    <button type="button" class="share-icon-btn share-btn-copy" [class.copied]="isCopyLinkDone" (click)="copyShareLink()" [attr.aria-label]="isCopyLinkDone ? t('copyDone') : t('copyLink')" [title]="isCopyLinkDone ? t('copyDone') : t('copyLink')">
+                        <i class="fas" [ngClass]="isCopyLinkDone ? 'fa-check' : 'fa-copy'" aria-hidden="true"></i>
+                    </button>
+                    <span class="share-icon-label">{{ isCopyLinkDone ? t('copyDone') : t('copyLink') }}</span>
+                </div>
             </div>
 
-            <!-- Detalle de gastos colapsable -->
-            <div class="expense-detail-toggle mt-4">
-                <button type="button" class="btn btn-link btn-detail-toggle" (click)="toggleExpenseDetail()">
-                    <i class="fas me-1" [ngClass]="showExpenseDetail ? 'fa-chevron-up' : 'fa-chevron-down'" aria-hidden="true"></i>
-                    {{ showExpenseDetail ? t('hideExpenseDetail') : t('showExpenseDetail') }}
-                    ({{ expenseItems.length }})
+            <!-- Detalle de gastos — accordion -->
+            <div class="expense-detail-section mt-4">
+                <button type="button" class="expense-detail-header" (click)="toggleExpenseDetail()" [attr.aria-expanded]="showExpenseDetail">
+                    <div class="detail-header-content">
+                        <i class="fas fa-receipt me-2" aria-hidden="true"></i>
+                        <span>{{ t('showExpenseDetail') }} <span class="detail-count">({{ expenseItems.length }})</span></span>
+                    </div>
+                    <i class="fas detail-chevron" [ngClass]="showExpenseDetail ? 'fa-chevron-up' : 'fa-chevron-down'" aria-hidden="true"></i>
                 </button>
 
-                <div *ngIf="showExpenseDetail">
-                    <div class="table-responsive compact-expenses desktop-table mt-2">
+                <div class="expense-detail-body" *ngIf="showExpenseDetail">
+                    <div class="table-responsive compact-expenses desktop-table">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -337,7 +345,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="mobile-cards mt-2">
+                    <div class="mobile-cards">
                         <article class="mobile-record-card" *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
                             <div class="mobile-row">
                                 <span class="mobile-label">{{ t('description') }}</span>
@@ -360,12 +368,12 @@
                 </div>
             </div>
 
-            <!-- Navegación inferior -->
-            <div class="secondary-actions mt-4">
-                <button type="button" class="btn btn-outline-light btn-sm-action" (click)="setWorkflowStage('expenses')">
+            <!-- Navegación inferior — texto sutil -->
+            <div class="results-nav mt-4">
+                <button type="button" class="btn-results-back" (click)="setWorkflowStage('expenses')">
                     <i class="fas fa-arrow-left me-1" aria-hidden="true"></i>{{ t('backToExpenses') }}
                 </button>
-                <button type="button" class="btn btn-outline-danger btn-sm-action" (click)="clearAll()" [title]="t('clearAllTitle')">
+                <button type="button" class="btn-results-danger" (click)="clearAll()" [title]="t('clearAllTitle')">
                     <i class="fas fa-trash me-1" aria-hidden="true"></i>{{ t('clearAll') }}
                 </button>
             </div>
