@@ -228,10 +228,6 @@
         width: 104px;
     }
 
-    .results-share-primary {
-        flex-direction: column;
-    }
-
     .settlement-card {
         padding: 0.75rem 0.8rem;
         gap: 0.5rem;
@@ -250,12 +246,19 @@
 }
 
 @media (max-width: 460px) {
-    .results-grid {
-        grid-template-columns: 1fr;
-    }
-
     .stat-pill {
         flex: 1 1 100%;
+    }
+
+    .results-nav {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .btn-results-back,
+    .btn-results-danger {
+        width: 100%;
+        justify-content: center;
     }
 }
 
@@ -525,45 +528,50 @@
     padding: 0.6rem;
 }
 
-/* Results nav - texto sutil */
 .results-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 0.25rem;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
 }
 
 .btn-results-back {
-    background: none;
-    border: none;
-    color: #374151;
+    background: rgba(148, 163, 184, 0.07);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    color: #94a3b8;
     font-size: var(--font-sm);
     cursor: pointer;
-    padding: 0.3rem 0;
+    padding: 0.45rem 0.85rem;
+    border-radius: 0.55rem;
     display: flex;
     align-items: center;
-    gap: 0.28rem;
-    transition: color 0.15s;
+    gap: 0.35rem;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
 
     &:hover {
-        color: #6b7280;
+        background: rgba(139, 92, 246, 0.12);
+        border-color: rgba(139, 92, 246, 0.45);
+        color: #c4b5fd;
     }
 }
 
 .btn-results-danger {
-    background: none;
-    border: none;
-    color: #374151;
-    font-size: var(--font-xs);
+    background: rgba(239, 68, 68, 0.06);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #f87171;
+    font-size: var(--font-sm);
     cursor: pointer;
-    padding: 0.3rem 0;
+    padding: 0.45rem 0.85rem;
+    border-radius: 0.55rem;
     display: flex;
     align-items: center;
-    gap: 0.28rem;
-    transition: color 0.15s;
+    gap: 0.35rem;
+    transition: background 0.15s, border-color 0.15s;
 
     &:hover {
-        color: #f87171;
+        background: rgba(239, 68, 68, 0.15);
+        border-color: rgba(239, 68, 68, 0.5);
     }
 }
 
