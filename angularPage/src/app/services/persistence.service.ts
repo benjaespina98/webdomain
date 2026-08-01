@@ -14,6 +14,8 @@ export interface AppState {
   workflowStage: 'participants' | 'expenses' | 'results';
   hasUnlockedExpenses: boolean;
   currentLanguage: 'es' | 'en';
+  isSharedView: boolean;
+  savedAt?: number;
 }
 
 @Injectable({
@@ -29,7 +31,8 @@ export class PersistenceService {
     try {
       const fullState: AppState = {
         ...state,
-        schemaVersion: this.currentSchemaVersion
+        schemaVersion: this.currentSchemaVersion,
+        savedAt: Date.now()
       };
       localStorage.setItem(this.storageKey, JSON.stringify(fullState));
     } catch (error) {

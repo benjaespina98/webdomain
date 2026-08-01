@@ -16,6 +16,17 @@
         </div>
     </div>
 
+    <!-- Banner sesión vieja -->
+    <div class="stale-session-banner" *ngIf="showStaleSessionBanner" role="alert">
+        <span class="stale-session-text">
+            <i class="fas fa-clock me-2" aria-hidden="true"></i>{{ getStaleSessionText() }}
+        </span>
+        <div class="stale-session-actions">
+            <button type="button" class="btn-stale-continue" (click)="dismissStaleBanner()">{{ t('staleSessionContinue') }}</button>
+            <button type="button" class="btn-stale-discard" (click)="discardStaleSession()">{{ t('staleSessionDiscard') }}</button>
+        </div>
+    </div>
+
     <div class="ux-notice-slot" aria-live="polite">
         <div class="ux-notice" *ngIf="uiNotice" [class.notice-success]="uiNoticeType === 'success'" [class.notice-warning]="uiNoticeType === 'warning'" [class.notice-info]="uiNoticeType === 'info'">
             <span>{{ uiNotice }}</span>
@@ -258,6 +269,17 @@
 
     <div class="row mt-4 justify-content-center" *ngIf="expenseItems.length > 0 && isStageActive('results')" [class.results-focus]="isStageActive('results')">
         <div class="col-12 col-xl-10">
+
+            <!-- Banner solo lectura -->
+            <div class="shared-view-banner mb-4" *ngIf="isSharedView">
+                <span class="shared-view-banner-text">
+                    <i class="fas fa-eye me-2" aria-hidden="true"></i>{{ t('sharedViewBanner') }}
+                </span>
+                <button type="button" class="btn-import-edit" (click)="importAndEdit()">
+                    <i class="fas fa-pen me-1" aria-hidden="true"></i>{{ t('importAndEditBtn') }}
+                </button>
+            </div>
+
             <h4 class="section-title mb-3">{{ t('results') }}</h4>
 
             <!-- KPIs -->
@@ -321,10 +343,11 @@
                         <i class="fas fa-receipt me-2" aria-hidden="true"></i>
                         <span>{{ showExpenseDetail ? t('hideExpenseDetail') : t('showExpenseDetail') }} <span class="detail-count">({{ expenseItems.length }})</span></span>
                     </div>
-                    <i class="fas detail-chevron" [ngClass]="showExpenseDetail ? 'fa-chevron-up' : 'fa-chevron-down'" aria-hidden="true"></i>
+                    <i class="fas fa-chevron-down detail-chevron" [class.rotated]="showExpenseDetail" aria-hidden="true"></i>
                 </button>
 
-                <div class="expense-detail-body" *ngIf="showExpenseDetail">
+                <div class="expense-detail-body" [class.detail-open]="showExpenseDetail">
+                <div class="expense-detail-body-inner">
                     <div class="table-responsive compact-expenses desktop-table">
                         <table class="table table-striped">
                             <thead>
@@ -366,10 +389,11 @@
                         </article>
                     </div>
                 </div>
+                </div>
             </div>
 
             <!-- Navegación inferior -->
-            <div class="results-nav mt-3">
+            <div class="results-nav mt-3" *ngIf="!isSharedView">
                 <button type="button" class="btn-results-back" (click)="setWorkflowStage('expenses')">
                     <i class="fas fa-arrow-left me-1" aria-hidden="true"></i>{{ t('backToExpenses') }}
                 </button>
