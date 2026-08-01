@@ -52,7 +52,8 @@ describe('SplitComponent', () => {
     expect(message).toContain('💰 Total: $10450.00');
     expect(message).toContain('Deudor 1 le paga *$100.00* a Acreedor 1');
     expect(message).toContain('Deudor 9 le paga *$108.00* a Acreedor 9');
-    expect(message).toContain('Calculado con dividimos?');
+    expect(message).toContain('Hecho con dividimos? 🤙');
+    expect(message).toContain('Tocá el link para ver todos los gastos 👆');
     expect(message).toContain('/share?data=');
   });
 

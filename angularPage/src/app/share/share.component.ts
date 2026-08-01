@@ -70,7 +70,8 @@ export class ShareComponent implements OnInit {
       nextExpenseId,
       workflowStage: 'results',
       hasUnlockedExpenses: true,
-      currentLanguage: this.isSpanish ? 'es' : 'en'
+      currentLanguage: this.isSpanish ? 'es' : 'en',
+      isSharedView: true
     };
   }
 }

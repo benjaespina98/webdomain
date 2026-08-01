@@ -68,6 +68,7 @@ interface TranslationMap {
   shareTransfersTitle: string;
   shareAllSettled: string;
   shareGeneratedWith: string;
+  shareLinkHint: string;
   languageAria: string;
   clearSelectionTitle: string;
   splitAllTitle: string;
@@ -116,6 +117,11 @@ interface TranslationMap {
   sharePaymentsHeader: string;
   showExpenseDetail: string;
   hideExpenseDetail: string;
+  sharedViewBanner: string;
+  importAndEditBtn: string;
+  staleSessionBanner: string;
+  staleSessionContinue: string;
+  staleSessionDiscard: string;
 }
 
 interface AppSnapshot {
@@ -190,8 +196,9 @@ export class SplitComponent implements OnInit {
       addParticipantsToSplit: 'por favor, sumá personas para dividir el gasto',
       shareTotal: 'Total',
       shareTransfersTitle: 'Pagos sugeridos',
-      shareAllSettled: 'Todo saldado, no quedan pagos pendientes.',
-      shareGeneratedWith: 'Calculado con dividimos?',
+      shareAllSettled: 'Todo saldado 😎 no quedan cuentas pendientes.',
+      shareGeneratedWith: 'Hecho con dividimos? 🤙',
+      shareLinkHint: 'Tocá el link para ver todos los gastos 👆',
       languageAria: 'cambiar idioma',
       clearSelectionTitle: 'Desmarcar todas las personas',
       splitAllTitle: 'Si elegís Todos, el gasto se divide entre todas las personas cargadas',
@@ -237,9 +244,14 @@ export class SplitComponent implements OnInit {
       expenseEdited: 'Gasto modificado',
       sharePays: 'le paga',
       shareTo: 'a',
-      sharePaymentsHeader: 'Así queda:',
+      sharePaymentsHeader: 'quién le paga a quién 👇',
       showExpenseDetail: 'Ver detalle de gastos',
-      hideExpenseDetail: 'Ocultar detalle'
+      hideExpenseDetail: 'Ocultar detalle',
+      sharedViewBanner: 'Estás viendo una sesión compartida',
+      importAndEditBtn: 'Importar y editar',
+      staleSessionBanner: 'Tenés una sesión guardada de hace {{days}} días — ¿seguís con esa o arrancás de cero?',
+      staleSessionContinue: 'Continuar',
+      staleSessionDiscard: 'Empezar de nuevo'
     },
     en: {
       detail: 'Detail',
@@ -287,8 +299,9 @@ export class SplitComponent implements OnInit {
       addParticipantsToSplit: 'Please add participants to split the expense',
       shareTotal: 'Total',
       shareTransfersTitle: 'Suggested payments',
-      shareAllSettled: 'Everything is settled, no pending payments.',
-      shareGeneratedWith: 'Calculated with dividimos?',
+      shareAllSettled: 'All settled 😎 no pending payments.',
+      shareGeneratedWith: 'Made with dividimos? 🤙',
+      shareLinkHint: 'Tap the link to see all expenses 👆',
       languageAria: 'Change language',
       clearSelectionTitle: 'Uncheck all people',
       splitAllTitle: 'If you choose All, the expense is split across all loaded people',
@@ -334,9 +347,14 @@ export class SplitComponent implements OnInit {
       expenseEdited: 'Expense updated',
       sharePays: 'pays',
       shareTo: 'to',
-      sharePaymentsHeader: 'Payments:',
+      sharePaymentsHeader: 'who pays who 👇',
       showExpenseDetail: 'View expense detail',
-      hideExpenseDetail: 'Hide detail'
+      hideExpenseDetail: 'Hide detail',
+      sharedViewBanner: 'You\'re viewing a shared session',
+      importAndEditBtn: 'Import and edit',
+      staleSessionBanner: 'You have a session saved {{days}} days ago — continue or start fresh?',
+      staleSessionContinue: 'Continue',
+      staleSessionDiscard: 'Start fresh'
     }
   };
 
@@ -364,6 +382,9 @@ export class SplitComponent implements OnInit {
   nextExpenseId = 1;
   workflowStage: 'participants' | 'expenses' | 'results' = 'participants';
   hasUnlockedExpenses = false;
+  isSharedView = false;
+  showStaleSessionBanner = false;
+  staleSessionDays = 0;
   editingExpenseId: number | null = null;
   pendingConfirm: { message: string; action: () => void } | null = null;
   showExpenseDetail = false;
@@ -397,6 +418,15 @@ export class SplitComponent implements OnInit {
     this.nextExpenseId = saved.nextExpenseId;
     this.workflowStage = saved.workflowStage;
     this.hasUnlockedExpenses = saved.hasUnlockedExpenses;
+    this.isSharedView = saved.isSharedView ?? false;
+
+    if (saved.savedAt && !this.isSharedView) {
+      const days = Math.floor((Date.now() - saved.savedAt) / 86_400_000);
+      if (days >= 7) {
+        this.staleSessionDays = days;
+        this.showStaleSessionBanner = true;
+      }
+    }
 
     if (saved.currentLanguage === 'es' || saved.currentLanguage === 'en') {
       this.currentLanguage = saved.currentLanguage;
@@ -420,7 +450,8 @@ export class SplitComponent implements OnInit {
       nextExpenseId: this.nextExpenseId,
       workflowStage: this.workflowStage,
       hasUnlockedExpenses: this.hasUnlockedExpenses,
-      currentLanguage: this.currentLanguage
+      currentLanguage: this.currentLanguage,
+      isSharedView: this.isSharedView
     };
 
     this.persistenceService.saveState(state);
@@ -601,7 +632,7 @@ export class SplitComponent implements OnInit {
   }
 
   onStepClick(stage: 'participants' | 'expenses' | 'results'): void {
-    if (stage === this.workflowStage) {
+    if (stage === this.workflowStage || this.isSharedView) {
       return;
     }
     this.setWorkflowStage(stage);
@@ -919,6 +950,24 @@ export class SplitComponent implements OnInit {
     return this.expenseItems.length > 0 && this.hasUnlockedExpenses;
   }
 
+  importAndEdit(): void {
+    this.isSharedView = false;
+    this.persistCurrentState();
+  }
+
+  dismissStaleBanner(): void {
+    this.showStaleSessionBanner = false;
+  }
+
+  discardStaleSession(): void {
+    this.showStaleSessionBanner = false;
+    this.clearAll();
+  }
+
+  getStaleSessionText(): string {
+    return this.t('staleSessionBanner').replace('{{days}}', String(this.staleSessionDays));
+  }
+
   getCurrentStepTitle(): string {
     if (this.workflowStage === 'participants') {
       return this.t('workflowStepParticipants');
@@ -1046,6 +1095,7 @@ export class SplitComponent implements OnInit {
 
     lines.push('');
     lines.push(`📲 ${this.t('shareGeneratedWith')}`);
+    lines.push(this.t('shareLinkHint'));
     lines.push(appLink);
 
     return lines.join('\n');
