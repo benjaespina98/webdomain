@@ -1,38 +1,42 @@
 import { Injectable } from '@angular/core';
+import { ExpenseItem, SplitMode } from '../models/expense.model';
+import { LanguageCode } from './language.service';
 
 export interface AppState {
   schemaVersion: number;
   people: string[];
-  expenseItems: any[];
+  expenseItems: ExpenseItem[];
   newPersonName: string;
   newExpenseDescription: string;
   newExpenseAmount: number | null;
   newExpensePaidBy: string;
-  splitMode: 'all' | 'custom';
+  splitMode: SplitMode;
   selectedParticipants: string[];
   nextExpenseId: number;
-  workflowStage: 'participants' | 'expenses' | 'results';
-  hasUnlockedExpenses: boolean;
-  currentLanguage: 'es' | 'en';
+  currentLanguage: LanguageCode;
   isSharedView: boolean;
   savedAt?: number;
 }
+
+export type PersistableState = Omit<AppState, 'schemaVersion' | 'savedAt'>;
 
 @Injectable({
   providedIn: 'root'
 })
 export class PersistenceService {
   private readonly storageKey = 'dividimos_app_state';
-  private readonly currentSchemaVersion = 1;
+  private readonly currentSchemaVersion = 2;
 
-  constructor() {}
-
-  saveState(state: Omit<AppState, 'schemaVersion'>): void {
+  /**
+   * `savedAt` marca la última interacción real del usuario. Se puede preservar
+   * explícitamente para que restaurar una sesión no la vuelva a marcar como reciente.
+   */
+  saveState(state: PersistableState, savedAt: number = Date.now()): void {
     try {
       const fullState: AppState = {
         ...state,
         schemaVersion: this.currentSchemaVersion,
-        savedAt: Date.now()
+        savedAt
       };
       localStorage.setItem(this.storageKey, JSON.stringify(fullState));
     } catch (error) {
@@ -48,10 +52,8 @@ export class PersistenceService {
       }
 
       const parsed = JSON.parse(serialized) as AppState;
-      
-      // Validate schema version
-      if (!parsed || parsed.schemaVersion !== this.currentSchemaVersion) {
-        console.warn('Stale or invalid schema version detected. Clearing state.');
+
+      if (!parsed || parsed.schemaVersion !== this.currentSchemaVersion || !Array.isArray(parsed.people)) {
         this.clearState();
         return null;
       }
@@ -59,7 +61,6 @@ export class PersistenceService {
       return parsed;
     } catch (error) {
       console.error('Failed to read state from localStorage:', error);
-      // Clean up corrupt storage
       this.clearState();
       return null;
     }

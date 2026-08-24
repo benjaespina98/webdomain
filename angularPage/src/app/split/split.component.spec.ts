@@ -1,19 +1,28 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
+import { RouterTestingModule } from '@angular/router/testing';
 
 import { SplitComponent } from './split.component';
+import { LanguageService } from '../services/language.service';
+import { VoiceInputService } from '../services/voice-input.service';
 
 describe('SplitComponent', () => {
   let component: SplitComponent;
   let fixture: ComponentFixture<SplitComponent>;
+  let languageService: LanguageService;
 
   beforeEach(() => {
+    localStorage.clear();
+
     TestBed.configureTestingModule({
       declarations: [SplitComponent],
-      imports: [FormsModule]
+      imports: [FormsModule, RouterTestingModule]
     });
+
     fixture = TestBed.createComponent(SplitComponent);
     component = fixture.componentInstance;
+    languageService = TestBed.inject(LanguageService);
+    languageService.set('es');
     fixture.detectChanges();
   });
 
@@ -21,82 +30,50 @@ describe('SplitComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should generate a WhatsApp summary with totals and suggested transfers', () => {
-    component.currentLanguage = 'es';
+  it('should build a WhatsApp summary with totals and suggested transfers', () => {
     component.people = ['Pepe', 'Juan', 'Ana'];
-    component.expenseItems = Array.from({ length: 10 }, (_, index) => ({
-      id: index + 1,
-      description: `Gasto ${index + 1}`,
-      amount: 1000 + index * 10,
-      paidBy: index % 2 === 0 ? 'Pepe' : 'Juan',
-      participants: ['Pepe', 'Juan', 'Ana']
-    }));
-    component.totalExpense = component.expenseItems.reduce((sum, item) => sum + item.amount, 0);
-    component.averageSpent = component.totalExpense / component.people.length;
-    component.results = Array.from({ length: 9 }, (_, index) => ({
-      debtor: `Deudor ${index + 1}`,
-      creditor: `Acreedor ${index + 1}`,
-      amount: 100 + index
-    }));
+    component.expenseItems = [
+      { id: 1, description: 'Cena', amount: 3000, paidBy: 'Pepe', participants: ['Pepe', 'Juan', 'Ana'] }
+    ];
+    component.calculateShares();
 
-    const clickSpy = spyOn(HTMLAnchorElement.prototype, 'click');
-
+    const openSpy = spyOn(window, 'open');
     component.shareWhatsApp();
 
-    expect(clickSpy).toHaveBeenCalledTimes(1);
-    const openedUrl = (clickSpy.calls.mostRecent().object as HTMLAnchorElement).href;
-    const message = decodeURIComponent(openedUrl.split('text=')[1]);
+    expect(openSpy).toHaveBeenCalledTimes(1);
+    const message = decodeURIComponent((openSpy.calls.mostRecent().args[0] as string).split('text=')[1]);
 
     expect(message).toContain('🧾 *dividimos?*');
     expect(message).toContain('👥 Pepe, Juan, Ana');
-    expect(message).toContain('💰 Total: $10450.00');
-    expect(message).toContain('Deudor 1 le paga *$100.00* a Acreedor 1');
-    expect(message).toContain('Deudor 9 le paga *$108.00* a Acreedor 9');
+    expect(message).toContain('Total: $ 3.000,00');
+    expect(message).toContain('Juan le paga *$ 1.000,00* a Pepe');
     expect(message).toContain('Hecho con dividimos? 🤙');
-    expect(message).toContain('Tocá el link para ver todos los gastos 👆');
     expect(message).toContain('/share?data=');
   });
 
-  it('should copy a short share link to the clipboard', async () => {
-    component.currentLanguage = 'es';
-    component.people = ['juan', 'benja', 'lucho', 'ari'];
+  it('should copy a share link to the clipboard', async () => {
+    component.people = ['juan', 'benja'];
     component.expenseItems = [
-      {
-        id: 1,
-        description: 'Helado',
-        amount: 100,
-        paidBy: 'ari',
-        participants: ['benja', 'lucho']
-      }
+      { id: 1, description: 'Helado', amount: 100, paidBy: 'juan', participants: ['juan', 'benja'] }
     ];
-    component.calculateAdvancedShares();
+    component.calculateShares();
 
     const writeTextSpy = jasmine.createSpy('writeText').and.returnValue(Promise.resolve());
-    Object.defineProperty(navigator, 'clipboard', {
-      value: { writeText: writeTextSpy },
-      configurable: true
-    });
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText: writeTextSpy }, configurable: true });
 
     await component.copyShareLink();
 
     expect(writeTextSpy).toHaveBeenCalledTimes(1);
-    const copiedLink = writeTextSpy.calls.mostRecent().args[0] as string;
-    expect(copiedLink).toContain('/share?data=');
+    expect(writeTextSpy.calls.mostRecent().args[0] as string).toContain('/share?data=');
   });
 
-  it('should calculate transfers correctly when only some participants share an expense', () => {
+  it('should calculate transfers when only some participants share an expense', () => {
     component.people = ['juan', 'benja', 'lucho', 'ari'];
     component.expenseItems = [
-      {
-        id: 1,
-        description: 'Helado',
-        amount: 100,
-        paidBy: 'ari',
-        participants: ['benja', 'lucho']
-      }
+      { id: 1, description: 'Helado', amount: 100, paidBy: 'ari', participants: ['benja', 'lucho'] }
     ];
 
-    component.calculateAdvancedShares();
+    component.calculateShares();
 
     expect(component.totalExpense).toBe(100);
     expect(component.averageSpent).toBe(25);
@@ -105,23 +82,106 @@ describe('SplitComponent', () => {
     expect(component.results).toContain(jasmine.objectContaining({ debtor: 'lucho', creditor: 'ari', amount: 50 }));
   });
 
-  it('should distribute cents consistently when amount is not divisible equally', () => {
+  it('should distribute cents consistently when the amount is not evenly divisible', () => {
     component.people = ['Ana', 'Beto', 'Caro'];
     component.expenseItems = [
-      {
-        id: 1,
-        description: 'Taxi',
-        amount: 10,
-        paidBy: 'Ana',
-        participants: ['Ana', 'Beto', 'Caro']
-      }
+      { id: 1, description: 'Taxi', amount: 10, paidBy: 'Ana', participants: ['Ana', 'Beto', 'Caro'] }
     ];
 
-    component.calculateAdvancedShares();
+    component.calculateShares();
 
     expect(component.totalExpense).toBe(10);
     expect(component.results.length).toBe(2);
     expect(component.results).toContain(jasmine.objectContaining({ debtor: 'Beto', creditor: 'Ana', amount: 3.33 }));
     expect(component.results).toContain(jasmine.objectContaining({ debtor: 'Caro', creditor: 'Ana', amount: 3.33 }));
+  });
+
+  it('should keep shared expenses alive when a participant (not the payer) is removed', () => {
+    component.people = ['Ana', 'Beto', 'Caro'];
+    component.expenseItems = [
+      { id: 1, description: 'Cena', amount: 90, paidBy: 'Ana', participants: ['Ana', 'Beto', 'Caro'] }
+    ];
+    component.calculateShares();
+
+    component.removePerson('Caro');
+
+    expect(component.expenseItems.length).toBe(1);
+    expect(component.expenseItems[0].participants).toEqual(['Ana', 'Beto']);
+    expect(component.results).toContain(jasmine.objectContaining({ debtor: 'Beto', creditor: 'Ana', amount: 45 }));
+  });
+
+  it('should drop expenses paid by a removed person', () => {
+    component.people = ['Ana', 'Beto'];
+    component.expenseItems = [
+      { id: 1, description: 'Cena', amount: 90, paidBy: 'Ana', participants: ['Ana', 'Beto'] }
+    ];
+    component.calculateShares();
+
+    component.removePerson('Ana');
+
+    expect(component.expenseItems.length).toBe(0);
+    expect(component.results.length).toBe(0);
+  });
+
+  it('should restore the previous state when undoing a deletion', () => {
+    component.people = ['Ana', 'Beto'];
+    component.expenseItems = [
+      { id: 1, description: 'Cena', amount: 90, paidBy: 'Ana', participants: ['Ana', 'Beto'] }
+    ];
+    component.nextExpenseId = 2;
+    component.calculateShares();
+
+    component.removeExpenseItem(1);
+    expect(component.expenseItems.length).toBe(0);
+
+    component.undoLastAction();
+    expect(component.expenseItems.length).toBe(1);
+    expect(component.expenseItems[0].description).toBe('Cena');
+  });
+});
+
+describe('VoiceInputService.parseExpense', () => {
+  let service: VoiceInputService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(VoiceInputService);
+  });
+
+  it('should extract payer, amount and description from a Spanish phrase', () => {
+    const parsed = service.parseExpense('Ana pagó 12500 de cena', ['Ana', 'Bruno'], 'es');
+
+    expect(parsed.paidBy).toBe('Ana');
+    expect(parsed.amount).toBe(12500);
+    expect(parsed.description.toLowerCase()).toBe('cena');
+  });
+
+  it('should understand thousands spoken as "mil"', () => {
+    const parsed = service.parseExpense('nafta 8 mil pagó Luca', ['Luca'], 'es');
+
+    expect(parsed.amount).toBe(8000);
+    expect(parsed.paidBy).toBe('Luca');
+  });
+
+  it('should read the participants that follow "entre"', () => {
+    const parsed = service.parseExpense('pizza 4500 pagó Ana entre Bruno y Luca', ['Ana', 'Bruno', 'Luca'], 'es');
+
+    expect(parsed.amount).toBe(4500);
+    expect(parsed.participants).toEqual(['Ana', 'Bruno', 'Luca']);
+  });
+
+  it('should parse an English phrase', () => {
+    const parsed = service.parseExpense('Ana paid 120.50 for dinner', ['Ana', 'Bruno'], 'en');
+
+    expect(parsed.paidBy).toBe('Ana');
+    expect(parsed.amount).toBe(120.5);
+    expect(parsed.description.toLowerCase()).toBe('dinner');
+  });
+
+  it('should return nothing usable when there is no amount or description', () => {
+    const parsed = service.parseExpense('Ana', ['Ana'], 'es');
+
+    expect(parsed.amount).toBeNull();
+    expect(parsed.description).toBe('');
   });
 });

@@ -119,11 +119,6 @@ export class AppComponent implements OnDestroy {
   }
 
   private safeReload(): void {
-    if (this.isReloadingForUpdate) {
-      document.location.reload();
-      return;
-    }
-
     this.isReloadingForUpdate = true;
     document.location.reload();
   }
