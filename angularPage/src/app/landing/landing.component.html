@@ -16,7 +16,7 @@
       <h1 class="hero-title">Nunca más hagas cuentas después de un <span class="accent-text">asado, una cena o una salida</span></h1>
       <p class="hero-subtitle">dividimos? calcula automáticamente quién le debe a quién. Sin registrarte, sin descargar nada y en pocos segundos.</p>
       <div class="hero-ctas">
-        <a routerLink="/app" class="btn btn-cta-primary"><i class="fas fa-calculator me-2" aria-hidden="true"></i>Dividir gastos ahora</a>
+        <a routerLink="/app" class="btn-cta-primary"><i class="fas fa-calculator" aria-hidden="true"></i>Dividir gastos ahora</a>
       </div>
     </div>
 
@@ -24,7 +24,7 @@
       <h1 class="hero-title">Stop doing the math after a <span class="accent-text">BBQ, dinner, or night out</span></h1>
       <p class="hero-subtitle">dividimos? automatically calculates who owes who. No sign-up, nothing to download, and it takes seconds.</p>
       <div class="hero-ctas">
-        <a routerLink="/app" class="btn btn-cta-primary"><i class="fas fa-calculator me-2" aria-hidden="true"></i>Split expenses now</a>
+        <a routerLink="/app" class="btn-cta-primary"><i class="fas fa-calculator" aria-hidden="true"></i>Split expenses now</a>
       </div>
     </div>
   </header>
@@ -40,6 +40,7 @@
         <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>No necesitás crear una cuenta ni registrarte con un email.</li>
         <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>No guardamos tu información en ningún servidor.</li>
         <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Funciona completamente en tu navegador, incluso sin conexión.</li>
+        <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Podés dictar un gasto por voz: «Ana pagó 12500 de cena».</li>
         <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Al terminar, compartís el resultado con un único enlace por WhatsApp.</li>
       </ul>
 
@@ -48,6 +49,7 @@
         <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>No account or email sign-up required.</li>
         <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>We don't store your information on any server.</li>
         <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Runs entirely in your browser, even offline.</li>
+        <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>You can dictate an expense out loud: "Ana paid 120 for dinner".</li>
         <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>When you're done, share the result with a single WhatsApp link.</li>
       </ul>
     </div>
@@ -64,18 +66,20 @@
         <span class="preview-mockup-url">dividimos.vercel.app/app</span>
       </div>
       <div class="preview-mockup-body">
-        <div class="preview-strip">
-          <span class="preview-step done">1</span>
-          <span class="preview-step done">2</span>
-          <span class="preview-step active">3</span>
-          <span class="preview-strip-title" *ngIf="currentLanguage === 'es'">Resultados</span>
-          <span class="preview-strip-title" *ngIf="currentLanguage === 'en'">Results</span>
-        </div>
-
         <div class="preview-chips">
           <span class="preview-chip">Ana</span>
           <span class="preview-chip">Bruno</span>
           <span class="preview-chip">Luca</span>
+          <span class="preview-chip preview-chip-add"><i class="fas fa-plus" aria-hidden="true"></i></span>
+        </div>
+
+        <div class="preview-form">
+          <span class="preview-input">Cena</span>
+          <span class="preview-mic"><i class="fas fa-microphone" aria-hidden="true"></i></span>
+        </div>
+        <div class="preview-form">
+          <span class="preview-input preview-input-sm">$ 326,00</span>
+          <span class="preview-input preview-input-sm">Ana</span>
         </div>
 
         <div class="preview-kpis">
@@ -91,19 +95,17 @@
           </div>
         </div>
 
-        <div class="preview-row preview-row-header">
-          <span *ngIf="currentLanguage === 'es'">Transferencia sugerida</span>
-          <span *ngIf="currentLanguage === 'en'">Suggested transfer</span>
-        </div>
         <div class="preview-settlement">
-          <span *ngIf="currentLanguage === 'es'"><strong>Bruno</strong> le debe a <strong>Ana</strong></span>
-          <span *ngIf="currentLanguage === 'en'"><strong>Bruno</strong> owes <strong>Ana</strong></span>
-          <strong class="preview-settlement-amount">$ 108,00</strong>
+          <span class="preview-avatar preview-avatar-debtor">B</span>
+          <span class="preview-settlement-name">Bruno</span>
+          <strong class="preview-settlement-amount">$ 108,67 <i class="fas fa-arrow-right" aria-hidden="true"></i></strong>
+          <span class="preview-settlement-name">Ana</span>
+          <span class="preview-avatar preview-avatar-creditor">A</span>
         </div>
 
         <div class="preview-share-actions">
-          <span class="preview-share-btn preview-share-whatsapp"><i class="fab fa-whatsapp me-1" aria-hidden="true"></i><span *ngIf="currentLanguage === 'es'">Compartir por WhatsApp</span><span *ngIf="currentLanguage === 'en'">Share on WhatsApp</span></span>
-          <span class="preview-share-btn"><i class="fas fa-link me-1" aria-hidden="true"></i><span *ngIf="currentLanguage === 'es'">Copiar enlace</span><span *ngIf="currentLanguage === 'en'">Copy link</span></span>
+          <span class="preview-share-btn preview-share-whatsapp"><i class="fab fa-whatsapp" aria-hidden="true"></i><span *ngIf="currentLanguage === 'es'">Compartir por WhatsApp</span><span *ngIf="currentLanguage === 'en'">Share on WhatsApp</span></span>
+          <span class="preview-share-btn"><i class="fas fa-link" aria-hidden="true"></i><span *ngIf="currentLanguage === 'es'">Copiar enlace</span><span *ngIf="currentLanguage === 'en'">Copy link</span></span>
         </div>
       </div>
     </div>
@@ -174,16 +176,16 @@
   <section class="final-cta-section reveal">
     <div *ngIf="currentLanguage === 'es'">
       <h2>¿Listo para saber quién le debe a quién?</h2>
-      <a routerLink="/app" class="btn btn-cta-primary mt-3"><i class="fas fa-check-circle me-2" aria-hidden="true"></i>Empezar gratis</a>
+      <a routerLink="/app" class="btn-cta-primary cta-spaced"><i class="fas fa-check-circle" aria-hidden="true"></i>Empezar gratis</a>
     </div>
     <div *ngIf="currentLanguage === 'en'">
       <h2>Ready to find out who owes who?</h2>
-      <a routerLink="/app" class="btn btn-cta-primary mt-3"><i class="fas fa-check-circle me-2" aria-hidden="true"></i>Start for free</a>
+      <a routerLink="/app" class="btn-cta-primary cta-spaced"><i class="fas fa-check-circle" aria-hidden="true"></i>Start for free</a>
     </div>
   </section>
 
   <!-- Footer -->
   <footer class="landing-footer">
-    <p>&copy; 2026 dividimos?. <span *ngIf="currentLanguage === 'es'">Hecho con 💜 para el mundo.</span><span *ngIf="currentLanguage === 'en'">Built with 💜 for the world.</span></p>
+    <p>&copy; {{ currentYear }} dividimos?. <span *ngIf="currentLanguage === 'es'">Hecho con 💜 para el mundo.</span><span *ngIf="currentLanguage === 'en'">Built with 💜 for the world.</span></p>
   </footer>
 </div>

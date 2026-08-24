@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy } from '@angular/core';
+import { LanguageService, LanguageCode } from '../services/language.service';
 
 @Component({
   selector: 'app-landing',
@@ -6,24 +7,20 @@ import { AfterViewInit, Component, ElementRef, OnDestroy } from '@angular/core';
   styleUrls: ['./landing.component.scss']
 })
 export class LandingComponent implements AfterViewInit, OnDestroy {
-  currentLanguage: 'es' | 'en' = 'es';
+  readonly currentYear = new Date().getFullYear();
   private revealObserver: IntersectionObserver | null = null;
 
-  constructor(private readonly elementRef: ElementRef<HTMLElement>) {
-    // Detect language preference
-    const saved = localStorage.getItem('split-language');
-    if (saved === 'es' || saved === 'en') {
-      this.currentLanguage = saved;
-    } else {
-      const browserLanguage = (navigator.languages?.[0] ?? navigator.language ?? 'es').toLowerCase();
-      this.currentLanguage = browserLanguage.startsWith('es') ? 'es' : 'en';
-    }
+  constructor(
+    private readonly elementRef: ElementRef<HTMLElement>,
+    private readonly languageService: LanguageService
+  ) {}
+
+  get currentLanguage(): LanguageCode {
+    return this.languageService.current;
   }
 
-  setLanguage(lang: 'es' | 'en'): void {
-    this.currentLanguage = lang;
-    localStorage.setItem('split-language', lang);
-    document.documentElement.setAttribute('lang', lang);
+  setLanguage(lang: LanguageCode): void {
+    this.languageService.set(lang);
   }
 
   ngAfterViewInit(): void {

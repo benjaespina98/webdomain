@@ -1,76 +1,90 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ShareService, SharePayload } from '../services/share.service';
-import { PersistenceService, AppState } from '../services/persistence.service';
+import { PersistenceService, PersistableState } from '../services/persistence.service';
+import { LanguageService } from '../services/language.service';
 
 @Component({
   selector: 'app-share',
   template: `
-    <div class="d-flex flex-column align-items-center justify-content-center" role="status" aria-live="polite" style="min-height: 100vh; background-color: #020617; color: #cbd5e1;">
-      <div class="text-center">
-        <i class="fas fa-circle-notch fa-spin fa-3x text-primary mb-3" aria-hidden="true" style="color: #8b5cf6 !important;"></i>
-        <p class="fs-5 fw-semibold mb-1">{{ isSpanish ? 'Cargando enlace compartido...' : 'Loading shared link...' }}</p>
-        <p class="text-muted small">{{ isSpanish ? 'Restaurando participantes, gastos y saldos...' : 'Restoring participants, expenses, and balances...' }}</p>
-      </div>
+    <div class="share-loader" role="status" aria-live="polite">
+      <i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i>
+      <p class="share-loader-title">{{ isSpanish ? 'Abriendo la división compartida…' : 'Opening the shared split…' }}</p>
     </div>
-  `
+  `,
+  styles: [`
+    .share-loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      min-height: 70vh;
+      color: var(--text-muted, #94a3b8);
+    }
+
+    .share-loader i {
+      font-size: 2.4rem;
+      color: var(--accent, #8b5cf6);
+    }
+
+    .share-loader-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text, #e2e8f0);
+    }
+  `]
 })
 export class ShareComponent implements OnInit {
-  isSpanish = true;
+  readonly isSpanish: boolean;
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly shareService: ShareService,
-    private readonly persistenceService: PersistenceService
+    private readonly persistenceService: PersistenceService,
+    private readonly languageService: LanguageService
   ) {
-    const saved = localStorage.getItem('split-language');
-    if (saved === 'es' || saved === 'en') {
-      this.isSpanish = saved === 'es';
-    } else {
-      const browserLanguage = (navigator.languages?.[0] ?? navigator.language ?? 'es').toLowerCase();
-      this.isSpanish = browserLanguage.startsWith('es');
-    }
+    this.isSpanish = this.languageService.isSpanish;
   }
 
   ngOnInit(): void {
     const data = this.route.snapshot.queryParamMap.get('data');
-    const version = parseInt(this.route.snapshot.queryParamMap.get('v') ?? '0', 10);
+    const version = Number.parseInt(this.route.snapshot.queryParamMap.get('v') ?? '0', 10);
+    const decoded = data ? this.shareService.decodeState<SharePayload>(data, version) : null;
 
-    if (data) {
-      const decoded = this.shareService.decodeState<SharePayload>(data, version);
-      if (decoded) {
-        this.persistenceService.saveState(this.toAppState(decoded));
-      }
+    if (decoded?.p?.length) {
+      this.persistenceService.saveState(this.toAppState(decoded));
+      void this.router.navigate(['/app']);
+      return;
     }
 
-    this.router.navigate(['/app']);
+    // Enlace inválido o de una versión vieja: no pisamos la sesión local del usuario.
+    void this.router.navigate(['/app'], { queryParams: { shareError: 1 } });
   }
 
-  private toAppState(payload: SharePayload): Omit<AppState, 'schemaVersion'> {
-    const expenseItems = payload.e.map((item, index) => ({
+  private toAppState(payload: SharePayload): PersistableState {
+    const people = payload.p;
+    const expenseItems = (payload.e ?? []).map((item, index) => ({
       id: index + 1,
       description: item.d,
       amount: item.a,
-      paidBy: payload.p[item.b] ?? payload.p[0],
-      participants: item.r ? item.r.map((i) => payload.p[i]).filter(Boolean) : payload.p
+      paidBy: people[item.b] ?? people[0],
+      participants: item.r ? item.r.map((i) => people[i]).filter(Boolean) : [...people]
     }));
 
-    const nextExpenseId = expenseItems.reduce((max, item) => Math.max(max, item.id), 0) + 1;
-
     return {
-      people: payload.p,
+      people,
       expenseItems,
       newPersonName: '',
       newExpenseDescription: '',
       newExpenseAmount: null,
       newExpensePaidBy: '',
       splitMode: 'all',
-      selectedParticipants: payload.p,
-      nextExpenseId,
-      workflowStage: 'results',
-      hasUnlockedExpenses: true,
-      currentLanguage: this.isSpanish ? 'es' : 'en',
+      selectedParticipants: [...people],
+      nextExpenseId: expenseItems.length + 1,
+      currentLanguage: this.languageService.current,
       isSharedView: true
     };
   }

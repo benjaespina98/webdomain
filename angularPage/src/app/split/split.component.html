@@ -1,406 +1,260 @@
-<div class="container-fluid advanced-mode">
-    <!-- Custom Modal/Confirm Dialog -->
-    <div class="confirm-modal-overlay" *ngIf="pendingConfirm" role="dialog" aria-modal="true" [attr.aria-label]="pendingConfirm.message">
-        <div class="confirm-modal-card">
-            <div class="confirm-modal-header">
-                <i class="fas fa-exclamation-triangle confirm-warn-icon" aria-hidden="true"></i>
-                <h5 class="confirm-modal-title">{{ t('info') }}</h5>
-            </div>
-            <div class="confirm-modal-body">
-                <p class="mb-0">{{ pendingConfirm.message }}</p>
-            </div>
-            <div class="confirm-modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="cancelConfirm()">{{ t('cancelAction') }}</button>
-                <button type="button" class="btn btn-danger" (click)="acceptConfirm()">{{ t('confirmAction') }}</button>
-            </div>
-        </div>
+<div class="app-shell">
+
+  <!-- ── Header ─────────────────────────────────────────────────────── -->
+  <header class="app-header">
+    <a routerLink="/" class="brand" [attr.aria-label]="t('homeAria')">
+      <img class="brand-icon" src="assets/icons/icon-180x180.png" alt="" width="36" height="36">
+      <span class="brand-name">dividimos?</span>
+    </a>
+
+    <div class="header-actions">
+      <button type="button" class="icon-btn danger-ghost" *ngIf="hasData && !isSharedView"
+              (click)="clearAll()" [title]="t('clearAll')" [attr.aria-label]="t('clearAll')">
+        <i class="fas fa-trash-can" aria-hidden="true"></i>
+      </button>
+      <div class="lang-switch" role="group" [attr.aria-label]="t('languageAria')">
+        <button type="button" class="lang-btn" [class.active]="currentLanguage === 'es'"
+                [attr.aria-pressed]="currentLanguage === 'es'" (click)="setLanguage('es')">ES</button>
+        <button type="button" class="lang-btn" [class.active]="currentLanguage === 'en'"
+                [attr.aria-pressed]="currentLanguage === 'en'" (click)="setLanguage('en')">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Banners ────────────────────────────────────────────────────── -->
+  <div class="banner banner-shared" *ngIf="isSharedView">
+    <span><i class="fas fa-eye" aria-hidden="true"></i>{{ t('sharedViewBanner') }}</span>
+    <button type="button" class="banner-btn accent" (click)="importAndEdit()">{{ t('importAndEdit') }}</button>
+  </div>
+
+  <div class="banner banner-stale" *ngIf="showStaleSessionBanner" role="alert">
+    <span><i class="fas fa-clock-rotate-left" aria-hidden="true"></i>{{ getStaleSessionText() }}</span>
+    <span class="banner-actions">
+      <button type="button" class="banner-btn" (click)="dismissStaleBanner()">{{ t('staleSessionContinue') }}</button>
+      <button type="button" class="banner-btn warn" (click)="discardStaleSession()">{{ t('staleSessionDiscard') }}</button>
+    </span>
+  </div>
+
+  <!-- ── 1. Personas ────────────────────────────────────────────────── -->
+  <section class="card people-card" [class.is-empty]="people.length === 0">
+    <div class="card-head">
+      <h2 class="card-title">{{ t('peopleTitle') }}</h2>
+      <span class="count-badge" *ngIf="people.length > 0">{{ people.length }}</span>
     </div>
 
-    <!-- Banner sesión vieja -->
-    <div class="stale-session-banner" *ngIf="showStaleSessionBanner" role="alert">
-        <span class="stale-session-text">
-            <i class="fas fa-clock me-2" aria-hidden="true"></i>{{ getStaleSessionText() }}
+    <div class="people-row" *ngIf="people.length > 0">
+      <span class="person-chip" *ngFor="let person of people; trackBy: trackByPerson">
+        <span class="person-chip-name">{{ person }}</span>
+        <button type="button" class="person-chip-remove" *ngIf="!isSharedView" (click)="removePerson(person)"
+                [attr.aria-label]="t('removePerson') + ' ' + person" [title]="t('removePerson')">
+          <i class="fas fa-xmark" aria-hidden="true"></i>
+        </button>
+      </span>
+    </div>
+
+    <form class="person-add" (ngSubmit)="addPerson()" *ngIf="!isSharedView">
+      <input #newPersonInput type="text" class="input person-input" [(ngModel)]="newPersonName" name="newPersonName"
+             [placeholder]="t('personPlaceholder')" [attr.aria-label]="t('addPerson')"
+             autocomplete="off" autocapitalize="words" maxlength="24">
+      <button type="submit" class="person-add-btn" [title]="t('addPerson')">
+        <i class="fas fa-plus" aria-hidden="true"></i>
+        <span>{{ t('addButton') }}</span>
+      </button>
+    </form>
+
+    <p class="empty-line" *ngIf="people.length === 0">{{ t('emptyPeople') }}</p>
+  </section>
+
+  <!-- ── 2. Nuevo gasto ─────────────────────────────────────────────── -->
+  <section class="card expense-card" *ngIf="people.length > 0 && !isSharedView"
+           [class.is-editing]="editingExpenseId !== null">
+
+    <div class="card-head">
+      <h2 class="card-title">{{ editingExpenseId !== null ? t('editingExpense') : t('expenseTitle') }}</h2>
+      <button type="button" class="link-btn" *ngIf="editingExpenseId !== null" (click)="cancelExpenseEdit()">
+        {{ t('cancel') }}
+      </button>
+    </div>
+
+    <form (ngSubmit)="addExpenseItem()">
+      <div class="expense-grid">
+        <div class="field field-description">
+          <input #expenseDescriptionInput type="text" class="input" [(ngModel)]="newExpenseDescription"
+                 name="expenseDescription" [placeholder]="t('expensePlaceholder')"
+                 [attr.aria-label]="t('expenseTitle')" autocomplete="off" maxlength="60">
+          <button type="button" class="mic-btn" *ngIf="isVoiceSupported" [class.listening]="isListening"
+                  (click)="toggleVoiceInput()" [title]="isListening ? t('voiceListening') : t('voiceStart')"
+                  [attr.aria-label]="isListening ? t('voiceListening') : t('voiceStart')"
+                  [attr.aria-pressed]="isListening">
+            <i class="fas" [ngClass]="isListening ? 'fa-stop' : 'fa-microphone'" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="field field-amount">
+          <span class="input-prefix" aria-hidden="true">$</span>
+          <input type="number" class="input has-prefix" [(ngModel)]="newExpenseAmount" name="expenseAmount"
+                 [placeholder]="t('amountPlaceholder')" [attr.aria-label]="t('amountPlaceholder')"
+                 step="0.01" min="0" inputmode="decimal">
+        </div>
+
+        <div class="field field-payer">
+          <select class="input select" [(ngModel)]="newExpensePaidBy" (ngModelChange)="onPaidByChange()"
+                  name="expensePaidBy" [attr.aria-label]="t('paidBy')">
+            <option value="">{{ t('selectPlaceholder') }}</option>
+            <option *ngFor="let person of people; trackBy: trackByPerson" [value]="person">{{ person }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="voice-live" *ngIf="isListening" aria-live="polite">
+        <span class="voice-pulse" aria-hidden="true"></span>
+        <span class="voice-text">{{ voiceTranscript || t('voiceHint') }}</span>
+      </div>
+
+      <div class="split-row">
+        <span class="split-label">{{ t('splitBetween') }}</span>
+        <div class="segmented" role="group" [attr.aria-label]="t('splitBetween')">
+          <button type="button" class="segment" [class.active]="splitMode === 'all'"
+                  [attr.aria-pressed]="splitMode === 'all'" (click)="setSplitMode('all')">{{ t('splitModeAll') }}</button>
+          <button type="button" class="segment" [class.active]="splitMode === 'custom'"
+                  [attr.aria-pressed]="splitMode === 'custom'" (click)="setSplitMode('custom')">{{ t('splitModeCustom') }}</button>
+        </div>
+      </div>
+
+      <div class="picker" *ngIf="splitMode === 'custom'">
+        <div class="picker-grid">
+          <button type="button" class="picker-chip" *ngFor="let person of people; trackBy: trackByPerson"
+                  [class.selected]="isParticipantSelected(person)" [attr.aria-pressed]="isParticipantSelected(person)"
+                  (click)="toggleParticipant(person)">
+            <i class="fas fa-check picker-check" aria-hidden="true"></i>
+            <span class="picker-name">{{ person }}</span>
+          </button>
+        </div>
+        <div class="picker-actions">
+          <button type="button" class="link-btn" (click)="selectAllAndPersist()">{{ t('selectAll') }}</button>
+          <button type="button" class="link-btn" (click)="deselectAllParticipants()">{{ t('selectNone') }}</button>
+        </div>
+        <p class="warn-line" *ngIf="!isPayerIncludedInParticipants()">
+          <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+          {{ newExpensePaidBy }} {{ t('payerNotIncluded') }}
+        </p>
+      </div>
+
+      <button type="submit" class="btn-primary btn-block" [class.incomplete]="!canSubmitExpense()">
+        <i class="fas" [ngClass]="editingExpenseId !== null ? 'fa-check' : 'fa-plus'" aria-hidden="true"></i>
+        {{ editingExpenseId !== null ? t('saveChanges') : t('addExpense') }}
+      </button>
+    </form>
+  </section>
+
+  <!-- ── 3. Lista de gastos ─────────────────────────────────────────── -->
+  <section class="card list-card" *ngIf="people.length > 0 || expenseItems.length > 0">
+    <div class="card-head">
+      <h2 class="card-title">{{ t('expensesTitle') }}</h2>
+      <span class="count-badge" *ngIf="expenseItems.length > 0">{{ expenseItems.length }}</span>
+    </div>
+
+    <p class="empty-line" *ngIf="expenseItems.length === 0">{{ t('emptyExpenses') }}</p>
+
+    <ul class="expense-list" *ngIf="expenseItems.length > 0">
+      <li class="expense-item" *ngFor="let item of expenseItems; trackBy: trackByExpenseItem"
+          [class.is-editing]="item.id === editingExpenseId">
+        <div class="expense-main">
+          <span class="expense-name">{{ item.description }}</span>
+          <span class="expense-meta">{{ t('paidByShort') }} {{ item.paidBy }} · {{ formatExpenseParticipants(item) }}</span>
+        </div>
+        <span class="expense-amount">{{ formatCurrency(item.amount) }}</span>
+        <div class="expense-actions" *ngIf="!isSharedView">
+          <button type="button" class="icon-btn" (click)="startExpenseEdit(item)"
+                  [title]="t('edit')" [attr.aria-label]="t('edit') + ': ' + item.description">
+            <i class="fas fa-pen" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="icon-btn danger-ghost" (click)="removeExpenseItem(item.id)"
+                  [title]="t('remove')" [attr.aria-label]="t('remove') + ': ' + item.description">
+            <i class="fas fa-trash-can" aria-hidden="true"></i>
+          </button>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ── 4. Resultados ──────────────────────────────────────────────── -->
+  <section class="card results-card" *ngIf="expenseItems.length > 0">
+    <div class="card-head">
+      <h2 class="card-title">{{ t('resultsTitle') }}</h2>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi">
+        <span class="kpi-label">{{ t('totalSpent') }}</span>
+        <strong class="kpi-value">{{ formatCurrency(totalExpense) }}</strong>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">{{ t('perPerson') }}</span>
+        <strong class="kpi-value">{{ formatCurrency(averageSpent) }}</strong>
+      </div>
+    </div>
+
+    <h3 class="subsection-title" *ngIf="results.length > 0">{{ t('settlementsTitle') }}</h3>
+
+    <ul class="settlement-list" *ngIf="results.length > 0">
+      <li class="settlement" *ngFor="let result of results; trackBy: trackByResult">
+        <span class="party">
+          <span class="avatar debtor">{{ result.debtor.charAt(0) }}</span>
+          <span class="party-name">{{ result.debtor }}</span>
         </span>
-        <div class="stale-session-actions">
-            <button type="button" class="btn-stale-continue" (click)="dismissStaleBanner()">{{ t('staleSessionContinue') }}</button>
-            <button type="button" class="btn-stale-discard" (click)="discardStaleSession()">{{ t('staleSessionDiscard') }}</button>
-        </div>
+        <span class="flow">
+          <span class="flow-amount">{{ formatCurrency(result.amount) }}</span>
+          <span class="flow-line" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+        </span>
+        <span class="party">
+          <span class="avatar creditor">{{ result.creditor.charAt(0) }}</span>
+          <span class="party-name">{{ result.creditor }}</span>
+        </span>
+      </li>
+    </ul>
+
+    <p class="settled-line" *ngIf="results.length === 0">
+      <i class="fas fa-circle-check" aria-hidden="true"></i>{{ t('allSettled') }}
+    </p>
+
+    <div class="share-row">
+      <button type="button" class="btn-share copy" [class.done]="isCopyLinkDone" (click)="copyShareLink()"
+              [attr.aria-label]="isCopyLinkDone ? t('copied') : t('copyLink')">
+        <i class="fas" [ngClass]="isCopyLinkDone ? 'fa-check' : 'fa-link'" aria-hidden="true"></i>
+        <span>{{ isCopyLinkDone ? t('copied') : t('copyLink') }}</span>
+      </button>
+      <button type="button" class="btn-share whatsapp" (click)="shareWhatsApp()" [attr.aria-label]="t('shareWhatsapp')">
+        <i class="fab fa-whatsapp" aria-hidden="true"></i>
+        <span>WhatsApp</span>
+      </button>
     </div>
+  </section>
 
-    <div class="ux-notice-slot" aria-live="polite">
-        <div class="ux-notice" *ngIf="uiNotice" [class.notice-success]="uiNoticeType === 'success'" [class.notice-warning]="uiNoticeType === 'warning'" [class.notice-info]="uiNoticeType === 'info'">
-            <span>{{ uiNotice }}</span>
-            <div class="ux-notice-actions">
-                <button type="button" class="btn btn-link btn-notice" *ngIf="canUndoLastAction" (click)="undoLastAction()">{{ t('undo') }}</button>
-                <button type="button" class="btn btn-link btn-notice" (click)="dismissNotice()" [attr.aria-label]="t('dismissNotice')">×</button>
-            </div>
-        </div>
+  <!-- ── Toast flotante ─────────────────────────────────────────────── -->
+  <div class="toast-layer" aria-live="polite" aria-atomic="true">
+    <div class="toast" *ngIf="uiNotice" [class.success]="uiNoticeType === 'success'"
+         [class.warning]="uiNoticeType === 'warning'" [class.info]="uiNoticeType === 'info'">
+      <i class="fas toast-icon"
+         [ngClass]="uiNoticeType === 'success' ? 'fa-circle-check' : uiNoticeType === 'warning' ? 'fa-circle-exclamation' : 'fa-circle-info'"
+         aria-hidden="true"></i>
+      <span class="toast-text">{{ uiNotice }}</span>
+      <button type="button" class="toast-undo" *ngIf="canUndoLastAction" (click)="undoLastAction()">{{ t('undo') }}</button>
+      <button type="button" class="toast-close" (click)="dismissNotice()" [attr.aria-label]="t('dismissNotice')">
+        <i class="fas fa-xmark" aria-hidden="true"></i>
+      </button>
     </div>
+  </div>
 
-    <div class="language-switch-wrap" [attr.aria-label]="t('languageAria')">
-        <button type="button" class="language-btn" [class.active]="currentLanguage === 'es'" [attr.aria-pressed]="currentLanguage === 'es'" (click)="setLanguage('es')" [title]="t('languageSpanish')">ES</button>
-        <button type="button" class="language-btn" [class.active]="currentLanguage === 'en'" [attr.aria-pressed]="currentLanguage === 'en'" (click)="setLanguage('en')" [title]="t('languageEnglish')">EN</button>
+  <!-- ── Confirmación ───────────────────────────────────────────────── -->
+  <div class="modal-overlay" *ngIf="pendingConfirm" (click)="cancelConfirm()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" (click)="$event.stopPropagation()">
+      <h2 class="modal-title" id="confirmTitle">{{ t('confirmTitle') }}</h2>
+      <p class="modal-body">{{ pendingConfirm.message }}</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" (click)="cancelConfirm()">{{ t('cancel') }}</button>
+        <button type="button" class="btn-danger" (click)="acceptConfirm()" autofocus>{{ t('confirmClear') }}</button>
+      </div>
     </div>
-    <h1 class="display-4 brand-title">
-        <a routerLink="/" class="brand-home-link" title="Volver al inicio">
-            <img class="brand-icon" src="assets/icons/icon-180x180.png" alt="dividimos? logo">
-            <span class="brand-name">dividimos?</span>
-        </a>
-    </h1>
-    <p class="page-subtitle text-center mb-4">{{ t('appSubtitle') }}</p>
-
-    <div class="workflow-shell">
-        <div class="workflow-strip">
-            <div class="workflow-strip-steps" aria-hidden="true">
-                <span class="strip-step" [class.active]="isStageActive('participants')" [class.done]="isStageDone('participants')" [class.step-clickable]="!isStageActive('participants') && canAccessExpenses()" (click)="onStepClick('participants')" [attr.role]="!isStageActive('participants') ? 'button' : null" [attr.tabindex]="!isStageActive('participants') ? 0 : null">1</span>
-                <span class="strip-step-connector" aria-hidden="true"></span>
-                <span class="strip-step" [class.active]="isStageActive('expenses')" [class.done]="isStageDone('expenses')" [class.step-clickable]="!isStageActive('expenses') && canAccessExpenses()" (click)="onStepClick('expenses')" [attr.role]="!isStageActive('expenses') && canAccessExpenses() ? 'button' : null" [attr.tabindex]="!isStageActive('expenses') && canAccessExpenses() ? 0 : null">2</span>
-                <span class="strip-step-connector" aria-hidden="true"></span>
-                <span class="strip-step" [class.active]="isStageActive('results')" [class.done]="isStageDone('results')" [class.step-clickable]="!isStageActive('results') && canAccessResults()" (click)="onStepClick('results')" [attr.role]="!isStageActive('results') && canAccessResults() ? 'button' : null" [attr.tabindex]="!isStageActive('results') && canAccessResults() ? 0 : null">3</span>
-            </div>
-            <span class="workflow-strip-title">{{ getCurrentStepTitle() }}</span>
-        </div>
-    </div>
-
-    <div class="quick-stats" *ngIf="people.length > 0 || expenseItems.length > 0">
-        <span class="stat-pill"><strong>{{ people.length }}</strong> {{ t('participants') }}</span>
-        <span class="stat-pill"><strong>{{ expenseItems.length }}</strong> {{ t('registeredExpenses') }}</span>
-    </div>
-
-    <div class="row g-3 justify-content-center workflow-content-row">
-        <div class="col-12 col-xl-10" *ngIf="isStageActive('participants')">
-            <div class="participants-section mb-3" [class.stage-focus]="isStageActive('participants')">
-                <form (ngSubmit)="addPerson()">
-                    <div class="mb-0">
-                        <label for="newPersonName" class="form-label mb-1 fw-bold">{{ t('addPersonLabel') }}</label>
-                        <div class="add-person-row">
-                            <input #newPersonInput type="text" id="newPersonName" class="form-control form-control-lg flex-grow-1" [placeholder]="t('personPlaceholder')" [(ngModel)]="newPersonName" name="newPersonName" [attr.aria-label]="t('participants')">
-                            <button type="submit" class="btn btn-primary btn-lg add-person-btn" [title]="t('addPersonLabel')">
-                                <i class="fas fa-plus me-1" aria-hidden="true"></i>{{ t('addButton') }}
-                            </button>
-                        </div>
-                    </div>
-                </form>
-
-                <div class="empty-state-hint" *ngIf="people.length === 0">
-                    <i class="fas fa-user-plus me-2" aria-hidden="true"></i>{{ t('noParticipantsYet') }}
-                </div>
-
-                <div class="mt-3 d-flex flex-wrap gap-2" *ngIf="people.length > 0">
-                    <span class="badge bg-secondary d-flex align-items-center" *ngFor="let person of people; trackBy: trackByPerson">
-                        {{ person }}
-                        <button type="button" class="btn-close btn-close-white ms-2 participant-badge-remove" [attr.aria-label]="t('deleteParticipantTitle')" (click)="removePerson(person)" [title]="t('deleteParticipantTitle')"></button>
-                    </span>
-                </div>
-
-                <div class="participants-footer" *ngIf="people.length > 0">
-                    <button type="button" class="btn btn-outline-light participants-next" (click)="continueToExpenses()">
-                        {{ t('continueToExpenses') }}
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-xl-10" *ngIf="canAccessExpenses() && isStageActive('expenses')">
-            <div class="step-back-row">
-                <button type="button" class="btn btn-link step-back-btn" (click)="setWorkflowStage('participants')">
-                    <i class="fas fa-arrow-left me-1" aria-hidden="true"></i>{{ t('backToParticipants') }}
-                </button>
-            </div>
-            <div class="expense-form" [class.stage-focus]="isStageActive('expenses')" [class.editing-mode]="editingExpenseId !== null">
-                <!-- Editing Mode Banner -->
-                <div class="alert alert-info d-flex justify-content-between align-items-center mb-3 editing-banner" *ngIf="editingExpenseId !== null">
-                    <span class="d-flex align-items-center">
-                        <i class="fas fa-edit me-2" aria-hidden="true"></i>
-                        <strong>{{ t('editingExpenseBanner') }}</strong>
-                    </span>
-                    <button type="button" class="btn btn-xs btn-outline-light px-2 py-1 banner-cancel-btn" (click)="cancelExpenseEdit()">
-                        {{ t('cancelAction') }}
-                    </button>
-                </div>
-
-                <form (ngSubmit)="addExpenseItem()">
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-5">
-                            <label for="expenseDescription" class="form-label small fw-bold mb-1">{{ t('expenseDescriptionLabel') }}</label>
-                            <input #expenseDescriptionInput type="text" id="expenseDescription" class="form-control form-control-sm" [placeholder]="t('expenseDescriptionPlaceholder')" [(ngModel)]="newExpenseDescription" name="expenseDescription" [attr.aria-label]="t('expenseDescriptionLabel')">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="expenseAmount" class="form-label small fw-bold mb-1">{{ t('totalAmountLabel') }}</label>
-                            <input type="number" id="expenseAmount" class="form-control form-control-sm" [placeholder]="t('amountPlaceholder')" step="0.01" inputmode="decimal" [(ngModel)]="newExpenseAmount" name="expenseAmount" [attr.aria-label]="t('totalAmountLabel')">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="expensePaidBy" class="form-label small fw-bold mb-1">{{ t('whoPaidLabel') }}</label>
-                            <select id="expensePaidBy" class="form-select form-select-sm" [(ngModel)]="newExpensePaidBy" (ngModelChange)="onPaidByChange()" name="expensePaidBy">
-                                <option value="">{{ t('selectPlaceholder') }}</option>
-                                <option *ngFor="let person of people; trackBy: trackByPerson" [value]="person">{{ person }}</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold mb-1" [title]="t('splitAllTitle')">{{ t('whoParticipates') }}</label>
-
-                        <div class="split-mode-grid mt-1 mb-2">
-                            <button type="button" class="split-mode-option" [class.active]="splitMode === 'all'" (click)="setSplitMode('all')" [attr.aria-pressed]="splitMode === 'all'" [title]="t('splitAllTitle')">
-                                <span class="mode-title">{{ t('splitModeAll') }}</span>
-                            </button>
-                            <button type="button" class="split-mode-option" [class.active]="splitMode === 'custom'" (click)="setSplitMode('custom')" [attr.aria-pressed]="splitMode === 'custom'">
-                                <span class="mode-title">{{ t('splitModeCustom') }}</span>
-                            </button>
-                        </div>
-                        <p class="split-mode-help mb-0">{{ splitMode === 'all' ? t('splitAllHelp') : t('splitCustomHelp') }}</p>
-
-                        <div *ngIf="splitMode === 'custom'" class="custom-participants-box mt-3">
-                            <div class="participant-actions mb-2">
-                                <button type="button" class="btn btn-link btn-compact-action" (click)="selectAllParticipants()">{{ t('selectAll') }}</button>
-                                <button type="button" class="btn btn-link btn-compact-action" (click)="deselectAllParticipants()" [title]="t('clearSelectionTitle')">{{ t('clearSelection') }}</button>
-                            </div>
-                            <div class="participant-chip-grid">
-                                <button
-                                    type="button"
-                                    class="participant-chip"
-                                    *ngFor="let person of people; trackBy: trackByPerson"
-                                    [class.selected]="isParticipantSelected(person)"
-                                    [attr.aria-pressed]="isParticipantSelected(person)"
-                                    (click)="toggleParticipant(person)">
-                                    <span class="participant-name">{{ person }}</span>
-                                    <span class="participant-check" *ngIf="isParticipantSelected(person)">✓</span>
-                                </button>
-                            </div>
-                            <small class="text-warning d-block mt-2" *ngIf="newExpensePaidBy && !isPayerIncludedInParticipants()">
-                                {{ newExpensePaidBy }} {{ t('payerNotIncluded') }}
-                            </small>
-                        </div>
-                    </div>
-
-                    <div class="actions-row d-flex gap-2">
-                        <button type="submit" class="btn btn-success btn-add-expense flex-grow-1" [disabled]="!canSubmitExpense()" [class.btn-edit-save]="editingExpenseId !== null">
-                            <i class="fas" [ngClass]="editingExpenseId !== null ? 'fa-save' : 'fa-plus-circle'" aria-hidden="true"></i>
-                            {{ editingExpenseId !== null ? t('saveChangesButton') : t('addExpenseButton') }}
-                        </button>
-                        <button type="button" class="btn btn-outline-light px-4 cancel-edit-btn" *ngIf="editingExpenseId !== null" (click)="cancelExpenseEdit()">
-                            {{ t('cancelAction') }}
-                        </button>
-                    </div>
-
-                    <div class="results-cta" *ngIf="isStageActive('expenses')">
-                        <div class="step-divider" aria-hidden="true"></div>
-                        <div class="results-cta-actions">
-                            <button type="button" class="btn btn-primary btn-sm-action btn-results" (click)="continueToResults()" [disabled]="expenseItems.length === 0">
-                                <i class="fas fa-calculator me-1" aria-hidden="true"></i>{{ t('viewResults') }}
-                            </button>
-                        </div>
-                        <small class="results-cta-hint d-block mt-2" [class.text-success]="expenseItems.length > 0">
-                            {{ expenseItems.length === 0 ? t('addExpenseToContinue') : t('readyToCalculate') }}
-                        </small>
-                    </div>
-
-                    <div class="table-responsive compact-expenses desktop-table" *ngIf="expenseItems.length > 0">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>{{ t('description') }}</th>
-                                    <th>{{ t('amount') }}</th>
-                                    <th>{{ t('paidBy') }}</th>
-                                    <th>{{ t('participantsColumn') }}</th>
-                                    <th>{{ t('actions') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
-                                    <td [attr.data-label]="t('description')"><strong>{{ item.description }}</strong></td>
-                                    <td [attr.data-label]="t('amount')">${{ item.amount.toFixed(2) }}</td>
-                                    <td [attr.data-label]="t('paidBy')"><strong>{{ item.paidBy }}</strong></td>
-                                    <td [attr.data-label]="t('participantsColumn')" class="expense-participants-text">{{ formatExpenseParticipants(item) }}</td>
-                                    <td [attr.data-label]="t('actions')">
-                                        <div class="d-flex gap-1 justify-content-end align-items-center">
-                                            <button type="button" class="btn btn-outline-primary btn-sm px-2" (click)="startExpenseEdit(item)" [title]="t('editExpense')">
-                                                <i class="fas fa-edit me-1" aria-hidden="true"></i>{{ t('editExpense') }}
-                                            </button>
-                                            <button type="button" class="btn btn-outline-danger btn-sm px-2" (click)="removeExpenseItem(item.id)" [title]="t('deleteExpenseTitle')">
-                                                <i class="fas fa-trash me-1" aria-hidden="true"></i>{{ t('deleteExpense') }}
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="mobile-cards" *ngIf="expenseItems.length > 0">
-                        <article class="mobile-record-card" *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
-                            <div class="mobile-row">
-                                <span class="mobile-label">{{ t('description') }}</span>
-                                <strong class="mobile-value">{{ item.description }}</strong>
-                            </div>
-                            <div class="mobile-row">
-                                <span class="mobile-label">{{ t('amount') }}</span>
-                                <span class="mobile-value">${{ item.amount.toFixed(2) }}</span>
-                            </div>
-                            <div class="mobile-row">
-                                <span class="mobile-label">{{ t('paidBy') }}</span>
-                                <strong class="mobile-value">{{ item.paidBy }}</strong>
-                            </div>
-                            <div class="mobile-row">
-                                <span class="mobile-label">{{ t('participantsColumn') }}</span>
-                                <span class="mobile-value mobile-wrap">{{ formatExpenseParticipants(item) }}</span>
-                            </div>
-                            <div class="d-flex gap-2 mt-2 pt-2 border-top border-secondary border-opacity-25">
-                                <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1" (click)="startExpenseEdit(item)" [title]="t('editExpense')">
-                                    <i class="fas fa-edit me-1" aria-hidden="true"></i>{{ t('editExpense') }}
-                                </button>
-                                <button type="button" class="btn btn-outline-danger btn-sm flex-grow-1" (click)="removeExpenseItem(item.id)" [title]="t('deleteExpenseTitle')">
-                                    <i class="fas fa-trash me-1" aria-hidden="true"></i>{{ t('deleteExpense') }}
-                                </button>
-                            </div>
-                        </article>
-                    </div>
-
-                    <div class="secondary-actions">
-                        <button type="button" class="btn btn-outline-danger btn-sm-action" (click)="clearAll()" [title]="t('clearAllTitle')">
-                            <i class="fas fa-trash me-1" aria-hidden="true"></i>{{ t('clearAll') }}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mt-4 justify-content-center" *ngIf="expenseItems.length > 0 && isStageActive('results')" [class.results-focus]="isStageActive('results')">
-        <div class="col-12 col-xl-10">
-
-            <!-- Banner solo lectura -->
-            <div class="shared-view-banner mb-4" *ngIf="isSharedView">
-                <span class="shared-view-banner-text">
-                    <i class="fas fa-eye me-2" aria-hidden="true"></i>{{ t('sharedViewBanner') }}
-                </span>
-                <button type="button" class="btn-import-edit" (click)="importAndEdit()">
-                    <i class="fas fa-pen me-1" aria-hidden="true"></i>{{ t('importAndEditBtn') }}
-                </button>
-            </div>
-
-            <h4 class="section-title mb-3">{{ t('results') }}</h4>
-
-            <!-- KPIs -->
-            <div class="results-grid mb-4">
-                <div class="result-kpi">
-                    <span class="kpi-label">{{ t('totalExpense') }}</span>
-                    <strong class="kpi-value">$ {{ totalExpense.toFixed(2) }}</strong>
-                </div>
-                <div class="result-kpi">
-                    <span class="kpi-label">{{ t('averagePerPerson') }}</span>
-                    <strong class="kpi-value">$ {{ averageSpent.toFixed(2) }}</strong>
-                </div>
-            </div>
-
-            <!-- Settlements hero -->
-            <div class="results-block-title mb-3">
-                <span>{{ t('shareTransfersTitle') }}</span>
-            </div>
-
-            <div class="settlement-cards" *ngIf="results.length > 0">
-                <div class="settlement-card" *ngFor="let result of results; trackBy: trackByResult">
-                    <div class="settlement-party debtor-party">
-                        <span class="party-avatar">{{ result.debtor[0] }}</span>
-                        <span class="party-name">{{ result.debtor }}</span>
-                    </div>
-                    <div class="settlement-middle">
-                        <span class="settlement-amount">$ {{ result.amount.toFixed(2) }}</span>
-                        <i class="fas fa-arrow-right settlement-arrow" aria-hidden="true"></i>
-                    </div>
-                    <div class="settlement-party creditor-party">
-                        <span class="party-avatar creditor-avatar">{{ result.creditor[0] }}</span>
-                        <span class="party-name">{{ result.creditor }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="result-empty" *ngIf="results.length === 0">
-                <strong>{{ t('allSettled') }}</strong>
-            </div>
-
-            <!-- Share — icon circles con etiqueta (Copiar izq, WA der) -->
-            <div class="results-share-row mt-4">
-                <div class="share-icon-col">
-                    <button type="button" class="share-icon-btn share-btn-copy" [class.copied]="isCopyLinkDone" (click)="copyShareLink()" [attr.aria-label]="isCopyLinkDone ? t('copyDone') : t('copyLink')" [title]="isCopyLinkDone ? t('copyDone') : t('copyLink')">
-                        <i class="fas" [ngClass]="isCopyLinkDone ? 'fa-check' : 'fa-copy'" aria-hidden="true"></i>
-                    </button>
-                    <span class="share-icon-label">{{ isCopyLinkDone ? t('copyDone') : t('copyLink') }}</span>
-                </div>
-                <div class="share-icon-col">
-                    <button type="button" class="share-icon-btn share-btn-whatsapp" (click)="shareWhatsApp()" [attr.aria-label]="t('shareWhatsapp')" [title]="t('shareWhatsapp')">
-                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                    </button>
-                    <span class="share-icon-label">WhatsApp</span>
-                </div>
-            </div>
-
-            <!-- Detalle de gastos — accordion -->
-            <div class="expense-detail-section mt-4">
-                <button type="button" class="expense-detail-header" (click)="toggleExpenseDetail()" [attr.aria-expanded]="showExpenseDetail">
-                    <div class="detail-header-content">
-                        <i class="fas fa-receipt me-2" aria-hidden="true"></i>
-                        <span>{{ showExpenseDetail ? t('hideExpenseDetail') : t('showExpenseDetail') }} <span class="detail-count">({{ expenseItems.length }})</span></span>
-                    </div>
-                    <i class="fas fa-chevron-down detail-chevron" [class.rotated]="showExpenseDetail" aria-hidden="true"></i>
-                </button>
-
-                <div class="expense-detail-body" [class.detail-open]="showExpenseDetail">
-                <div class="expense-detail-body-inner">
-                    <div class="table-responsive compact-expenses desktop-table">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>{{ t('description') }}</th>
-                                    <th>{{ t('amount') }}</th>
-                                    <th>{{ t('paidBy') }}</th>
-                                    <th>{{ t('participantsColumn') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
-                                    <td><strong>{{ item.description }}</strong></td>
-                                    <td>${{ item.amount.toFixed(2) }}</td>
-                                    <td><strong>{{ item.paidBy }}</strong></td>
-                                    <td class="expense-participants-text">{{ formatExpenseParticipants(item) }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="mobile-cards">
-                        <article class="mobile-record-card" *ngFor="let item of expenseItems; trackBy: trackByExpenseItem">
-                            <div class="mobile-row">
-                                <span class="mobile-label">{{ t('description') }}</span>
-                                <strong class="mobile-value">{{ item.description }}</strong>
-                            </div>
-                            <div class="mobile-row">
-                                <span class="mobile-label">{{ t('amount') }}</span>
-                                <span class="mobile-value">${{ item.amount.toFixed(2) }}</span>
-                            </div>
-                            <div class="mobile-row">
-                                <span class="mobile-label">{{ t('paidBy') }}</span>
-                                <strong class="mobile-value">{{ item.paidBy }}</strong>
-                            </div>
-                            <div class="mobile-row">
-                                <span class="mobile-label">{{ t('participantsColumn') }}</span>
-                                <span class="mobile-value mobile-wrap">{{ formatExpenseParticipants(item) }}</span>
-                            </div>
-                        </article>
-                    </div>
-                </div>
-                </div>
-            </div>
-
-            <!-- Navegación inferior -->
-            <div class="results-nav mt-3" *ngIf="!isSharedView">
-                <button type="button" class="btn-results-back" (click)="setWorkflowStage('expenses')">
-                    <i class="fas fa-arrow-left me-1" aria-hidden="true"></i>{{ t('backToExpenses') }}
-                </button>
-                <button type="button" class="btn-results-danger" (click)="clearAll()" [title]="t('clearAllTitle')">
-                    <i class="fas fa-trash me-1" aria-hidden="true"></i>{{ t('clearAll') }}
-                </button>
-            </div>
-        </div>
-    </div>
+  </div>
 </div>
