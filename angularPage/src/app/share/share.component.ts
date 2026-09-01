@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ShareService, SharePayload } from '../services/share.service';
-import { PersistenceService, PersistableState } from '../services/persistence.service';
+import { ShareService } from '../services/share.service';
+import { PersistenceService } from '../services/persistence.service';
 import { LanguageService } from '../services/language.service';
 
 @Component({
@@ -52,40 +52,27 @@ export class ShareComponent implements OnInit {
   ngOnInit(): void {
     const data = this.route.snapshot.queryParamMap.get('data');
     const version = Number.parseInt(this.route.snapshot.queryParamMap.get('v') ?? '0', 10);
-    const decoded = data ? this.shareService.decodeState<SharePayload>(data, version) : null;
+    const payload = data ? this.shareService.parseShareLink(data, version) : null;
 
-    if (decoded?.p?.length) {
-      this.persistenceService.saveState(this.toAppState(decoded));
-      void this.router.navigate(['/app']);
+    if (!payload) {
+      // Enlace inválido, corrupto o de una versión vieja: no tocamos la sesión local del usuario.
+      void this.router.navigate(['/app'], { queryParams: { shareError: 1 } });
       return;
     }
 
-    // Enlace inválido o de una versión vieja: no pisamos la sesión local del usuario.
-    void this.router.navigate(['/app'], { queryParams: { shareError: 1 } });
-  }
+    const existingSession = this.persistenceService.loadState();
+    const hasExistingSession = !!existingSession
+      && (existingSession.people.length > 0 || existingSession.expenseItems.length > 0);
 
-  private toAppState(payload: SharePayload): PersistableState {
-    const people = payload.p;
-    const expenseItems = (payload.e ?? []).map((item, index) => ({
-      id: index + 1,
-      description: item.d,
-      amount: item.a,
-      paidBy: people[item.b] ?? people[0],
-      participants: item.r ? item.r.map((i) => people[i]).filter(Boolean) : [...people]
-    }));
+    if (hasExistingSession) {
+      // Ya hay una sesión con datos: no la pisamos en silencio. Mandamos el enlace,
+      // todavía sin aplicar, a /app para que SplitComponent pida confirmación antes
+      // de reemplazar nada (ver `handleIncomingShareQueryParams`).
+      void this.router.navigate(['/app'], { queryParams: { data, v: version, shareConflict: 1 } });
+      return;
+    }
 
-    return {
-      people,
-      expenseItems,
-      newPersonName: '',
-      newExpenseDescription: '',
-      newExpenseAmount: null,
-      newExpensePaidBy: '',
-      splitMode: 'all',
-      selectedParticipants: [...people],
-      nextExpenseId: expenseItems.length + 1,
-      currentLanguage: this.languageService.current,
-      isSharedView: true
-    };
+    this.persistenceService.saveState(this.shareService.buildImportedState(payload, this.languageService.current));
+    void this.router.navigate(['/app']);
   }
 }

@@ -1,14 +1,14 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, effect } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { PersistenceService, PersistableState } from '../services/persistence.service';
+import { PersistenceService } from '../services/persistence.service';
 import { ShareService, SharePayload } from '../services/share.service';
 import { AnalyticsService } from '../services/analytics.service';
 import { LanguageService, LanguageCode } from '../services/language.service';
 import { VoiceInputService } from '../services/voice-input.service';
-import { ExpenseItem, SettlementResult, SplitMode } from '../models/expense.model';
+import { SplitStateService } from '../services/split-state.service';
+import { CURRENCY_OPTIONS, CurrencySymbol, ExpenseItem, SettlementResult, SplitMode } from '../models/expense.model';
 
-type BalanceMap = Record<string, number>;
 type NoticeType = 'success' | 'info' | 'warning';
 
 interface TranslationMap {
@@ -45,6 +45,7 @@ interface TranslationMap {
   allSettled: string;
   settlementsTitle: string;
   clearAll: string;
+  currencyAria: string;
   copyLink: string;
   copied: string;
   linkCopied: string;
@@ -79,6 +80,10 @@ interface TranslationMap {
   confirmTitle: string;
   confirmClearAll: string;
   confirmClear: string;
+  confirmImportTitle: string;
+  confirmImportMessage: string;
+  confirmImportAccept: string;
+  shareImported: string;
   languageAria: string;
   homeAria: string;
   sharedViewBanner: string;
@@ -96,6 +101,13 @@ interface TranslationMap {
   peopleFirst: string;
 }
 
+interface PendingConfirm {
+  title: string;
+  message: string;
+  acceptLabel: string;
+  action: () => void;
+}
+
 interface AppSnapshot {
   people: string[];
   expenseItems: ExpenseItem[];
@@ -106,6 +118,7 @@ interface AppSnapshot {
   selectedParticipants: string[];
   nextExpenseId: number;
   editingExpenseId: number | null;
+  currency: CurrencySymbol;
 }
 
 @Component({
@@ -116,6 +129,8 @@ interface AppSnapshot {
 export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly publicAppUrl = 'https://dividimos.vercel.app/';
   private readonly staleSessionDaysThreshold = 7;
+  /** Duración de la transición de salida en la lista de personas/gastos (ver `.removing` en el SCSS). */
+  private readonly removeAnimationMs = 180;
 
   private readonly translations: Record<LanguageCode, TranslationMap> = {
     es: {
@@ -151,7 +166,8 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       perPerson: 'Promedio por persona',
       allSettled: 'Todo saldado, no hay pagos pendientes',
       settlementsTitle: 'Quién le paga a quién',
-      clearAll: 'Limpiar todo',
+      clearAll: 'Empezar de nuevo',
+      currencyAria: 'Elegir moneda',
       copyLink: 'Copiar enlace',
       copied: 'Copiado',
       linkCopied: 'Enlace copiado',
@@ -183,9 +199,13 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       undo: 'Deshacer',
       undoApplied: 'Cambio deshecho',
       dismissNotice: 'Cerrar aviso',
-      confirmTitle: '¿Borrar todo?',
-      confirmClearAll: 'Se eliminan todas las personas y gastos de esta sesión.',
-      confirmClear: 'Sí, borrar',
+      confirmTitle: '¿Empezar un evento nuevo?',
+      confirmClearAll: 'Se van a borrar todos los participantes y gastos de esta sesión. Esta acción no se puede deshacer.',
+      confirmClear: 'Sí, empezar de nuevo',
+      confirmImportTitle: 'Reemplazar tu sesión',
+      confirmImportMessage: 'Abriste un enlace compartido, pero ya tenés datos cargados. Si continuás, se reemplaza todo lo actual por la información compartida.',
+      confirmImportAccept: 'Sí, reemplazar',
+      shareImported: 'Sesión compartida importada',
       languageAria: 'Cambiar idioma',
       homeAria: 'Ir al inicio',
       sharedViewBanner: 'Estás viendo una sesión compartida',
@@ -235,7 +255,8 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       perPerson: 'Average per person',
       allSettled: 'All settled, no pending payments',
       settlementsTitle: 'Who pays whom',
-      clearAll: 'Clear all',
+      clearAll: 'Start over',
+      currencyAria: 'Choose currency',
       copyLink: 'Copy link',
       copied: 'Copied',
       linkCopied: 'Link copied',
@@ -267,9 +288,13 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       undo: 'Undo',
       undoApplied: 'Change undone',
       dismissNotice: 'Dismiss',
-      confirmTitle: 'Clear everything?',
-      confirmClearAll: 'This deletes every person and expense in this session.',
-      confirmClear: 'Yes, clear',
+      confirmTitle: 'Start a new event?',
+      confirmClearAll: 'This will delete every person and expense in this session. This action cannot be undone.',
+      confirmClear: 'Yes, start over',
+      confirmImportTitle: 'Replace your session',
+      confirmImportMessage: 'You opened a shared link, but you already have data loaded. Continuing will replace everything current with the shared info.',
+      confirmImportAccept: 'Yes, replace',
+      shareImported: 'Shared session imported',
       languageAria: 'Change language',
       homeAria: 'Go to home',
       sharedViewBanner: "You're viewing a shared session",
@@ -291,32 +316,24 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('newPersonInput') private newPersonInput?: ElementRef<HTMLInputElement>;
   @ViewChild('expenseDescriptionInput') private expenseDescriptionInput?: ElementRef<HTMLInputElement>;
 
-  people: string[] = [];
-  expenseItems: ExpenseItem[] = [];
-  newPersonName = '';
-  newExpenseDescription = '';
-  newExpenseAmount: number | null = null;
-  newExpensePaidBy = '';
-  splitMode: SplitMode = 'all';
-  selectedParticipants: string[] = [];
-  nextExpenseId = 1;
-  editingExpenseId: number | null = null;
-  isSharedView = false;
+  readonly currencyOptions = CURRENCY_OPTIONS;
 
-  totalExpense = 0;
-  averageSpent = 0;
-  results: SettlementResult[] = [];
+  editingExpenseId: number | null = null;
 
   uiNotice = '';
   uiNoticeType: NoticeType = 'info';
   canUndoLastAction = false;
   isCopyLinkDone = false;
-  pendingConfirm: { message: string; action: () => void } | null = null;
+  pendingConfirm: PendingConfirm | null = null;
   showStaleSessionBanner = false;
   staleSessionDays = 0;
 
   isListening = false;
   voiceTranscript = '';
+
+  /** Personas/gastos en pleno fade-out: el template les agrega `.removing` mientras el array real todavía no cambió. */
+  readonly removingPeople = new Set<string>();
+  readonly removingExpenseIds = new Set<number>();
 
   private lastSnapshot: AppSnapshot | null = null;
   private noticeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -325,14 +342,72 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
   private hasTrackedResults = false;
 
   constructor(
+    private readonly stateService: SplitStateService,
     private readonly persistenceService: PersistenceService,
     private readonly shareService: ShareService,
     private readonly analyticsService: AnalyticsService,
     private readonly languageService: LanguageService,
     private readonly voiceInputService: VoiceInputService,
     private readonly changeDetector: ChangeDetectorRef,
-    private readonly route: ActivatedRoute
-  ) {}
+    private readonly route: ActivatedRoute,
+    private readonly router: Router
+  ) {
+    // El motor de liquidación vive en SplitStateService como un `computed()`: se
+    // recalcula solo cuando cambian personas o gastos. Este effect solo se ocupa
+    // de disparar el evento de analítica la primera vez que hay resultados.
+    effect(() => {
+      if (!this.hasTrackedResults && this.stateService.settlement().results.length > 0) {
+        this.hasTrackedResults = true;
+        this.analyticsService.track('results_generated');
+      }
+    });
+  }
+
+  // -------------------------------------------------------- puente con signals
+  //
+  // El resto del componente (y el template, incluidos los [(ngModel)]) sigue
+  // leyendo/escribiendo estas propiedades como campos comunes. Cada asignación
+  // termina escribiendo en una signal de SplitStateService, lo que dispara su
+  // `effect` de persistencia automática: ya no hace falta llamar a
+  // `persistenceService.saveState()` a mano en cada mutador.
+
+  get people(): string[] { return this.stateService.people(); }
+  set people(value: string[]) { this.stateService.people.set(value); }
+
+  get expenseItems(): ExpenseItem[] { return this.stateService.expenseItems(); }
+  set expenseItems(value: ExpenseItem[]) { this.stateService.expenseItems.set(value); }
+
+  get newPersonName(): string { return this.stateService.newPersonName(); }
+  set newPersonName(value: string) { this.stateService.newPersonName.set(value); }
+
+  get newExpenseDescription(): string { return this.stateService.newExpenseDescription(); }
+  set newExpenseDescription(value: string) { this.stateService.newExpenseDescription.set(value); }
+
+  get newExpenseAmount(): number | null { return this.stateService.newExpenseAmount(); }
+  set newExpenseAmount(value: number | null) { this.stateService.newExpenseAmount.set(value); }
+
+  get newExpensePaidBy(): string { return this.stateService.newExpensePaidBy(); }
+  set newExpensePaidBy(value: string) { this.stateService.newExpensePaidBy.set(value); }
+
+  get splitMode(): SplitMode { return this.stateService.splitMode(); }
+  set splitMode(value: SplitMode) { this.stateService.splitMode.set(value); }
+
+  get selectedParticipants(): string[] { return this.stateService.selectedParticipants(); }
+  set selectedParticipants(value: string[]) { this.stateService.selectedParticipants.set(value); }
+
+  get nextExpenseId(): number { return this.stateService.nextExpenseId(); }
+  set nextExpenseId(value: number) { this.stateService.nextExpenseId.set(value); }
+
+  get isSharedView(): boolean { return this.stateService.isSharedView(); }
+  set isSharedView(value: boolean) { this.stateService.isSharedView.set(value); }
+
+  get currency(): CurrencySymbol { return this.stateService.currency(); }
+  set currency(value: CurrencySymbol) { this.stateService.currency.set(value); }
+
+  /** Derivados del motor de liquidación (`computed()` en SplitStateService): se recalculan solos. */
+  get results(): SettlementResult[] { return this.stateService.settlement().results; }
+  get totalExpense(): number { return this.stateService.settlement().totalExpense; }
+  get averageSpent(): number { return this.stateService.settlement().averageSpent; }
 
   get currentLanguage(): LanguageCode {
     return this.languageService.current;
@@ -348,10 +423,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.restorePersistedState();
-
-    if (this.route.snapshot.queryParamMap.has('shareError')) {
-      this.showNotice(this.t('shareLinkError'), 'warning');
-    }
+    this.handleIncomingShareQueryParams();
   }
 
   ngAfterViewInit(): void {
@@ -378,67 +450,76 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.languageService.set(language);
-    this.persistCurrentState();
+    this.stateService.currentLanguage.set(language);
   }
 
   formatCurrency(amount: number): string {
-    return this.languageService.formatCurrency(amount);
+    return this.languageService.formatCurrency(amount, this.currency);
   }
 
   // ---------------------------------------------------------- persistencia
 
   private restorePersistedState(): void {
     const saved = this.persistenceService.loadState();
+    this.stateService.initialize(saved);
+
     if (!saved) {
       return;
     }
-
-    this.people = [...saved.people];
-    this.expenseItems = saved.expenseItems.map((item) => ({ ...item, participants: [...item.participants] }));
-    this.newPersonName = saved.newPersonName;
-    this.newExpenseDescription = saved.newExpenseDescription;
-    this.newExpenseAmount = saved.newExpenseAmount;
-    this.newExpensePaidBy = saved.newExpensePaidBy;
-    this.splitMode = saved.splitMode;
-    this.selectedParticipants = [...saved.selectedParticipants];
-    this.nextExpenseId = saved.nextExpenseId;
-    this.isSharedView = saved.isSharedView ?? false;
 
     if (saved.currentLanguage === 'es' || saved.currentLanguage === 'en') {
       this.languageService.set(saved.currentLanguage);
     }
 
-    if (saved.savedAt && !this.isSharedView) {
+    // Una sesión vacía (recién abierta, sin datos) no cuenta como "sesión vieja".
+    const hasRestoredData = saved.people.length > 0 || saved.expenseItems.length > 0;
+    if (saved.savedAt && !saved.isSharedView && hasRestoredData) {
       const days = Math.floor((Date.now() - saved.savedAt) / 86_400_000);
       if (days >= this.staleSessionDaysThreshold) {
         this.staleSessionDays = days;
         this.showStaleSessionBanner = true;
       }
     }
-
-    // Restaurar no cuenta como actividad: recalculamos sin re-persistir `savedAt`.
-    this.calculateShares();
   }
 
-  private persistCurrentState(): void {
-    this.persistenceService.saveState({
-      people: this.people,
-      expenseItems: this.expenseItems,
-      newPersonName: this.newPersonName,
-      newExpenseDescription: this.newExpenseDescription,
-      newExpenseAmount: this.newExpenseAmount,
-      newExpensePaidBy: this.newExpensePaidBy,
-      splitMode: this.splitMode,
-      selectedParticipants: this.selectedParticipants,
-      nextExpenseId: this.nextExpenseId,
-      currentLanguage: this.currentLanguage,
-      isSharedView: this.isSharedView
-    });
-  }
+  /**
+   * Si venimos de un enlace compartido que entraba en conflicto con una sesión local
+   * con datos (ver ShareComponent), acá se pide confirmación explícita antes de
+   * aplicar nada: mientras el usuario no acepta, no se toca el estado ni el storage.
+   */
+  private handleIncomingShareQueryParams(): void {
+    const params = this.route.snapshot.queryParamMap;
 
-  private recalculateAndPersist(): void {
-    this.calculateShares();
-    this.persistCurrentState();
+    if (!params.has('shareError') && !params.has('shareConflict')) {
+      return;
+    }
+
+    const hadConflict = params.has('shareConflict');
+    const conflictData = params.get('data');
+    const conflictVersion = Number.parseInt(params.get('v') ?? '0', 10);
+
+    // Limpiamos la URL para que un refresh no repita el aviso ni la importación.
+    void this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
+
+    if (!hadConflict) {
+      this.showNotice(this.t('shareLinkError'), 'warning');
+      return;
+    }
+
+    const payload = conflictData ? this.shareService.parseShareLink(conflictData, conflictVersion) : null;
+    if (!payload) {
+      this.showNotice(this.t('shareLinkError'), 'warning');
+      return;
+    }
+
+    this.showConfirm(
+      this.t('confirmImportMessage'),
+      () => {
+        this.stateService.applyState(this.shareService.buildImportedState(payload, this.currentLanguage));
+        this.showNotice(this.t('shareImported'), 'success');
+      },
+      { title: this.t('confirmImportTitle'), acceptLabel: this.t('confirmImportAccept') }
+    );
   }
 
   // ------------------------------------------------------------- personas
@@ -456,24 +537,36 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.people.push(cleanPersonName);
+    this.people = [...this.people, cleanPersonName];
     this.newPersonName = '';
 
     if (this.splitMode === 'all') {
       this.selectAllParticipants();
     }
 
-    this.recalculateAndPersist();
     this.showNotice(this.t('personAdded'), 'success');
     this.analyticsService.track('participant_added');
     this.newPersonInput?.nativeElement.focus({ preventScroll: true });
+  }
+
+  /** Dispara el fade-out del chip; la mutación real de datos se hace en `commitRemovePerson`. */
+  removePerson(person: string): void {
+    if (this.removingPeople.has(person)) {
+      return;
+    }
+
+    this.removingPeople.add(person);
+    setTimeout(() => {
+      this.removingPeople.delete(person);
+      this.commitRemovePerson(person);
+    }, this.removeAnimationMs);
   }
 
   /**
    * Quitar a alguien no debería destruir gastos ajenos: el gasto sólo desaparece
    * si esa persona lo pagó o si era el único participante.
    */
-  removePerson(person: string): void {
+  private commitRemovePerson(person: string): void {
     this.saveSnapshotForUndo();
 
     this.people = this.people.filter((currentPerson) => currentPerson !== person);
@@ -492,20 +585,15 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cancelExpenseEdit();
     }
 
-    this.recalculateAndPersist();
     this.showNotice(this.t('personRemoved'), 'warning', true);
   }
 
   // -------------------------------------------------------------- reparto
 
   toggleParticipant(person: string): void {
-    const index = this.selectedParticipants.indexOf(person);
-    if (index > -1) {
-      this.selectedParticipants.splice(index, 1);
-    } else {
-      this.selectedParticipants.push(person);
-    }
-    this.persistCurrentState();
+    this.selectedParticipants = this.isParticipantSelected(person)
+      ? this.selectedParticipants.filter((participant) => participant !== person)
+      : [...this.selectedParticipants, person];
   }
 
   isParticipantSelected(person: string): boolean {
@@ -516,21 +604,14 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedParticipants = [...this.people];
   }
 
-  selectAllAndPersist(): void {
-    this.selectAllParticipants();
-    this.persistCurrentState();
-  }
-
   deselectAllParticipants(): void {
     this.selectedParticipants = [];
-    this.persistCurrentState();
   }
 
   onPaidByChange(): void {
     if (this.newExpensePaidBy && !this.selectedParticipants.includes(this.newExpensePaidBy)) {
       this.selectedParticipants = [...this.selectedParticipants, this.newExpensePaidBy];
     }
-    this.persistCurrentState();
   }
 
   setSplitMode(mode: SplitMode): void {
@@ -539,8 +620,6 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.people.length > 0 && (mode === 'all' || this.selectedParticipants.length === 0)) {
       this.selectAllParticipants();
     }
-
-    this.persistCurrentState();
   }
 
   isPayerIncludedInParticipants(): boolean {
@@ -582,24 +661,34 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.editingExpenseId !== null) {
       this.saveSnapshotForUndo();
-      const index = this.expenseItems.findIndex((item) => item.id === this.editingExpenseId);
-      if (index !== -1) {
-        this.expenseItems[index] = { id: this.editingExpenseId, ...draft };
-        this.showNotice(this.t('expenseEdited'), 'success', true);
-      }
+      const editingId = this.editingExpenseId;
+      this.expenseItems = this.expenseItems.map((item) => (item.id === editingId ? { id: editingId, ...draft } : item));
+      this.showNotice(this.t('expenseEdited'), 'success', true);
       this.editingExpenseId = null;
     } else {
-      this.expenseItems.push({ id: this.nextExpenseId++, ...draft });
+      this.expenseItems = [...this.expenseItems, { id: this.nextExpenseId++, ...draft }];
       this.showNotice(this.t('expenseAdded'), 'success');
       this.analyticsService.track('expense_added');
     }
 
     this.resetExpenseForm();
-    this.recalculateAndPersist();
     this.expenseDescriptionInput?.nativeElement.focus({ preventScroll: true });
   }
 
+  /** Dispara el fade-out del ítem; la mutación real de datos se hace en `commitRemoveExpenseItem`. */
   removeExpenseItem(expenseId: number): void {
+    if (this.removingExpenseIds.has(expenseId)) {
+      return;
+    }
+
+    this.removingExpenseIds.add(expenseId);
+    setTimeout(() => {
+      this.removingExpenseIds.delete(expenseId);
+      this.commitRemoveExpenseItem(expenseId);
+    }, this.removeAnimationMs);
+  }
+
+  private commitRemoveExpenseItem(expenseId: number): void {
     this.saveSnapshotForUndo();
 
     this.expenseItems = this.expenseItems.filter((item) => item.id !== expenseId);
@@ -609,7 +698,6 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       this.resetExpenseForm();
     }
 
-    this.recalculateAndPersist();
     this.showNotice(this.t('expenseRemoved'), 'warning', true);
   }
 
@@ -621,7 +709,6 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedParticipants = [...item.participants];
     this.splitMode = this.areAllPeopleIncluded(item.participants) ? 'all' : 'custom';
 
-    this.persistCurrentState();
     setTimeout(() => {
       const input = this.expenseDescriptionInput?.nativeElement;
       input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -632,7 +719,6 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
   cancelExpenseEdit(): void {
     this.editingExpenseId = null;
     this.resetExpenseForm();
-    this.persistCurrentState();
   }
 
   private resetExpenseForm(): void {
@@ -687,9 +773,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       this.editingExpenseId = null;
       this.isSharedView = false;
       this.resetExpenseForm();
-      this.resetResults();
 
-      this.persistenceService.clearState();
       this.showNotice(this.t('allCleared'), 'warning', true);
       this.analyticsService.track('session_cleared');
       setTimeout(() => this.newPersonInput?.nativeElement.focus({ preventScroll: true }));
@@ -790,10 +874,10 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedParticipants = [...snapshot.selectedParticipants];
     this.nextExpenseId = snapshot.nextExpenseId;
     this.editingExpenseId = snapshot.editingExpenseId;
+    this.currency = snapshot.currency;
 
     this.lastSnapshot = null;
     this.canUndoLastAction = false;
-    this.recalculateAndPersist();
     this.showNotice(this.t('undoApplied'), 'info');
   }
 
@@ -807,7 +891,8 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       splitMode: this.splitMode,
       selectedParticipants: [...this.selectedParticipants],
       nextExpenseId: this.nextExpenseId,
-      editingExpenseId: this.editingExpenseId
+      editingExpenseId: this.editingExpenseId,
+      currency: this.currency
     };
   }
 
@@ -841,8 +926,18 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ------------------------------------------------------------- confirm
 
-  showConfirm(message: string, action: () => void): void {
-    this.pendingConfirm = { message, action };
+  /**
+   * Modal de confirmación genérico: además de "borrar todo" (con los textos por
+   * defecto), lo reutiliza el flujo de import de un enlace compartido en conflicto
+   * pasándole su propio título y etiqueta de aceptar.
+   */
+  showConfirm(message: string, action: () => void, options?: { title?: string; acceptLabel?: string }): void {
+    this.pendingConfirm = {
+      title: options?.title ?? this.t('confirmTitle'),
+      message,
+      acceptLabel: options?.acceptLabel ?? this.t('confirmClear'),
+      action
+    };
   }
 
   acceptConfirm(): void {
@@ -877,99 +972,6 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
       this.addExpenseItem();
     }
-  }
-
-  // -------------------------------------------------------------- cálculo
-
-  calculateShares(): void {
-    if (this.people.length === 0 || this.expenseItems.length === 0) {
-      this.resetResults();
-      return;
-    }
-
-    const balancesInCents = this.people.reduce<BalanceMap>((accumulator, person) => {
-      accumulator[person] = 0;
-      return accumulator;
-    }, {});
-
-    let totalExpenseInCents = 0;
-
-    this.expenseItems.forEach((expense) => {
-      const validParticipants = expense.participants.filter((participant) => this.people.includes(participant));
-      if (validParticipants.length === 0 || !this.people.includes(expense.paidBy)) {
-        return;
-      }
-
-      const amountInCents = Math.round(expense.amount * 100);
-      totalExpenseInCents += amountInCents;
-      balancesInCents[expense.paidBy] += amountInCents;
-
-      // El resto en centavos se reparte de a uno para que los saldos cierren exactos.
-      const baseShare = Math.floor(amountInCents / validParticipants.length);
-      const remainder = amountInCents % validParticipants.length;
-
-      validParticipants.forEach((participant, index) => {
-        balancesInCents[participant] -= baseShare + (index < remainder ? 1 : 0);
-      });
-    });
-
-    this.results = this.buildTransfers(balancesInCents);
-    this.totalExpense = this.fromCents(totalExpenseInCents);
-    this.averageSpent = this.fromCents(Math.round(totalExpenseInCents / this.people.length));
-
-    if (!this.hasTrackedResults && this.results.length > 0) {
-      this.hasTrackedResults = true;
-      this.analyticsService.track('results_generated');
-    }
-  }
-
-  /** Greedy sobre saldos ordenados: minimiza la cantidad de transferencias. */
-  private buildTransfers(balances: BalanceMap): SettlementResult[] {
-    const debtors = Object.entries(balances)
-      .filter(([, balance]) => balance < 0)
-      .map(([person, balance]) => ({ person, amount: -balance }))
-      .sort((a, b) => b.amount - a.amount);
-
-    const creditors = Object.entries(balances)
-      .filter(([, balance]) => balance > 0)
-      .map(([person, balance]) => ({ person, amount: balance }))
-      .sort((a, b) => b.amount - a.amount);
-
-    const transfers: SettlementResult[] = [];
-    let debtorIndex = 0;
-    let creditorIndex = 0;
-
-    while (debtorIndex < debtors.length && creditorIndex < creditors.length) {
-      const debtor = debtors[debtorIndex];
-      const creditor = creditors[creditorIndex];
-      const amount = Math.min(debtor.amount, creditor.amount);
-
-      if (amount > 0) {
-        transfers.push({ debtor: debtor.person, creditor: creditor.person, amount: this.fromCents(amount) });
-        debtor.amount -= amount;
-        creditor.amount -= amount;
-      }
-
-      if (debtor.amount <= 0) {
-        debtorIndex++;
-      }
-
-      if (creditor.amount <= 0) {
-        creditorIndex++;
-      }
-    }
-
-    return transfers;
-  }
-
-  private resetResults(): void {
-    this.results = [];
-    this.totalExpense = 0;
-    this.averageSpent = 0;
-  }
-
-  private fromCents(cents: number): number {
-    return Number((cents / 100).toFixed(2));
   }
 
   // ------------------------------------------------------------ compartir
@@ -1044,6 +1046,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       '',
       `👥 ${this.people.join(', ')}`,
       `💰 ${this.t('shareTotal')}: ${this.formatCurrency(this.totalExpense)}`,
+      `🙋 ${this.t('perPerson')}: ${this.formatCurrency(this.averageSpent)}`,
       ''
     ];
 
@@ -1071,7 +1074,8 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
         ...(this.areAllPeopleIncluded(item.participants)
           ? {}
           : { r: item.participants.map((p) => this.people.indexOf(p)).filter((i) => i >= 0) })
-      }))
+      })),
+      c: this.currency
     };
 
     try {
@@ -1085,7 +1089,6 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
   importAndEdit(): void {
     this.isSharedView = false;
-    this.persistCurrentState();
   }
 
   dismissStaleBanner(): void {

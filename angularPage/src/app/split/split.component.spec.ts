@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 
@@ -35,7 +35,6 @@ describe('SplitComponent', () => {
     component.expenseItems = [
       { id: 1, description: 'Cena', amount: 3000, paidBy: 'Pepe', participants: ['Pepe', 'Juan', 'Ana'] }
     ];
-    component.calculateShares();
 
     const openSpy = spyOn(window, 'open');
     component.shareWhatsApp();
@@ -56,7 +55,6 @@ describe('SplitComponent', () => {
     component.expenseItems = [
       { id: 1, description: 'Helado', amount: 100, paidBy: 'juan', participants: ['juan', 'benja'] }
     ];
-    component.calculateShares();
 
     const writeTextSpy = jasmine.createSpy('writeText').and.returnValue(Promise.resolve());
     Object.defineProperty(navigator, 'clipboard', { value: { writeText: writeTextSpy }, configurable: true });
@@ -73,7 +71,6 @@ describe('SplitComponent', () => {
       { id: 1, description: 'Helado', amount: 100, paidBy: 'ari', participants: ['benja', 'lucho'] }
     ];
 
-    component.calculateShares();
 
     expect(component.totalExpense).toBe(100);
     expect(component.averageSpent).toBe(25);
@@ -88,7 +85,6 @@ describe('SplitComponent', () => {
       { id: 1, description: 'Taxi', amount: 10, paidBy: 'Ana', participants: ['Ana', 'Beto', 'Caro'] }
     ];
 
-    component.calculateShares();
 
     expect(component.totalExpense).toBe(10);
     expect(component.results.length).toBe(2);
@@ -96,48 +92,53 @@ describe('SplitComponent', () => {
     expect(component.results).toContain(jasmine.objectContaining({ debtor: 'Caro', creditor: 'Ana', amount: 3.33 }));
   });
 
-  it('should keep shared expenses alive when a participant (not the payer) is removed', () => {
+  it('should keep shared expenses alive when a participant (not the payer) is removed', fakeAsync(() => {
     component.people = ['Ana', 'Beto', 'Caro'];
     component.expenseItems = [
       { id: 1, description: 'Cena', amount: 90, paidBy: 'Ana', participants: ['Ana', 'Beto', 'Caro'] }
     ];
-    component.calculateShares();
 
     component.removePerson('Caro');
+    tick(200); // fade-out (removeAnimationMs): recién ahí se agenda el timer del aviso
+    tick(6000); // timer del aviso con "deshacer" (6000ms)
 
     expect(component.expenseItems.length).toBe(1);
     expect(component.expenseItems[0].participants).toEqual(['Ana', 'Beto']);
     expect(component.results).toContain(jasmine.objectContaining({ debtor: 'Beto', creditor: 'Ana', amount: 45 }));
-  });
+  }));
 
-  it('should drop expenses paid by a removed person', () => {
+  it('should drop expenses paid by a removed person', fakeAsync(() => {
     component.people = ['Ana', 'Beto'];
     component.expenseItems = [
       { id: 1, description: 'Cena', amount: 90, paidBy: 'Ana', participants: ['Ana', 'Beto'] }
     ];
-    component.calculateShares();
 
     component.removePerson('Ana');
+    tick(200); // fade-out (removeAnimationMs): recién ahí se agenda el timer del aviso
+    tick(6000); // timer del aviso con "deshacer" (6000ms)
 
     expect(component.expenseItems.length).toBe(0);
     expect(component.results.length).toBe(0);
-  });
+  }));
 
-  it('should restore the previous state when undoing a deletion', () => {
+  it('should restore the previous state when undoing a deletion', fakeAsync(() => {
     component.people = ['Ana', 'Beto'];
     component.expenseItems = [
       { id: 1, description: 'Cena', amount: 90, paidBy: 'Ana', participants: ['Ana', 'Beto'] }
     ];
     component.nextExpenseId = 2;
-    component.calculateShares();
 
     component.removeExpenseItem(1);
+    tick(200); // fade-out (removeAnimationMs): recién ahí se agenda el timer del aviso
+    tick(6000); // timer del aviso con "deshacer" (6000ms)
     expect(component.expenseItems.length).toBe(0);
 
     component.undoLastAction();
     expect(component.expenseItems.length).toBe(1);
     expect(component.expenseItems[0].description).toBe('Cena');
-  });
+
+    tick(3000); // drena el timer del aviso final ("Cambio deshecho") para que fakeAsync no se queje
+  }));
 });
 
 describe('VoiceInputService.parseExpense', () => {

@@ -13,3 +13,8 @@ export interface SettlementResult {
 }
 
 export type SplitMode = 'all' | 'custom';
+
+/** Símbolos de moneda soportados por el selector. Es solo una etiqueta visual: no hay conversión entre ellos. */
+export type CurrencySymbol = '$' | 'US$' | '€';
+
+export const CURRENCY_OPTIONS: readonly CurrencySymbol[] = ['$', 'US$', '€'];
