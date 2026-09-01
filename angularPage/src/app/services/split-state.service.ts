@@ -45,11 +45,28 @@ export class SplitStateService {
    */
   private pendingSavedAt: number | null = null;
 
+  /**
+   * El `effect()` de abajo corre una primera vez apenas se construye el servicio,
+   * con los valores por defecto de las signals (todo vacío) — antes de que
+   * `initialize()` tenga la chance de aplicar lo que haya en `localStorage`. Si esa
+   * primera corrida persistiera igual, pisaría cualquier sesión existente (o un
+   * enlace compartido recién guardado por `ShareComponent`) con un estado vacío
+   * antes de que `SplitComponent` llegue a leerlo. `isInitialized` hace que esa
+   * primera corrida sea un no-op: sigue leyendo las signals (para que el effect
+   * quede suscripto a sus cambios), pero no escribe hasta que `initialize()` corrió.
+   */
+  private isInitialized = false;
+
   constructor(private readonly persistenceService: PersistenceService) {
     effect(() => {
       const snapshot = this.buildSnapshot();
       const savedAt = this.pendingSavedAt ?? Date.now();
       this.pendingSavedAt = null;
+
+      if (!this.isInitialized) {
+        return;
+      }
+
       this.persistenceService.saveState(snapshot, savedAt);
     });
   }
@@ -60,6 +77,7 @@ export class SplitStateService {
       this.pendingSavedAt = saved.savedAt ?? null;
       this.applyState(saved);
     }
+    this.isInitialized = true;
   }
 
   /** Reemplaza toda la sesión de una sola vez: lo usan la restauración inicial, el undo y la importación de un enlace compartido. */
