@@ -8,9 +8,10 @@
     </a>
 
     <div class="header-actions">
-      <button type="button" class="icon-btn danger-ghost" *ngIf="hasData && !isSharedView"
+      <button type="button" class="restart-btn" *ngIf="hasData && !isSharedView"
               (click)="clearAll()" [title]="t('clearAll')" [attr.aria-label]="t('clearAll')">
-        <i class="fas fa-trash-can" aria-hidden="true"></i>
+        <i class="fas fa-arrow-rotate-left" aria-hidden="true"></i>
+        <span class="restart-btn-label">{{ t('clearAll') }}</span>
       </button>
       <div class="lang-switch" role="group" [attr.aria-label]="t('languageAria')">
         <button type="button" class="lang-btn" [class.active]="currentLanguage === 'es'"
@@ -43,7 +44,8 @@
     </div>
 
     <div class="people-row" *ngIf="people.length > 0">
-      <span class="person-chip" *ngFor="let person of people; trackBy: trackByPerson">
+      <span class="person-chip" *ngFor="let person of people; trackBy: trackByPerson"
+            [class.removing]="removingPeople.has(person)">
         <span class="person-chip-name">{{ person }}</span>
         <button type="button" class="person-chip-remove" *ngIf="!isSharedView" (click)="removePerson(person)"
                 [attr.aria-label]="t('removePerson') + ' ' + person" [title]="t('removePerson')">
@@ -91,7 +93,10 @@
         </div>
 
         <div class="field field-amount">
-          <span class="input-prefix" aria-hidden="true">$</span>
+          <select class="currency-select" [(ngModel)]="currency" name="currencySymbol"
+                  [attr.aria-label]="t('currencyAria')" [title]="t('currencyAria')">
+            <option *ngFor="let currencyOption of currencyOptions" [value]="currencyOption">{{ currencyOption }}</option>
+          </select>
           <input type="number" class="input has-prefix" [(ngModel)]="newExpenseAmount" name="expenseAmount"
                  [placeholder]="t('amountPlaceholder')" [attr.aria-label]="t('amountPlaceholder')"
                  step="0.01" min="0" inputmode="decimal">
@@ -131,7 +136,7 @@
           </button>
         </div>
         <div class="picker-actions">
-          <button type="button" class="link-btn" (click)="selectAllAndPersist()">{{ t('selectAll') }}</button>
+          <button type="button" class="link-btn" (click)="selectAllParticipants()">{{ t('selectAll') }}</button>
           <button type="button" class="link-btn" (click)="deselectAllParticipants()">{{ t('selectNone') }}</button>
         </div>
         <p class="warn-line" *ngIf="!isPayerIncludedInParticipants()">
@@ -158,7 +163,7 @@
 
     <ul class="expense-list" *ngIf="expenseItems.length > 0">
       <li class="expense-item" *ngFor="let item of expenseItems; trackBy: trackByExpenseItem"
-          [class.is-editing]="item.id === editingExpenseId">
+          [class.is-editing]="item.id === editingExpenseId" [class.removing]="removingExpenseIds.has(item.id)">
         <div class="expense-main">
           <span class="expense-name">{{ item.description }}</span>
           <span class="expense-meta">{{ t('paidByShort') }} {{ item.paidBy }} · {{ formatExpenseParticipants(item) }}</span>
@@ -249,11 +254,11 @@
   <!-- ── Confirmación ───────────────────────────────────────────────── -->
   <div class="modal-overlay" *ngIf="pendingConfirm" (click)="cancelConfirm()">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" (click)="$event.stopPropagation()">
-      <h2 class="modal-title" id="confirmTitle">{{ t('confirmTitle') }}</h2>
+      <h2 class="modal-title" id="confirmTitle">{{ pendingConfirm.title }}</h2>
       <p class="modal-body">{{ pendingConfirm.message }}</p>
       <div class="modal-actions">
         <button type="button" class="btn-ghost" (click)="cancelConfirm()">{{ t('cancel') }}</button>
-        <button type="button" class="btn-danger" (click)="acceptConfirm()" autofocus>{{ t('confirmClear') }}</button>
+        <button type="button" class="btn-danger" (click)="acceptConfirm()" autofocus>{{ pendingConfirm.acceptLabel }}</button>
       </div>
     </div>
   </div>

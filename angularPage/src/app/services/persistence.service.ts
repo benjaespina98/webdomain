@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ExpenseItem, SplitMode } from '../models/expense.model';
+import { CurrencySymbol, ExpenseItem, SplitMode } from '../models/expense.model';
 import { LanguageCode } from './language.service';
 
 export interface AppState {
@@ -15,6 +15,8 @@ export interface AppState {
   nextExpenseId: number;
   currentLanguage: LanguageCode;
   isSharedView: boolean;
+  /** Opcional: las sesiones guardadas antes de agregar el selector de moneda no lo traen. */
+  currency?: CurrencySymbol;
   savedAt?: number;
 }
 

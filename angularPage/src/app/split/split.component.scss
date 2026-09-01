@@ -59,6 +59,36 @@
     gap: 0.5rem;
 }
 
+/* Reiniciar sesión: antes era un ícono de tacho suelto en el header (difícil de
+   notar); ahora lleva texto y un ícono menos "destructivo" — el modal de
+   confirmación ya se encarga de frenar un click accidental. */
+.restart-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2.1rem;
+    padding: 0 0.75rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: var(--font-xs);
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+    i {
+        font-size: 0.78rem;
+    }
+
+    &:hover {
+        background: rgba(239, 68, 68, 0.12);
+        border-color: rgba(239, 68, 68, 0.32);
+        color: var(--danger-light);
+    }
+}
+
 .lang-switch {
     display: inline-flex;
     padding: 2px;
@@ -255,6 +285,13 @@
     font-size: var(--font-sm);
     font-weight: 600;
     animation: slideUp 0.2s var(--ease-out) both;
+    transition: opacity 0.16s ease, transform 0.16s ease;
+
+    &.removing {
+        opacity: 0;
+        transform: scale(0.85);
+        pointer-events: none;
+    }
 }
 
 .person-chip-name {
@@ -372,16 +409,43 @@
     }
 
     &.has-prefix {
-        padding-left: 2rem;
+        padding-left: 2.7rem;
     }
 }
 
-.input-prefix {
+/* Selector de moneda: ocupa el lugar del antiguo prefijo "$" fijo, pero es
+   interactivo. Ultra minimalista a propósito: sin conversión entre monedas,
+   es solo la etiqueta que se antepone a cada monto en toda la app. */
+.currency-select {
     position: absolute;
-    left: 0.8rem;
+    left: 0.5rem;
+    z-index: 1;
+    max-width: 3.9rem;
+    border: 0;
+    background: transparent;
     color: var(--text-muted);
-    font-size: 0.95rem;
-    pointer-events: none;
+    font-size: 0.92rem;
+    font-weight: 600;
+    padding: 0.3rem 0.2rem;
+    border-radius: var(--radius-sm);
+    appearance: none;
+    cursor: pointer;
+    transition: color 0.15s ease;
+
+    &:hover,
+    &:focus {
+        color: var(--text);
+    }
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px var(--accent-soft);
+    }
+
+    option {
+        background: var(--surface-2);
+        color: var(--text);
+    }
 }
 
 .select {
@@ -734,7 +798,8 @@
     padding: 0.65rem 0.5rem;
     border-radius: var(--radius-sm);
     border-bottom: 1px solid var(--border);
-    transition: background 0.15s ease;
+    animation: slideUp 0.22s var(--ease-out) both;
+    transition: background 0.15s ease, opacity 0.16s ease, transform 0.16s ease;
 
     &:last-child {
         border-bottom: 0;
@@ -747,6 +812,12 @@
     &.is-editing {
         background: var(--accent-soft);
         box-shadow: inset 3px 0 0 var(--accent);
+    }
+
+    &.removing {
+        opacity: 0;
+        transform: translateX(14px);
+        pointer-events: none;
     }
 }
 
@@ -787,7 +858,9 @@
     flex-shrink: 0;
     display: flex;
     gap: 0.15rem;
-    opacity: 0.55;
+    /* En touch no existe :hover, así que el valor de reposo ya tiene que ser
+       legible: 0.55 dejaba los botones de editar/borrar demasiado apagados en mobile. */
+    opacity: 0.75;
     transition: opacity 0.15s ease;
 
     .expense-item:hover &,
@@ -1223,6 +1296,27 @@
 
     .lang-btn {
         padding: 0.3rem 0.5rem;
+    }
+
+    /* El texto del botón de reiniciar se oculta visualmente (sigue en el aria-label)
+       para que el header no desborde en pantallas muy angostas. */
+    .restart-btn {
+        width: 2.1rem;
+        padding: 0;
+        justify-content: center;
+        border-radius: var(--radius-sm);
+    }
+
+    .restart-btn-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
     }
 
     .app-shell {

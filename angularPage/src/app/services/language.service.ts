@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { CurrencySymbol } from '../models/expense.model';
 
 export type LanguageCode = 'es' | 'en';
 
@@ -12,7 +13,7 @@ export type LanguageCode = 'es' | 'en';
 export class LanguageService {
   private readonly storageKey = 'split-language';
   private language: LanguageCode = 'es';
-  private currencyFormatter!: Intl.NumberFormat;
+  private numberFormatter!: Intl.NumberFormat;
 
   constructor() {
     this.apply(this.readStoredLanguage() ?? this.detectDeviceLanguage(), false);
@@ -31,22 +32,22 @@ export class LanguageService {
   }
 
   /**
-   * Formato de moneda consistente en toda la app ($ 1.234,56 en es / $1,234.56 en en).
-   * Intl separa símbolo y número con un espacio duro; lo pasamos a espacio normal
-   * porque este texto también viaja a WhatsApp, al portapapeles y a la URL compartida.
+   * Formatea el número con los separadores de miles/decimales del idioma actual
+   * (1.234,56 en es / 1,234.56 en en) y le antepone el símbolo elegido en el
+   * selector de moneda. Antes usábamos `Intl.NumberFormat` con `style: 'currency'`
+   * fijo en USD, lo que ataba el símbolo mostrado al locale en vez de a la elección
+   * real de la persona (en es-AR, Intl imprime "US$" en vez de "$"). Separar el
+   * número del símbolo nos da control total y hace que el símbolo elegido se
+   * refleje igual en la UI, en el portapapeles y en el mensaje de WhatsApp.
    */
-  formatCurrency(amount: number): string {
-    return this.currencyFormatter
-      .format(Number.isFinite(amount) ? amount : 0)
-      .replace(/[  ]/g, ' ');
+  formatCurrency(amount: number, currencySymbol: CurrencySymbol = '$'): string {
+    const safeAmount = Number.isFinite(amount) ? amount : 0;
+    return `${currencySymbol} ${this.numberFormatter.format(safeAmount)}`;
   }
 
   private apply(language: LanguageCode, persist: boolean): void {
     this.language = language;
-    this.currencyFormatter = new Intl.NumberFormat(language === 'es' ? 'es-AR' : 'en-US', {
-      style: 'currency',
-      currency: 'USD',
-      currencyDisplay: 'narrowSymbol',
+    this.numberFormatter = new Intl.NumberFormat(language === 'es' ? 'es-AR' : 'en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
