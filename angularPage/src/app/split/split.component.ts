@@ -7,7 +7,8 @@ import { AnalyticsService } from '../services/analytics.service';
 import { LanguageService, LanguageCode } from '../services/language.service';
 import { VoiceInputService } from '../services/voice-input.service';
 import { SplitStateService } from '../services/split-state.service';
-import { CURRENCY_OPTIONS, CurrencySymbol, ExpenseItem, SettlementResult, SplitMode } from '../models/expense.model';
+import { CURRENCY_OPTIONS, CategoryOption, CurrencySymbol, EXPENSE_CATEGORIES, ExpenseCategory, ExpenseItem, SettlementResult, SplitMode } from '../models/expense.model';
+import { PersonBalance } from '../utils/settlement.util';
 
 type NoticeType = 'success' | 'info' | 'warning';
 
@@ -99,6 +100,13 @@ interface TranslationMap {
   voiceError: string;
   voiceFilled: string;
   peopleFirst: string;
+  personBalancesTitle: string;
+  paidTotal: string;
+  consumedTotal: string;
+  netBalance: string;
+  downloadImage: string;
+  categoryTitle: string;
+  imageDownloaded: string;
 }
 
 interface PendingConfirm {
@@ -220,7 +228,14 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       voiceDenied: 'Necesito permiso del micrófono para dictar',
       voiceError: 'No se pudo usar el micrófono',
       voiceFilled: 'Listo, revisá y confirmá',
-      peopleFirst: 'Sumá personas antes de dictar'
+      peopleFirst: 'Sumá personas antes de dictar',
+      personBalancesTitle: 'Resumen por persona',
+      paidTotal: 'Pagó',
+      consumedTotal: 'Consumió',
+      netBalance: 'Saldo neto',
+      downloadImage: 'Descargar imagen',
+      categoryTitle: 'Categoría',
+      imageDownloaded: 'Imagen descargada'
     },
     en: {
       peopleTitle: 'People',
@@ -309,7 +324,14 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       voiceDenied: 'I need microphone permission to dictate',
       voiceError: 'Could not use the microphone',
       voiceFilled: 'Done, review and confirm',
-      peopleFirst: 'Add people before dictating'
+      peopleFirst: 'Add people before dictating',
+      personBalancesTitle: 'Balances per person',
+      paidTotal: 'Paid',
+      consumedTotal: 'Consumed',
+      netBalance: 'Net balance',
+      downloadImage: 'Download image',
+      categoryTitle: 'Category',
+      imageDownloaded: 'Image downloaded'
     }
   };
 
@@ -317,7 +339,9 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('expenseDescriptionInput') private expenseDescriptionInput?: ElementRef<HTMLInputElement>;
 
   readonly currencyOptions = CURRENCY_OPTIONS;
+  readonly expenseCategories = EXPENSE_CATEGORIES;
 
+  selectedCategory: ExpenseCategory = 'other';
   editingExpenseId: number | null = null;
 
   uiNotice = '';
@@ -406,6 +430,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Derivados del motor de liquidación (`computed()` en SplitStateService): se recalculan solos. */
   get results(): SettlementResult[] { return this.stateService.settlement().results; }
+  get personBalances(): PersonBalance[] { return this.stateService.settlement().personBalances; }
   get totalExpense(): number { return this.stateService.settlement().totalExpense; }
   get averageSpent(): number { return this.stateService.settlement().averageSpent; }
 
@@ -656,7 +681,8 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       description: this.newExpenseDescription.trim(),
       amount: Math.round(this.newExpenseAmount * 100) / 100,
       paidBy: this.newExpensePaidBy,
-      participants: [...this.selectedParticipants]
+      participants: [...this.selectedParticipants],
+      category: this.selectedCategory
     };
 
     if (this.editingExpenseId !== null) {
@@ -706,6 +732,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     this.newExpenseDescription = item.description;
     this.newExpenseAmount = item.amount;
     this.newExpensePaidBy = item.paidBy;
+    this.selectedCategory = item.category || 'other';
     this.selectedParticipants = [...item.participants];
     this.splitMode = this.areAllPeopleIncluded(item.participants) ? 'all' : 'custom';
 
@@ -725,6 +752,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     this.newExpenseDescription = '';
     this.newExpenseAmount = null;
     this.newExpensePaidBy = '';
+    this.selectedCategory = 'other';
     this.splitMode = 'all';
     this.selectAllParticipants();
   }
@@ -1044,16 +1072,34 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     const lines: string[] = [
       '🧾 *dividimos?*',
       '',
-      `👥 ${this.people.join(', ')}`,
-      `💰 ${this.t('shareTotal')}: ${this.formatCurrency(this.totalExpense)}`,
-      `🙋 ${this.t('perPerson')}: ${this.formatCurrency(this.averageSpent)}`,
+      `👥 *${this.t('peopleTitle')}*: ${this.people.join(', ')}`,
+      `💰 *${this.t('shareTotal')}*: ${this.formatCurrency(this.totalExpense)}`,
+      `🙋 *${this.t('perPerson')}*: ${this.formatCurrency(this.averageSpent)}`,
       ''
     ];
+
+    if (this.expenseItems.length > 0) {
+      lines.push(`📋 *${this.t('expensesTitle')}*`);
+      this.expenseItems.forEach((item) => {
+        const catEmoji = this.getCategoryOption(item.category).emoji;
+        lines.push(`• ${catEmoji} *${item.description}*: ${this.formatCurrency(item.amount)} (${this.t('paidByShort')} ${item.paidBy})`);
+      });
+      lines.push('');
+    }
+
+    if (this.personBalances.length > 0) {
+      lines.push(`📊 *${this.t('personBalancesTitle')}*`);
+      this.personBalances.forEach((pb) => {
+        const sign = pb.netBalance > 0 ? '+' : '';
+        lines.push(`• ${pb.person}: *${sign}${this.formatCurrency(pb.netBalance)}*`);
+      });
+      lines.push('');
+    }
 
     if (this.results.length > 0) {
       lines.push(`💸 *${this.t('sharePaymentsHeader')}*`);
       this.results.forEach((result) => {
-        lines.push(`• ${result.debtor} ${this.t('sharePays')} *${this.formatCurrency(result.amount)}* ${this.t('shareTo')} ${result.creditor}`);
+        lines.push(`• *${result.debtor}* ${this.t('sharePays')} *${this.formatCurrency(result.amount)}* ${this.t('shareTo')} *${result.creditor}*`);
       });
     } else {
       lines.push(`✅ *${this.t('shareAllSettled')}*`);
@@ -1104,6 +1150,228 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.t('staleSessionBanner').replace('{{days}}', String(this.staleSessionDays));
   }
 
+  // ----------------------------------------------------------- categorías
+
+  getCategoryOption(cat?: ExpenseCategory): CategoryOption {
+    return this.expenseCategories.find((c) => c.id === (cat || 'other')) || this.expenseCategories[5];
+  }
+
+  selectCategory(cat: ExpenseCategory): void {
+    this.selectedCategory = cat;
+  }
+
+  onDescriptionChange(value: string): void {
+    const clean = value.toLowerCase().trim();
+    if (!clean) return;
+    if (/cena|comida|almuerzo|pizza|burger|hamburguesa|restauran|asado|parrilla|mcdonald|empana|postre|sushi/i.test(clean)) {
+      this.selectedCategory = 'food';
+    } else if (/birra|cerveza|trago|bebida|vino|alcohol|bar|pub|café|cafe|coffee|tragos|gaseosa/i.test(clean)) {
+      this.selectedCategory = 'drink';
+    } else if (/super|mercado|compras|chinos|verduleria|carne|chino|coto|dia|carrefour|vea/i.test(clean)) {
+      this.selectedCategory = 'supermarket';
+    } else if (/uber|taxi|nafta|combustible|peaje|estacionamiento|colectivo|remis|gasolina|gasoil|cabify|didi|pasaje/i.test(clean)) {
+      this.selectedCategory = 'transport';
+    } else if (/hotel|airbnb|alquiler|hospedaje|cabaña|resort|depto|hostel|camping/i.test(clean)) {
+      this.selectedCategory = 'stay';
+    }
+  }
+
+  // ----------------------------------------------------- exportación png
+
+  exportSummaryAsImage(): void {
+    if (!this.hasData) {
+      this.showNotice(this.t('noExpensesToShare'), 'warning');
+      return;
+    }
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = 750;
+    const padding = 30;
+
+    const personCount = this.personBalances.length;
+    const settlementCount = this.results.length;
+
+    const headerH = 100;
+    const summaryH = 100;
+    const personBalancesH = personCount > 0 ? 45 + personCount * 40 : 0;
+    const settlementsH = settlementCount > 0 ? 55 + settlementCount * 46 : 60;
+    const footerH = 50;
+
+    const height = padding * 2 + headerH + summaryH + personBalancesH + settlementsH + footerH;
+
+    canvas.width = width * 2;
+    canvas.height = height * 2;
+    ctx.scale(2, 2);
+
+    // Fondo degradado dark
+    const bgGradient = ctx.createLinearGradient(0, 0, width, height);
+    bgGradient.addColorStop(0, '#0f172a');
+    bgGradient.addColorStop(1, '#1e1b4b');
+    ctx.fillStyle = bgGradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Card principal
+    const cardX = padding;
+    const cardY = padding;
+    const cardW = width - padding * 2;
+    const cardH = height - padding * 2;
+
+    ctx.fillStyle = 'rgba(30, 41, 59, 0.85)';
+    ctx.strokeStyle = 'rgba(139, 92, 246, 0.4)';
+    ctx.lineWidth = 1.5;
+    this.roundRect(ctx, cardX, cardY, cardW, cardH, 20, true, true);
+
+    let curY = cardY + 40;
+
+    // Header logo
+    ctx.fillStyle = '#a855f7';
+    ctx.font = 'bold 24px sans-serif';
+    ctx.fillText('d/', cardX + 30, curY);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 26px sans-serif';
+    ctx.fillText('dividimos?', cardX + 60, curY);
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '14px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('https://dividimos.vercel.app', cardX + cardW - 30, curY);
+    ctx.textAlign = 'left';
+
+    curY += 35;
+
+    // Divisor
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.beginPath();
+    ctx.moveTo(cardX + 30, curY);
+    ctx.lineTo(cardX + cardW - 30, curY);
+    ctx.stroke();
+
+    curY += 25;
+
+    // Cajas de resumen (Total y Promedio)
+    const boxW = (cardW - 75) / 2;
+
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.6)';
+    this.roundRect(ctx, cardX + 30, curY, boxW, 75, 12, true, false);
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '12px sans-serif';
+    ctx.fillText(this.t('totalSpent').toUpperCase(), cardX + 45, curY + 25);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 22px sans-serif';
+    ctx.fillText(this.formatCurrency(this.totalExpense), cardX + 45, curY + 56);
+
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.6)';
+    this.roundRect(ctx, cardX + 45 + boxW, curY, boxW, 75, 12, true, false);
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '12px sans-serif';
+    ctx.fillText(this.t('perPerson').toUpperCase(), cardX + 60 + boxW, curY + 25);
+    ctx.fillStyle = '#c084fc';
+    ctx.font = 'bold 22px sans-serif';
+    ctx.fillText(this.formatCurrency(this.averageSpent), cardX + 60 + boxW, curY + 56);
+
+    curY += 95;
+
+    // Resumen por persona
+    if (this.personBalances.length > 0) {
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.fillText(this.t('personBalancesTitle'), cardX + 30, curY);
+      curY += 20;
+
+      this.personBalances.forEach((pb) => {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.5)';
+        this.roundRect(ctx, cardX + 30, curY, cardW - 60, 34, 8, true, false);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '600 13px sans-serif';
+        ctx.fillText(pb.person, cardX + 45, curY + 22);
+
+        const sign = pb.netBalance > 0 ? '+' : '';
+        const netStr = sign + this.formatCurrency(pb.netBalance);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = pb.netBalance > 0 ? '#4ade80' : pb.netBalance < 0 ? '#f87171' : '#94a3b8';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText(netStr, cardX + cardW - 45, curY + 22);
+        ctx.textAlign = 'left';
+
+        curY += 38;
+      });
+
+      curY += 15;
+    }
+
+    // Liquidación final
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = 'bold 15px sans-serif';
+    ctx.fillText(this.t('settlementsTitle'), cardX + 30, curY);
+    curY += 20;
+
+    if (this.results.length === 0) {
+      ctx.fillStyle = '#4ade80';
+      ctx.font = '14px sans-serif';
+      ctx.fillText('😎 ' + this.t('allSettled'), cardX + 30, curY + 20);
+      curY += 40;
+    } else {
+      this.results.forEach((res) => {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.6)';
+        this.roundRect(ctx, cardX + 30, curY, cardW - 60, 38, 10, true, false);
+
+        ctx.fillStyle = '#f87171';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText(res.debtor, cardX + 45, curY + 24);
+
+        const debtorW = ctx.measureText(res.debtor).width;
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '12px sans-serif';
+        ctx.fillText(` ${this.t('sharePays')} `, cardX + 48 + debtorW, curY + 24);
+
+        const paysW = ctx.measureText(` ${this.t('sharePays')} `).width;
+        ctx.fillStyle = '#4ade80';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText(res.creditor, cardX + 48 + debtorW + paysW, curY + 24);
+
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#c084fc';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.fillText(this.formatCurrency(res.amount), cardX + cardW - 45, curY + 24);
+        ctx.textAlign = 'left';
+
+        curY += 44;
+      });
+    }
+
+    curY += 10;
+    ctx.fillStyle = '#64748b';
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(this.t('shareGeneratedWith'), cardX + cardW / 2, curY + 15);
+    ctx.textAlign = 'left';
+
+    const link = document.createElement('a');
+    link.download = 'dividimos-resumen.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+
+    this.showNotice(this.t('imageDownloaded'), 'success');
+    this.analyticsService.track('summary_image_downloaded');
+  }
+
+  private roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number, fill: boolean, stroke: boolean): void {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    if (fill) ctx.fill();
+    if (stroke) ctx.stroke();
+  }
+
   // ------------------------------------------------------------- trackBy
 
   trackByPerson(_index: number, person: string): string {
@@ -1118,3 +1386,4 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     return `${result.debtor}→${result.creditor}`;
   }
 }
+
