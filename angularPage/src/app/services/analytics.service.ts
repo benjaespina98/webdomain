@@ -10,7 +10,8 @@ export type AnalyticsEvent =
   | 'share_clicked'
   | 'summary_copied'
   | 'session_cleared'
-  | 'voice_expense_dictated';
+  | 'voice_expense_dictated'
+  | 'summary_image_downloaded';
 
 @Injectable({
   providedIn: 'root'

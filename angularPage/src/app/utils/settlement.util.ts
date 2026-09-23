@@ -1,7 +1,15 @@
 import { ExpenseItem, SettlementResult } from '../models/expense.model';
 
+export interface PersonBalance {
+  person: string;
+  totalPaid: number;
+  totalConsumed: number;
+  netBalance: number;
+}
+
 export interface SettlementSummary {
   results: SettlementResult[];
+  personBalances: PersonBalance[];
   totalExpense: number;
   averageSpent: number;
 }
@@ -20,10 +28,20 @@ type BalanceMap = Record<string, number>;
  */
 export function calculateSettlement(people: string[], expenseItems: ExpenseItem[]): SettlementSummary {
   if (people.length === 0 || expenseItems.length === 0) {
-    return { results: [], totalExpense: 0, averageSpent: 0 };
+    return { results: [], personBalances: [], totalExpense: 0, averageSpent: 0 };
   }
 
   const balancesInCents = people.reduce<BalanceMap>((accumulator, person) => {
+    accumulator[person] = 0;
+    return accumulator;
+  }, {});
+
+  const paidInCents = people.reduce<BalanceMap>((accumulator, person) => {
+    accumulator[person] = 0;
+    return accumulator;
+  }, {});
+
+  const consumedInCents = people.reduce<BalanceMap>((accumulator, person) => {
     accumulator[person] = 0;
     return accumulator;
   }, {});
@@ -39,18 +57,31 @@ export function calculateSettlement(people: string[], expenseItems: ExpenseItem[
     const amountInCents = Math.round(expense.amount * 100);
     totalExpenseInCents += amountInCents;
     balancesInCents[expense.paidBy] += amountInCents;
+    paidInCents[expense.paidBy] += amountInCents;
 
     // El resto en centavos se reparte de a uno para que los saldos cierren exactos.
     const baseShare = Math.floor(amountInCents / validParticipants.length);
     const remainder = amountInCents % validParticipants.length;
 
     validParticipants.forEach((participant, index) => {
-      balancesInCents[participant] -= baseShare + (index < remainder ? 1 : 0);
+      const share = baseShare + (index < remainder ? 1 : 0);
+      balancesInCents[participant] -= share;
+      consumedInCents[participant] += share;
     });
   });
 
+  const personBalances: PersonBalance[] = people
+    .map((person) => ({
+      person,
+      totalPaid: fromCents(paidInCents[person]),
+      totalConsumed: fromCents(consumedInCents[person]),
+      netBalance: fromCents(balancesInCents[person])
+    }))
+    .sort((a, b) => b.netBalance - a.netBalance);
+
   return {
     results: buildTransfers(balancesInCents),
+    personBalances,
     totalExpense: fromCents(totalExpenseInCents),
     averageSpent: fromCents(Math.round(totalExpenseInCents / people.length))
   };

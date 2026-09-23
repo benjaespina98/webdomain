@@ -82,6 +82,7 @@
       <div class="expense-grid">
         <div class="field field-description">
           <input #expenseDescriptionInput type="text" class="input" [(ngModel)]="newExpenseDescription"
+                 (ngModelChange)="onDescriptionChange($event)"
                  name="expenseDescription" [placeholder]="t('expensePlaceholder')"
                  [attr.aria-label]="t('expenseTitle')" autocomplete="off" maxlength="60">
           <button type="button" class="mic-btn" *ngIf="isVoiceSupported" [class.listening]="isListening"
@@ -108,6 +109,19 @@
             <option value="">{{ t('selectPlaceholder') }}</option>
             <option *ngFor="let person of people; trackBy: trackByPerson" [value]="person">{{ person }}</option>
           </select>
+        </div>
+      </div>
+
+      <!-- Categoría de gasto -->
+      <div class="category-row">
+        <span class="category-label">{{ t('categoryTitle') }}</span>
+        <div class="category-chips" role="radiogroup" [attr.aria-label]="t('categoryTitle')">
+          <button type="button" class="category-chip" *ngFor="let cat of expenseCategories"
+                  [class.active]="selectedCategory === cat.id" (click)="selectCategory(cat.id)"
+                  [title]="currentLanguage === 'es' ? cat.labelEs : cat.labelEn">
+            <span class="cat-emoji">{{ cat.emoji }}</span>
+            <span class="cat-label">{{ currentLanguage === 'es' ? cat.labelEs : cat.labelEn }}</span>
+          </button>
         </div>
       </div>
 
@@ -165,7 +179,12 @@
       <li class="expense-item" *ngFor="let item of expenseItems; trackBy: trackByExpenseItem"
           [class.is-editing]="item.id === editingExpenseId" [class.removing]="removingExpenseIds.has(item.id)">
         <div class="expense-main">
-          <span class="expense-name">{{ item.description }}</span>
+          <span class="expense-name">
+            <span class="cat-icon-badge" [title]="currentLanguage === 'es' ? getCategoryOption(item.category).labelEs : getCategoryOption(item.category).labelEn">
+              {{ getCategoryOption(item.category).emoji }}
+            </span>
+            {{ item.description }}
+          </span>
           <span class="expense-meta">{{ t('paidByShort') }} {{ item.paidBy }} · {{ formatExpenseParticipants(item) }}</span>
         </div>
         <span class="expense-amount">{{ formatCurrency(item.amount) }}</span>
@@ -200,6 +219,25 @@
       </div>
     </div>
 
+    <!-- Resumen de balances por persona -->
+    <h3 class="subsection-title" *ngIf="personBalances.length > 0">{{ t('personBalancesTitle') }}</h3>
+
+    <ul class="person-balance-list" *ngIf="personBalances.length > 0">
+      <li class="person-balance-item" *ngFor="let pb of personBalances">
+        <div class="pb-info">
+          <span class="avatar pb-avatar">{{ pb.person.charAt(0) }}</span>
+          <span class="pb-name">{{ pb.person }}</span>
+        </div>
+        <div class="pb-details">
+          <span class="pb-sub"><span class="pb-sub-label">{{ t('paidTotal') }}:</span> {{ formatCurrency(pb.totalPaid) }}</span>
+          <span class="pb-sub"><span class="pb-sub-label">{{ t('consumedTotal') }}:</span> {{ formatCurrency(pb.totalConsumed) }}</span>
+        </div>
+        <div class="pb-badge" [class.positive]="pb.netBalance > 0" [class.negative]="pb.netBalance < 0" [class.neutral]="pb.netBalance === 0">
+          {{ pb.netBalance > 0 ? '+' : '' }}{{ formatCurrency(pb.netBalance) }}
+        </div>
+      </li>
+    </ul>
+
     <h3 class="subsection-title" *ngIf="results.length > 0">{{ t('settlementsTitle') }}</h3>
 
     <ul class="settlement-list" *ngIf="results.length > 0">
@@ -232,6 +270,10 @@
       <button type="button" class="btn-share whatsapp" (click)="shareWhatsApp()" [attr.aria-label]="t('shareWhatsapp')">
         <i class="fab fa-whatsapp" aria-hidden="true"></i>
         <span>WhatsApp</span>
+      </button>
+      <button type="button" class="btn-share image" (click)="exportSummaryAsImage()" [attr.aria-label]="t('downloadImage')">
+        <i class="fas fa-file-image" aria-hidden="true"></i>
+        <span>{{ t('downloadImage') }}</span>
       </button>
     </div>
   </section>
