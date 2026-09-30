@@ -1102,6 +1102,7 @@
     align-items: center;
     gap: 0.5rem;
     min-width: 0;
+    flex: 1 1 auto;
 }
 
 .pb-avatar {
@@ -1129,6 +1130,27 @@
     gap: 0.8rem;
     font-size: var(--font-xs);
     color: var(--text-dim);
+    white-space: nowrap;
+}
+
+/* En pantallas angostas el nombre se quedaba sin lugar: pasamos los detalles a una segunda fila. */
+@media (max-width: 520px) {
+    .person-balance-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            'info badge'
+            'details details';
+        row-gap: 0.4rem;
+    }
+
+    .pb-info { grid-area: info; }
+    .pb-badge { grid-area: badge; }
+    .pb-details {
+        grid-area: details;
+        justify-content: space-between;
+        padding-left: 2.35rem;
+    }
 }
 
 .pb-sub-label {

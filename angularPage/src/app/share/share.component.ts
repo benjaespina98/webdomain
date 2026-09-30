@@ -50,8 +50,10 @@ export class ShareComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const data = this.route.snapshot.queryParamMap.get('data');
-    const version = Number.parseInt(this.route.snapshot.queryParamMap.get('v') ?? '0', 10);
+    // Los enlaces nuevos usan el fragmento; los ya enviados por WhatsApp usan query params.
+    const fromFragment = this.shareService.parseFragment(this.route.snapshot.fragment);
+    const data = fromFragment?.data ?? this.route.snapshot.queryParamMap.get('data');
+    const version = fromFragment?.version ?? Number.parseInt(this.route.snapshot.queryParamMap.get('v') ?? '0', 10);
     const payload = data ? this.shareService.parseShareLink(data, version) : null;
 
     if (!payload) {
@@ -68,7 +70,10 @@ export class ShareComponent implements OnInit {
       // Ya hay una sesión con datos: no la pisamos en silencio. Mandamos el enlace,
       // todavía sin aplicar, a /app para que SplitComponent pida confirmación antes
       // de reemplazar nada (ver `handleIncomingShareQueryParams`).
-      void this.router.navigate(['/app'], { queryParams: { data, v: version, shareConflict: 1 } });
+      void this.router.navigate(['/app'], {
+        queryParams: { shareConflict: 1 },
+        fragment: this.shareService.buildFragment(data as string, version)
+      });
       return;
     }
 

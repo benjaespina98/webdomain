@@ -43,11 +43,11 @@ describe('SplitComponent', () => {
     const message = decodeURIComponent((openSpy.calls.mostRecent().args[0] as string).split('text=')[1]);
 
     expect(message).toContain('🧾 *dividimos?*');
-    expect(message).toContain('👥 Pepe, Juan, Ana');
-    expect(message).toContain('Total: $ 3.000,00');
-    expect(message).toContain('Juan le paga *$ 1.000,00* a Pepe');
+    expect(message).toContain('👥 *Personas*: Pepe, Juan, Ana');
+    expect(message).toContain('💰 *Total*: $ 3.000,00');
+    expect(message).toContain('*Juan* le paga *$ 1.000,00* a *Pepe*');
     expect(message).toContain('Hecho con dividimos? 🤙');
-    expect(message).toContain('/share?data=');
+    expect(message).toContain('/share#data=');
   });
 
   it('should copy a share link to the clipboard', async () => {
@@ -62,7 +62,7 @@ describe('SplitComponent', () => {
     await component.copyShareLink();
 
     expect(writeTextSpy).toHaveBeenCalledTimes(1);
-    expect(writeTextSpy.calls.mostRecent().args[0] as string).toContain('/share?data=');
+    expect(writeTextSpy.calls.mostRecent().args[0] as string).toContain('/share#data=');
   });
 
   it('should calculate transfers when only some participants share an expense', () => {

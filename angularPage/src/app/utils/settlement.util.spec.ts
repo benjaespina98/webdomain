@@ -2,8 +2,8 @@ import { calculateSettlement } from './settlement.util';
 
 describe('calculateSettlement', () => {
   it('returns an empty summary when there are no people or no expenses', () => {
-    expect(calculateSettlement([], [])).toEqual({ results: [], totalExpense: 0, averageSpent: 0 });
-    expect(calculateSettlement(['Ana'], [])).toEqual({ results: [], totalExpense: 0, averageSpent: 0 });
+    expect(calculateSettlement([], [])).toEqual({ results: [], personBalances: [], totalExpense: 0, averageSpent: 0 });
+    expect(calculateSettlement(['Ana'], [])).toEqual({ results: [], personBalances: [], totalExpense: 0, averageSpent: 0 });
   });
 
   it('produces no transfers when a single person pays for themselves', () => {

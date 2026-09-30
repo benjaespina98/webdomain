@@ -520,11 +520,12 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const hadConflict = params.has('shareConflict');
-    const conflictData = params.get('data');
-    const conflictVersion = Number.parseInt(params.get('v') ?? '0', 10);
+    const fromFragment = this.shareService.parseFragment(this.route.snapshot.fragment);
+    const conflictData = fromFragment?.data ?? params.get('data');
+    const conflictVersion = fromFragment?.version ?? Number.parseInt(params.get('v') ?? '0', 10);
 
     // Limpiamos la URL para que un refresh no repita el aviso ni la importación.
-    void this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
+    void this.router.navigate([], { relativeTo: this.route, queryParams: {}, fragment: undefined, replaceUrl: true });
 
     if (!hadConflict) {
       this.showNotice(this.t('shareLinkError'), 'warning');
@@ -1117,6 +1118,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
         d: item.description,
         a: item.amount,
         b: Math.max(0, this.people.indexOf(item.paidBy)),
+        ...(item.category ? { k: item.category } : {}),
         ...(this.areAllPeopleIncluded(item.participants)
           ? {}
           : { r: item.participants.map((p) => this.people.indexOf(p)).filter((i) => i >= 0) })

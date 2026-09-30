@@ -16,11 +16,36 @@ describe('ShareService', () => {
       c: 'U$S'
     };
     const url = service.buildShareUrl(payload);
-    const params = new URL(url).searchParams;
-
-    const decoded = service.parseShareLink(params.get('data')!, Number(params.get('v')));
+    const fragment = service.parseFragment(new URL(url).hash);
+    const decoded = service.parseShareLink(fragment!.data, fragment!.version);
 
     expect(decoded).toEqual(payload as any);
+  });
+
+  it('conserva la categoría al importar y ignora una desconocida', () => {
+    const state = service.buildImportedState({
+      p: ['Ana', 'Beto'],
+      e: [
+        { d: 'Asado', a: 100, b: 0, k: 'food' },
+        { d: 'Otro', a: 50, b: 1, k: 'nope' as any }
+      ]
+    }, 'es');
+
+    expect(state.expenseItems[0].category).toBe('food');
+    expect(state.expenseItems[1].category).toBeUndefined();
+  });
+
+  it('pone los datos en el fragmento y no en el query string', () => {
+    const url = new URL(service.buildShareUrl({ p: ['Ana'], e: [] }));
+
+    expect(url.search).toBe('');
+    expect(url.hash).toContain('data=');
+  });
+
+  it('parseFragment devuelve null sin datos y conserva los + de lz-string', () => {
+    expect(service.parseFragment(null)).toBeNull();
+    expect(service.parseFragment('v=4')).toBeNull();
+    expect(service.parseFragment('#data=ab+c$d-e&v=4')).toEqual({ data: 'ab+c$d-e', version: 4 });
   });
 
   it('migra un enlace v3 (pagador/participantes por nombre) al formato actual', () => {
