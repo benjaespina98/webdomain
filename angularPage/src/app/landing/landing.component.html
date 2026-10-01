@@ -12,56 +12,41 @@
       <span class="hero-brand">dividimos?</span>
     </div>
 
-    @if (currentLanguage === 'es') {
-      <div>
-        <h1 class="hero-title">Nunca más hagas cuentas después de un <span class="accent-text">asado, una cena o una salida</span></h1>
-        <p class="hero-subtitle">dividimos? calcula automáticamente quién le debe a quién. Sin registrarte, sin descargar nada y en pocos segundos.</p>
+    <div>
+      @if (currentLanguage === 'es') {
+        <h1 class="hero-title">Dividí la cuenta <span class="accent-text">sin hacer cuentas</span></h1>
+        <p class="hero-subtitle">Cargá los gastos y mirá quién le paga a quién.</p>
         <div class="hero-ctas">
-          <a routerLink="/app" class="btn-cta-primary"><i class="fas fa-calculator" aria-hidden="true"></i>Dividir gastos ahora</a>
+          <a routerLink="/app" class="btn-cta-primary"><i class="fas fa-calculator" aria-hidden="true"></i>Empezar</a>
         </div>
-      </div>
-    }
-
-    @if (currentLanguage === 'en') {
-      <div>
-        <h1 class="hero-title">Stop doing the math after a <span class="accent-text">BBQ, dinner, or night out</span></h1>
-        <p class="hero-subtitle">dividimos? automatically calculates who owes who. No sign-up, nothing to download, and it takes seconds.</p>
+      } @else {
+        <h1 class="hero-title">Split the bill <span class="accent-text">without the math</span></h1>
+        <p class="hero-subtitle">Add the expenses and see who pays whom.</p>
         <div class="hero-ctas">
-          <a routerLink="/app" class="btn-cta-primary"><i class="fas fa-calculator" aria-hidden="true"></i>Split expenses now</a>
+          <a routerLink="/app" class="btn-cta-primary"><i class="fas fa-calculator" aria-hidden="true"></i>Get started</a>
         </div>
-      </div>
-    }
+      }
+    </div>
   </header>
 
-  <!-- What is dividimos? -->
+  <!-- Por qué dividimos? -->
   <section class="section what-is-section">
     <div class="what-is-card reveal">
-      @if (currentLanguage === 'es') {
-        <h2 class="section-title">¿Qué es dividimos?</h2>
-      }
-      @if (currentLanguage === 'en') {
-        <h2 class="section-title">What is dividimos?</h2>
-      }
+      <h2 class="section-title">{{ currentLanguage === 'es' ? 'Simple, privado y gratis' : 'Simple, private and free' }}</h2>
 
       @if (currentLanguage === 'es') {
         <ul class="what-is-list">
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Está pensada para resolver gastos grupales puntuales, no para llevar una contabilidad permanente.</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>No necesitás crear una cuenta ni registrarte con un email.</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>No guardamos tu información en ningún servidor.</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Funciona completamente en tu navegador, incluso sin conexión.</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Podés dictar un gasto por voz: «Ana pagó 12500 de cena».</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Al terminar, compartís el resultado con un único enlace por WhatsApp.</li>
+          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Sin registro ni cuenta.</li>
+          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Funciona en tu navegador, hasta sin conexión.</li>
+          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Tus datos no pasan por ningún servidor.</li>
+          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Dictá un gasto: «Ana pagó 12500 de cena».</li>
         </ul>
-      }
-
-      @if (currentLanguage === 'en') {
+      } @else {
         <ul class="what-is-list">
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Built to settle one-off group expenses, not to keep permanent accounting.</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>No account or email sign-up required.</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>We don't store your information on any server.</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Runs entirely in your browser, even offline.</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>You can dictate an expense out loud: "Ana paid 120 for dinner".</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>When you're done, share the result with a single WhatsApp link.</li>
+          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>No sign-up, no account.</li>
+          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Runs in your browser, even offline.</li>
+          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Your data never touches a server.</li>
+          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Dictate an expense: "Ana paid 120 for dinner".</li>
         </ul>
       }
     </div>
@@ -96,21 +81,11 @@
 
           <div class="preview-kpis">
             <div class="preview-kpi">
-              @if (currentLanguage === 'es') {
-                <span class="preview-kpi-label">Total gastado</span>
-              }
-              @if (currentLanguage === 'en') {
-                <span class="preview-kpi-label">Total spent</span>
-              }
+              <span class="preview-kpi-label">{{ currentLanguage === 'es' ? 'Total gastado' : 'Total spent' }}</span>
               <strong class="preview-kpi-value">$ 326,00</strong>
             </div>
             <div class="preview-kpi">
-              @if (currentLanguage === 'es') {
-                <span class="preview-kpi-label">Promedio por persona</span>
-              }
-              @if (currentLanguage === 'en') {
-                <span class="preview-kpi-label">Average per person</span>
-              }
+              <span class="preview-kpi-label">{{ currentLanguage === 'es' ? 'Promedio por persona' : 'Average per person' }}</span>
               <strong class="preview-kpi-value">$ 108,67</strong>
             </div>
           </div>
@@ -124,144 +99,101 @@
           </div>
 
           <div class="preview-share-actions">
-            <span class="preview-share-btn preview-share-whatsapp"><i class="fab fa-whatsapp" aria-hidden="true"></i>@if (currentLanguage === 'es') {
-            <span>Compartir por WhatsApp</span>
-            }@if (currentLanguage === 'en') {
-            <span>Share on WhatsApp</span>
-          }</span>
-          <span class="preview-share-btn"><i class="fas fa-link" aria-hidden="true"></i>@if (currentLanguage === 'es') {
-          <span>Copiar enlace</span>
-          }@if (currentLanguage === 'en') {
-          <span>Copy link</span>
-        }</span>
+            <span class="preview-share-btn preview-share-whatsapp"><i class="fab fa-whatsapp" aria-hidden="true"></i><span>WhatsApp</span></span>
+            <span class="preview-share-btn">
+              <i class="fas fa-link" aria-hidden="true"></i>
+              @if (currentLanguage === 'es') { <span>Copiar enlace</span> } @else { <span>Copy link</span> }
+            </span>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
-</section>
+  </section>
 
-<!-- How It Works Section -->
-<section class="section workflow-section">
-  @if (currentLanguage === 'es') {
-    <h2 class="section-title">Cómo funciona</h2>
-  }
-  @if (currentLanguage === 'en') {
-    <h2 class="section-title">How it works</h2>
-  }
+  <!-- Cómo funciona -->
+  <section class="section workflow-section">
+    <h2 class="section-title">{{ currentLanguage === 'es' ? 'Cómo funciona' : 'How it works' }}</h2>
 
-  <div class="workflow-steps workflow-steps-4">
-    <div class="step-item reveal">
-      <span class="step-num">1</span>
+    <div class="workflow-steps workflow-steps-4">
       @if (currentLanguage === 'es') {
-        <h4>Agregás a los participantes</h4>
-      }
-      @if (currentLanguage === 'es') {
-        <p>Sumá a las personas que van a compartir los gastos del grupo.</p>
-      }
-      @if (currentLanguage === 'en') {
-        <h4>Add the participants</h4>
-      }
-      @if (currentLanguage === 'en') {
-        <p>Add the people who are going to share the group's expenses.</p>
+        <div class="step-item reveal">
+          <span class="step-num">1</span>
+          <h4>Sumá a la gente</h4>
+          <p>Un nombre por persona.</p>
+        </div>
+        <div class="step-item reveal">
+          <span class="step-num">2</span>
+          <h4>Cargá los gastos</h4>
+          <p>Quién pagó y entre quiénes se reparte.</p>
+        </div>
+        <div class="step-item reveal">
+          <span class="step-num">3</span>
+          <h4>Mirá quién paga a quién</h4>
+          <p>Las transferencias, calculadas solas.</p>
+        </div>
+        <div class="step-item reveal">
+          <span class="step-num">4</span>
+          <h4>Compartí</h4>
+          <p>Por WhatsApp, enlace o imagen.</p>
+        </div>
+      } @else {
+        <div class="step-item reveal">
+          <span class="step-num">1</span>
+          <h4>Add people</h4>
+          <p>One name each.</p>
+        </div>
+        <div class="step-item reveal">
+          <span class="step-num">2</span>
+          <h4>Add expenses</h4>
+          <p>Who paid and who shares it.</p>
+        </div>
+        <div class="step-item reveal">
+          <span class="step-num">3</span>
+          <h4>See who pays whom</h4>
+          <p>The transfers, worked out for you.</p>
+        </div>
+        <div class="step-item reveal">
+          <span class="step-num">4</span>
+          <h4>Share it</h4>
+          <p>WhatsApp, link or image.</p>
+        </div>
       }
     </div>
+  </section>
 
-    <div class="step-item reveal">
-      <span class="step-num">2</span>
-      @if (currentLanguage === 'es') {
-        <h4>Cargás los gastos</h4>
-      }
-      @if (currentLanguage === 'es') {
-        <p>A medida que ocurren: durante el asado, la cena o la salida.</p>
-      }
-      @if (currentLanguage === 'en') {
-        <h4>Add the expenses</h4>
-      }
-      @if (currentLanguage === 'en') {
-        <p>As they happen: during the BBQ, the dinner, or the night out.</p>
-      }
-    </div>
-
-    <div class="step-item reveal">
-      <span class="step-num">3</span>
-      @if (currentLanguage === 'es') {
-        <h4>La app calcula todo</h4>
-      }
-      @if (currentLanguage === 'es') {
-        <p>Calculamos automáticamente quién le debe a quién, sin que hagas cuentas.</p>
-      }
-      @if (currentLanguage === 'en') {
-        <h4>The app does the math</h4>
-      }
-      @if (currentLanguage === 'en') {
-        <p>We automatically calculate who owes who, no manual math needed.</p>
-      }
-    </div>
-
-    <div class="step-item reveal">
-      <span class="step-num">4</span>
-      @if (currentLanguage === 'es') {
-        <h4>Compartís el resultado</h4>
-      }
-      @if (currentLanguage === 'es') {
-        <p>Un único enlace por WhatsApp para que todos vean exactamente lo mismo.</p>
-      }
-      @if (currentLanguage === 'en') {
-        <h4>Share the result</h4>
-      }
-      @if (currentLanguage === 'en') {
-        <p>One single WhatsApp link so everyone sees the exact same result.</p>
-      }
-    </div>
-  </div>
-</section>
-
-<!-- Privacy pill -->
-<section class="section no-account-section">
-  <div class="no-account-card reveal">
-    @if (currentLanguage === 'es') {
+  <!-- Privacidad -->
+  <section class="section no-account-section">
+    <div class="no-account-card reveal">
       <div class="no-account-inner">
         <i class="fas fa-shield-halved no-account-icon" aria-hidden="true"></i>
         <div>
-          <h3 class="no-account-title">Tus datos son tuyos</h3>
-          <p class="no-account-body">Todo se guarda en tu navegador — nada pasa por servidores. Si cerrás la página, podés volver y seguir donde lo dejaste. Al terminar, un solo link comparte el resultado con todos.</p>
+          @if (currentLanguage === 'es') {
+            <h3 class="no-account-title">Tus datos son tuyos</h3>
+            <p class="no-account-body">Todo queda en tu navegador, nada pasa por servidores. Cerrás la página y seguís cuando quieras.</p>
+          } @else {
+            <h3 class="no-account-title">Your data stays with you</h3>
+            <p class="no-account-body">Everything stays in your browser, nothing goes through a server. Close the page and pick up whenever.</p>
+          }
         </div>
       </div>
-    }
-    @if (currentLanguage === 'en') {
-      <div class="no-account-inner">
-        <i class="fas fa-shield-halved no-account-icon" aria-hidden="true"></i>
-        <div>
-          <h3 class="no-account-title">Your data stays with you</h3>
-          <p class="no-account-body">Everything is saved in your browser — nothing goes through servers. Close the page and pick up where you left off. When done, one link shares the result with everyone.</p>
-        </div>
-      </div>
-    }
-  </div>
-</section>
-
-<!-- Final CTA Section -->
-<section class="final-cta-section reveal">
-  @if (currentLanguage === 'es') {
-    <div>
-      <h2>¿Listo para saber quién le debe a quién?</h2>
-      <a routerLink="/app" class="btn-cta-primary cta-spaced"><i class="fas fa-check-circle" aria-hidden="true"></i>Empezar gratis</a>
     </div>
-  }
-  @if (currentLanguage === 'en') {
-    <div>
-      <h2>Ready to find out who owes who?</h2>
-      <a routerLink="/app" class="btn-cta-primary cta-spaced"><i class="fas fa-check-circle" aria-hidden="true"></i>Start for free</a>
-    </div>
-  }
-</section>
+  </section>
 
-<!-- Footer -->
-<footer class="landing-footer">
-  <p>&copy; {{ currentYear }} dividimos?. @if (currentLanguage === 'es') {
-    <span>Hecho con 💜 para el mundo.</span>
-    }@if (currentLanguage === 'en') {
-    <span>Built with 💜 for the world.</span>
-  }</p>
-</footer>
+  <!-- CTA final -->
+  <section class="final-cta-section reveal">
+    <div>
+      @if (currentLanguage === 'es') {
+        <h2>¿Quién le debe a quién?</h2>
+        <a routerLink="/app" class="btn-cta-primary cta-spaced"><i class="fas fa-check-circle" aria-hidden="true"></i>Empezar</a>
+      } @else {
+        <h2>Who owes who?</h2>
+        <a routerLink="/app" class="btn-cta-primary cta-spaced"><i class="fas fa-check-circle" aria-hidden="true"></i>Get started</a>
+      }
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <p>&copy; {{ currentYear }} dividimos?. {{ currentLanguage === 'es' ? 'Hecho con 💜' : 'Made with 💜' }}</p>
+  </footer>
 </div>
