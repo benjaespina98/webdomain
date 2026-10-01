@@ -70,8 +70,9 @@
     padding: 0 0.75rem;
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-pill);
-    background: transparent;
-    color: var(--text-dim);
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: var(--danger-light);
     font-size: var(--font-xs);
     font-weight: 600;
     white-space: nowrap;
@@ -83,8 +84,8 @@
     }
 
     &:hover {
-        background: rgba(239, 68, 68, 0.12);
-        border-color: rgba(239, 68, 68, 0.32);
+        background: rgba(239, 68, 68, 0.18);
+        border-color: rgba(239, 68, 68, 0.5);
         color: var(--danger-light);
     }
 }
@@ -292,6 +293,11 @@
         transform: scale(0.85);
         pointer-events: none;
     }
+}
+
+/* Sin el botón de quitar (vista compartida) el globo queda simétrico y el texto centrado. */
+.person-chip.readonly {
+    padding: 0 0.95rem;
 }
 
 .person-chip-name {
@@ -632,11 +638,14 @@
     font-size: 0.68rem;
     opacity: 0;
     width: 0;
-    transition: opacity 0.15s ease, width 0.15s ease;
+    /* El gap del chip seguía sumándose con el ícono oculto y corría el texto ~9px a la derecha. */
+    margin-right: -0.4rem;
+    transition: opacity 0.15s ease, width 0.15s ease, margin-right 0.15s ease;
 
     .picker-chip.selected & {
         opacity: 1;
         width: 0.68rem;
+        margin-right: 0;
     }
 }
 
@@ -1198,6 +1207,9 @@
     justify-content: center;
     gap: 0.55rem;
     border-radius: var(--radius);
+    padding: 0 0.5rem;
+    text-align: center;
+    line-height: 1.15;
     font-size: var(--font-sm);
     font-weight: 700;
     cursor: pointer;
@@ -1205,6 +1217,7 @@
 
     i {
         font-size: 1.05rem;
+        flex: none;
     }
 
     &:hover {
@@ -1506,5 +1519,49 @@
 
     .app-shell {
         width: min(100% - 1rem, 720px);
+    }
+}
+
+
+/* ── Borrar todo (acción destructiva, bien visible al final de los resultados) ── */
+
+.btn-clear-all {
+    width: 100%;
+    min-height: 3rem;
+    margin-top: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    border-radius: var(--radius);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger-light);
+    font-size: var(--font-sm);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+
+    &:hover {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: rgba(239, 68, 68, 0.6);
+    }
+}
+
+.app-footer {
+    display: flex;
+    justify-content: center;
+    padding: 1.4rem 0 2rem;
+}
+
+.about-link {
+    color: var(--text-dim);
+    font-size: var(--font-sm);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+        color: var(--accent-light);
+        text-decoration: underline;
     }
 }

@@ -1,12 +1,13 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { LanguageService, LanguageCode } from '../services/language.service';
+import { markLandingSeen } from './landing.guard';
 
 @Component({
   selector: 'app-landing',
   templateUrl: './landing.component.html',
   styleUrls: ['./landing.component.scss']
 })
-export class LandingComponent implements AfterViewInit, OnDestroy {
+export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly currentYear = new Date().getFullYear();
   private revealObserver: IntersectionObserver | null = null;
 
@@ -21,6 +22,10 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
 
   setLanguage(lang: LanguageCode): void {
     this.languageService.set(lang);
+  }
+
+  ngOnInit(): void {
+    markLandingSeen();
   }
 
   ngAfterViewInit(): void {
