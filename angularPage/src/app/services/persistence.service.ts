@@ -46,6 +46,12 @@ export class PersistenceService {
     }
   }
 
+  /**
+   * Lee y normaliza la sesión guardada. Antes, cualquier `schemaVersion` distinto del actual
+   * borraba la sesión entera; ahora las versiones anteriores se migran (`migrate`) y solo se
+   * descarta lo que está realmente corrupto. Una versión *más nueva* (el usuario volvió a un
+   * deploy viejo) se ignora sin borrarla, para no destruir datos de una versión que sí los entiende.
+   */
   loadState(): AppState | null {
     try {
       const serialized = localStorage.getItem(this.storageKey);
@@ -53,19 +59,60 @@ export class PersistenceService {
         return null;
       }
 
-      const parsed = JSON.parse(serialized) as AppState;
+      const parsed = JSON.parse(serialized) as Partial<AppState> | null;
 
-      if (!parsed || parsed.schemaVersion !== this.currentSchemaVersion || !Array.isArray(parsed.people)) {
+      if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.people)) {
         this.clearState();
         return null;
       }
 
-      return parsed;
+      const version = typeof parsed.schemaVersion === 'number' ? parsed.schemaVersion : 0;
+      if (version > this.currentSchemaVersion) {
+        return null;
+      }
+
+      return this.migrate(parsed);
     } catch (error) {
       console.error('Failed to read state from localStorage:', error);
       this.clearState();
       return null;
     }
+  }
+
+  /**
+   * Lleva cualquier sesión guardada (de la versión que sea) al formato actual, completando
+   * con valores por defecto lo que falte y descartando gastos mal formados.
+   * Cuando el esquema cambie de forma incompatible, agregar acá un paso por versión.
+   */
+  private migrate(saved: Partial<AppState>): AppState {
+    const people = (saved.people ?? []).filter((person): person is string => typeof person === 'string' && person.trim().length > 0);
+
+    const expenseItems = (Array.isArray(saved.expenseItems) ? saved.expenseItems : [])
+      .filter((item) => !!item
+        && typeof item.description === 'string'
+        && typeof item.amount === 'number' && Number.isFinite(item.amount)
+        && typeof item.paidBy === 'string'
+        && Array.isArray(item.participants))
+      .map((item) => ({ ...item, participants: item.participants.filter((participant) => typeof participant === 'string') }));
+
+    const nextId = Math.max(saved.nextExpenseId ?? 1, ...expenseItems.map((item) => item.id + 1), 1);
+
+    return {
+      schemaVersion: this.currentSchemaVersion,
+      people,
+      expenseItems,
+      newPersonName: saved.newPersonName ?? '',
+      newExpenseDescription: saved.newExpenseDescription ?? '',
+      newExpenseAmount: typeof saved.newExpenseAmount === 'number' ? saved.newExpenseAmount : null,
+      newExpensePaidBy: saved.newExpensePaidBy ?? '',
+      splitMode: saved.splitMode === 'custom' ? 'custom' : 'all',
+      selectedParticipants: Array.isArray(saved.selectedParticipants) ? saved.selectedParticipants : [...people],
+      nextExpenseId: nextId,
+      currentLanguage: saved.currentLanguage === 'en' ? 'en' : 'es',
+      isSharedView: saved.isSharedView === true,
+      currency: saved.currency,
+      savedAt: saved.savedAt
+    };
   }
 
   clearState(): void {

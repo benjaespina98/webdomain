@@ -9,6 +9,33 @@ export interface ParsedExpense {
   participants: string[] | null;
 }
 
+interface SpeechRecognitionResultLike {
+  isFinal: boolean;
+  [index: number]: { transcript: string };
+}
+
+interface SpeechRecognitionEventLike {
+  resultIndex: number;
+  results: { length: number; [index: number]: SpeechRecognitionResultLike };
+}
+
+interface SpeechRecognitionErrorEventLike {
+  error?: string;
+}
+
+type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
+
+/** La Web Speech API todavía no está en los tipos de `lib.dom`, y en Chrome/Safari vive con prefijo. */
+interface SpeechWindow extends Window {
+  SpeechRecognition?: SpeechRecognitionCtor;
+  webkitSpeechRecognition?: SpeechRecognitionCtor;
+}
+
+function getSpeechRecognitionCtor(): SpeechRecognitionCtor | undefined {
+  const speechWindow = window as SpeechWindow;
+  return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition;
+}
+
 interface SpeechRecognitionLike {
   lang: string;
   continuous: boolean;
@@ -17,8 +44,8 @@ interface SpeechRecognitionLike {
   start(): void;
   stop(): void;
   abort(): void;
-  onresult: ((event: any) => void) | null;
-  onerror: ((event: any) => void) | null;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null;
   onend: (() => void) | null;
 }
 
@@ -35,21 +62,20 @@ export class VoiceInputService {
   constructor(private readonly zone: NgZone) {}
 
   get isSupported(): boolean {
-    return typeof window !== 'undefined'
-      && !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
+    return typeof window !== 'undefined' && !!getSpeechRecognitionCtor();
   }
 
   /** Emite transcripciones parciales y completa al terminar de escuchar. */
   listen(language: LanguageCode): Observable<{ transcript: string; isFinal: boolean }> {
     return new Observable((subscriber) => {
-      const SpeechRecognitionCtor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const RecognitionCtor = getSpeechRecognitionCtor();
 
-      if (!SpeechRecognitionCtor) {
+      if (!RecognitionCtor) {
         subscriber.error(new Error('unsupported'));
         return;
       }
 
-      const recognition: SpeechRecognitionLike = new SpeechRecognitionCtor();
+      const recognition: SpeechRecognitionLike = new RecognitionCtor();
       this.recognition = recognition;
 
       recognition.lang = language === 'es' ? 'es-AR' : 'en-US';
@@ -57,7 +83,7 @@ export class VoiceInputService {
       recognition.interimResults = true;
       recognition.maxAlternatives = 1;
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event) => {
         let transcript = '';
         let isFinal = false;
 
@@ -69,7 +95,7 @@ export class VoiceInputService {
         this.zone.run(() => subscriber.next({ transcript: transcript.trim(), isFinal }));
       };
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event) => {
         this.zone.run(() => subscriber.error(new Error(event?.error ?? 'speech-error')));
       };
 
