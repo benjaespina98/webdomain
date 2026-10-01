@@ -5,14 +5,14 @@ import { PersistenceService } from '../services/persistence.service';
 import { LanguageService } from '../services/language.service';
 
 @Component({
-  selector: 'app-share',
-  template: `
+    selector: 'app-share',
+    template: `
     <div class="share-loader" role="status" aria-live="polite">
       <i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i>
       <p class="share-loader-title">{{ isSpanish ? 'Abriendo la división compartida…' : 'Opening the shared split…' }}</p>
     </div>
   `,
-  styles: [`
+    styles: [`
     .share-loader {
       display: flex;
       flex-direction: column;
@@ -34,7 +34,8 @@ import { LanguageService } from '../services/language.service';
       font-weight: 600;
       color: var(--text, #e2e8f0);
     }
-  `]
+  `],
+    standalone: false
 })
 export class ShareComponent implements OnInit {
   readonly isSpanish: boolean;

@@ -50,9 +50,10 @@ interface AppSnapshot {
 }
 
 @Component({
-  selector: 'app-split',
-  templateUrl: './split.component.html',
-  styleUrls: ['./split.component.scss']
+    selector: 'app-split',
+    templateUrl: './split.component.html',
+    styleUrls: ['./split.component.scss'],
+    standalone: false
 })
 export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly publicAppUrl = 'https://dividimos.vercel.app/';

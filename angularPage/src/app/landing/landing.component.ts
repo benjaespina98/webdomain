@@ -3,9 +3,10 @@ import { LanguageService, LanguageCode } from '../services/language.service';
 import { markLandingSeen } from './landing.guard';
 
 @Component({
-  selector: 'app-landing',
-  templateUrl: './landing.component.html',
-  styleUrls: ['./landing.component.scss']
+    selector: 'app-landing',
+    templateUrl: './landing.component.html',
+    styleUrls: ['./landing.component.scss'],
+    standalone: false
 })
 export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly currentYear = new Date().getFullYear();
