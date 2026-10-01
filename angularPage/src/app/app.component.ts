@@ -37,10 +37,10 @@ export class AppComponent implements OnDestroy {
           route = route.firstChild;
         }
 
-        const { title, description } = route.data as { title?: string; description?: string };
+        const { title, description, canonical } = route.data as { title?: string; description?: string; canonical?: string };
         if (title && description) {
           const path = route.url.map((segment) => segment.path).join('/');
-          this.seoService.update({ title, description }, path ? `/${path}` : '/');
+          this.seoService.update({ title, description }, canonical ?? (path ? `/${path}` : '/'));
         }
       });
 

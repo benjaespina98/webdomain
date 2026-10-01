@@ -139,6 +139,25 @@ describe('SplitComponent', () => {
 
     tick(3000); // drena el timer del aviso final ("Cambio deshecho") para que fakeAsync no se queje
   }));
+
+  it('pide confirmación antes de borrar todo y permite deshacer', () => {
+    component.people = ['Ana', 'Beto'];
+    component.expenseItems = [
+      { id: 1, description: 'Cena', amount: 100, paidBy: 'Ana', participants: ['Ana', 'Beto'] }
+    ];
+
+    component.clearAll();
+    expect(component.pendingConfirm).not.toBeNull();
+    expect(component.people.length).toBe(2);
+
+    component.acceptConfirm();
+    expect(component.people).toEqual([]);
+    expect(component.expenseItems).toEqual([]);
+
+    component.undoLastAction();
+    expect(component.people).toEqual(['Ana', 'Beto']);
+    expect(component.expenseItems.length).toBe(1);
+  });
 });
 
 describe('VoiceInputService.parseExpense', () => {

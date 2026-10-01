@@ -2,7 +2,7 @@
 
   <!-- ── Header ─────────────────────────────────────────────────────── -->
   <header class="app-header">
-    <a routerLink="/" class="brand" [attr.aria-label]="t('homeAria')">
+    <a routerLink="/app" class="brand" [attr.aria-label]="t('homeAria')">
       <img class="brand-icon" src="assets/icons/icon-180x180.png" alt="" width="36" height="36">
       <span class="brand-name">dividimos?</span>
     </a>
@@ -10,7 +10,7 @@
     <div class="header-actions">
       <button type="button" class="restart-btn" *ngIf="hasData && !isSharedView"
               (click)="clearAll()" [title]="t('clearAll')" [attr.aria-label]="t('clearAll')">
-        <i class="fas fa-arrow-rotate-left" aria-hidden="true"></i>
+        <i class="fas fa-trash-can" aria-hidden="true"></i>
         <span class="restart-btn-label">{{ t('clearAll') }}</span>
       </button>
       <div class="lang-switch" role="group" [attr.aria-label]="t('languageAria')">
@@ -45,7 +45,7 @@
 
     <div class="people-row" *ngIf="people.length > 0">
       <span class="person-chip" *ngFor="let person of people; trackBy: trackByPerson"
-            [class.removing]="removingPeople.has(person)">
+            [class.removing]="removingPeople.has(person)" [class.readonly]="isSharedView">
         <span class="person-chip-name">{{ person }}</span>
         <button type="button" class="person-chip-remove" *ngIf="!isSharedView" (click)="removePerson(person)"
                 [attr.aria-label]="t('removePerson') + ' ' + person" [title]="t('removePerson')">
@@ -276,7 +276,16 @@
         <span>{{ t('downloadImage') }}</span>
       </button>
     </div>
+
+    <button type="button" class="btn-clear-all" *ngIf="hasData && !isSharedView" (click)="clearAll()">
+      <i class="fas fa-trash-can" aria-hidden="true"></i>
+      <span>{{ t('clearAllFull') }}</span>
+    </button>
   </section>
+
+  <footer class="app-footer">
+    <a routerLink="/about" class="about-link">{{ t('aboutLink') }}</a>
+  </footer>
 
   <!-- ── Toast flotante ─────────────────────────────────────────────── -->
   <div class="toast-layer" aria-live="polite" aria-atomic="true">

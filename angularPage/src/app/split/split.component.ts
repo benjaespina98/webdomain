@@ -46,6 +46,8 @@ interface TranslationMap {
   allSettled: string;
   settlementsTitle: string;
   clearAll: string;
+  clearAllFull: string;
+  aboutLink: string;
   currencyAria: string;
   copyLink: string;
   copied: string;
@@ -174,7 +176,9 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       perPerson: 'Promedio por persona',
       allSettled: 'Todo saldado, no hay pagos pendientes',
       settlementsTitle: 'Quién le paga a quién',
-      clearAll: 'Empezar de nuevo',
+      clearAll: 'Borrar todo',
+      clearAllFull: 'Borrar todo y empezar de nuevo',
+      aboutLink: '¿Qué es dividimos?',
       currencyAria: 'Elegir moneda',
       copyLink: 'Copiar enlace',
       copied: 'Copiado',
@@ -207,9 +211,9 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       undo: 'Deshacer',
       undoApplied: 'Cambio deshecho',
       dismissNotice: 'Cerrar aviso',
-      confirmTitle: '¿Empezar un evento nuevo?',
-      confirmClearAll: 'Se van a borrar todos los participantes y gastos de esta sesión. Esta acción no se puede deshacer.',
-      confirmClear: 'Sí, empezar de nuevo',
+      confirmTitle: '¿Borrar todo y empezar de nuevo?',
+      confirmClearAll: 'Se van a borrar todas las personas y todos los gastos de esta sesión. Si te arrepentís, vas a poder deshacerlo desde el aviso que aparece después.',
+      confirmClear: 'Sí, borrar todo',
       confirmImportTitle: 'Reemplazar tu sesión',
       confirmImportMessage: 'Abriste un enlace compartido, pero ya tenés datos cargados. Si continuás, se reemplaza todo lo actual por la información compartida.',
       confirmImportAccept: 'Sí, reemplazar',
@@ -270,7 +274,9 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       perPerson: 'Average per person',
       allSettled: 'All settled, no pending payments',
       settlementsTitle: 'Who pays whom',
-      clearAll: 'Start over',
+      clearAll: 'Delete all',
+      clearAllFull: 'Delete everything and start over',
+      aboutLink: 'What is dividimos?',
       currencyAria: 'Choose currency',
       copyLink: 'Copy link',
       copied: 'Copied',
@@ -303,9 +309,9 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       undo: 'Undo',
       undoApplied: 'Change undone',
       dismissNotice: 'Dismiss',
-      confirmTitle: 'Start a new event?',
-      confirmClearAll: 'This will delete every person and expense in this session. This action cannot be undone.',
-      confirmClear: 'Yes, start over',
+      confirmTitle: 'Delete everything and start over?',
+      confirmClearAll: 'This will delete every person and expense in this session. If you change your mind, you can undo it from the notice that appears afterwards.',
+      confirmClear: 'Yes, delete everything',
       confirmImportTitle: 'Replace your session',
       confirmImportMessage: 'You opened a shared link, but you already have data loaded. Continuing will replace everything current with the shared info.',
       confirmImportAccept: 'Yes, replace',
