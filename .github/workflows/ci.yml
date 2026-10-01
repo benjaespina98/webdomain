@@ -34,3 +34,8 @@ jobs:
 
       - name: Build de producción
         run: npm run build
+
+      # El CSP de vercel.json no permite scripts inline: si el build vuelve a generar
+      # un `onload=` (carga diferida del CSS de Angular), el navegador lo bloquea.
+      - name: El index.html no tiene handlers inline (CSP)
+        run: "! grep -q 'onload=' dist/angular-page/index.html"
