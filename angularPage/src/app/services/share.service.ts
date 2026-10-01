@@ -11,6 +11,8 @@ export interface ShareExpenseDto {
   r?: number[];
   /** Categoría del gasto. Opcional: los enlaces anteriores no la traen. */
   k?: ExpenseCategory;
+  /** Montos exactos por persona, en el mismo orden que `p` (0 = no participa). Reemplaza a `r`. */
+  s?: number[];
 }
 
 export interface SharePayload {
@@ -164,7 +166,10 @@ export class ShareService {
       description: item.d,
       amount: item.a,
       paidBy: people[item.b],
-      participants: item.r ? item.r.map((personIndex) => people[personIndex]) : [...people],
+      participants: item.s
+        ? people.filter((_, index) => item.s![index] > 0)
+        : item.r ? item.r.map((personIndex) => people[personIndex]) : [...people],
+      ...(item.s ? { shares: this.sharesFromAmounts(people, item.s) } : {}),
       // Cosmético, igual que la moneda: una categoría desconocida se ignora en vez de invalidar el enlace.
       ...(item.k && EXPENSE_CATEGORIES.some((category) => category.id === item.k) ? { category: item.k } : {})
     }));
@@ -188,6 +193,30 @@ export class ShareService {
     };
   }
 
+  /** Los montos deben ser uno por persona, no negativos, con al menos uno > 0, y sumar el total del gasto. */
+  private isValidShares(amounts: unknown, total: number, peopleCount: number): boolean {
+    if (!Array.isArray(amounts) || amounts.length !== peopleCount) {
+      return false;
+    }
+
+    if (!amounts.every((amount) => typeof amount === 'number' && Number.isFinite(amount) && amount >= 0)) {
+      return false;
+    }
+
+    const sumInCents = amounts.reduce((sum: number, amount: number) => sum + Math.round(amount * 100), 0);
+    return amounts.some((amount) => amount > 0) && sumInCents === Math.round(total * 100);
+  }
+
+  private sharesFromAmounts(people: string[], amounts: number[]): Record<string, number> {
+    const shares: Record<string, number> = {};
+    people.forEach((person, index) => {
+      if (amounts[index] > 0) {
+        shares[person] = amounts[index];
+      }
+    });
+    return shares;
+  }
+
   private isValidPayload(payload: SharePayload): payload is SharePayload {
     if (!Array.isArray(payload.p) || payload.p.length === 0) {
       return false;
@@ -209,6 +238,7 @@ export class ShareService {
       && typeof item.a === 'number' && Number.isFinite(item.a) && item.a > 0
       && isValidIndex(item.b)
       && (item.r === undefined || (Array.isArray(item.r) && item.r.length > 0 && item.r.every(isValidIndex)))
+      && (item.s === undefined || this.isValidShares(item.s, item.a, peopleCount))
     );
   }
 }

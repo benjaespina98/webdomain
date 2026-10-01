@@ -1,5 +1,5 @@
 import { Injectable, computed, effect, signal } from '@angular/core';
-import { CurrencySymbol, ExpenseItem, SplitMode } from '../models/expense.model';
+import { CurrencySymbol, ExpenseItem, SplitMode, cloneExpense } from '../models/expense.model';
 import { calculateSettlement, SettlementSummary } from '../utils/settlement.util';
 import { AppState, PersistableState, PersistenceService } from './persistence.service';
 import { LanguageCode } from './language.service';
@@ -29,6 +29,10 @@ export class SplitStateService {
   readonly newExpenseAmount = signal<number | null>(null);
   readonly newExpensePaidBy = signal('');
   readonly splitMode = signal<SplitMode>('all');
+  /** Montos por persona del gasto en carga (modo "Personalizado"). */
+  readonly newExpenseShares = signal<Record<string, number | null>>({});
+  /** Alias/CBU opcional por persona (clave: nombre). */
+  readonly aliases = signal<Record<string, string>>({});
   readonly selectedParticipants = signal<string[]>([]);
   readonly nextExpenseId = signal(1);
   readonly isSharedView = signal(false);
@@ -83,12 +87,14 @@ export class SplitStateService {
   /** Reemplaza toda la sesión de una sola vez: lo usan la restauración inicial, el undo y la importación de un enlace compartido. */
   applyState(state: PersistableState): void {
     this.people.set([...state.people]);
-    this.expenseItems.set(state.expenseItems.map((item) => ({ ...item, participants: [...item.participants] })));
+    this.expenseItems.set(state.expenseItems.map(cloneExpense));
     this.newPersonName.set(state.newPersonName);
     this.newExpenseDescription.set(state.newExpenseDescription);
     this.newExpenseAmount.set(state.newExpenseAmount);
     this.newExpensePaidBy.set(state.newExpensePaidBy);
     this.splitMode.set(state.splitMode);
+    this.newExpenseShares.set({ ...(state.newExpenseShares ?? {}) });
+    this.aliases.set({ ...(state.aliases ?? {}) });
     this.selectedParticipants.set([...state.selectedParticipants]);
     this.nextExpenseId.set(state.nextExpenseId);
     this.isSharedView.set(state.isSharedView);
@@ -105,6 +111,8 @@ export class SplitStateService {
       newExpenseAmount: this.newExpenseAmount(),
       newExpensePaidBy: this.newExpensePaidBy(),
       splitMode: this.splitMode(),
+      newExpenseShares: this.newExpenseShares(),
+      aliases: this.aliases(),
       selectedParticipants: this.selectedParticipants(),
       nextExpenseId: this.nextExpenseId(),
       currentLanguage: this.currentLanguage(),

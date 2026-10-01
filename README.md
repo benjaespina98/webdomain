@@ -42,7 +42,8 @@ A diferencia de otras aplicaciones de gastos compartidos, **dividimos?** está p
   * monto,
   * persona que pagó,
   * participantes incluidos.
-* División de gastos entre todos o entre participantes específicos.
+* División de gastos entre todos, entre participantes específicos o por montos exactos por persona.
+* Edición de nombres y alias/CBU opcional (se muestra en los resultados y en el mensaje de WhatsApp, no viaja en el enlace).
 * Cálculo automático de:
 
   * gasto total,

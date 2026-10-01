@@ -45,8 +45,13 @@
 
     <div class="people-row" *ngIf="people.length > 0">
       <span class="person-chip" *ngFor="let person of people; trackBy: trackByPerson"
-            [class.removing]="removingPeople.has(person)" [class.readonly]="isSharedView">
-        <span class="person-chip-name">{{ person }}</span>
+            [class.removing]="removingPeople.has(person)" [class.readonly]="isSharedView"
+            [class.editing]="editingPerson === person">
+        <button type="button" class="person-chip-name person-chip-edit" *ngIf="!isSharedView; else plainName"
+                (click)="startPersonEdit(person)" [title]="t('editPerson') + ' ' + person"
+                [attr.aria-label]="t('editPerson') + ' ' + person">{{ person }}</button>
+        <ng-template #plainName><span class="person-chip-name">{{ person }}</span></ng-template>
+        <i class="fas fa-credit-card chip-alias" *ngIf="aliasOf(person)" [title]="t('hasAlias')" aria-hidden="true"></i>
         <button type="button" class="person-chip-remove" *ngIf="!isSharedView" (click)="removePerson(person)"
                 [attr.aria-label]="t('removePerson') + ' ' + person" [title]="t('removePerson')">
           <i class="fas fa-xmark" aria-hidden="true"></i>
@@ -64,7 +69,25 @@
       </button>
     </form>
 
-    <p class="empty-line" *ngIf="people.length === 0">{{ t('emptyPeople') }}</p>
+    <form class="person-editor" *ngIf="editingPerson !== null && !isSharedView" (ngSubmit)="savePersonEdit()"
+          (keydown.escape)="cancelPersonEdit()">
+      <label class="person-editor-field">
+        <span>{{ t('personNameLabel') }}</span>
+        <input #personNameInput type="text" class="input" [(ngModel)]="personDraftName" name="personDraftName"
+               maxlength="24" autocomplete="off" autocapitalize="words">
+      </label>
+      <label class="person-editor-field">
+        <span>{{ t('aliasLabel') }}</span>
+        <input type="text" class="input" [(ngModel)]="personDraftAlias" name="personDraftAlias"
+               [placeholder]="t('aliasPlaceholder')" maxlength="40" autocomplete="off" autocapitalize="off">
+      </label>
+      <p class="person-editor-hint">{{ t('aliasHint') }}</p>
+      <div class="person-editor-actions">
+        <button type="button" class="btn-ghost" (click)="cancelPersonEdit()">{{ t('cancel') }}</button>
+        <button type="submit" class="btn-primary">{{ t('savePerson') }}</button>
+      </div>
+    </form>
+
   </section>
 
   <!-- ── 2. Nuevo gasto ─────────────────────────────────────────────── -->
@@ -137,6 +160,8 @@
                   [attr.aria-pressed]="splitMode === 'all'" (click)="setSplitMode('all')">{{ t('splitModeAll') }}</button>
           <button type="button" class="segment" [class.active]="splitMode === 'custom'"
                   [attr.aria-pressed]="splitMode === 'custom'" (click)="setSplitMode('custom')">{{ t('splitModeCustom') }}</button>
+          <button type="button" class="segment" [class.active]="splitMode === 'amounts'"
+                  [attr.aria-pressed]="splitMode === 'amounts'" (click)="setSplitMode('amounts')">{{ t('splitModeAmounts') }}</button>
         </div>
       </div>
 
@@ -159,6 +184,23 @@
         </p>
       </div>
 
+      <div class="amounts" *ngIf="splitMode === 'amounts'">
+        <div class="amounts-row" *ngFor="let person of people; trackBy: trackByPerson">
+          <span class="amounts-name">{{ person }}</span>
+          <div class="amounts-field">
+            <span class="amounts-currency" aria-hidden="true">{{ currency }}</span>
+            <input type="number" class="input has-prefix" [ngModel]="getShare(person)"
+                   (ngModelChange)="setShare(person, $event)" [name]="'share-' + person"
+                   placeholder="0" step="0.01" min="0" inputmode="decimal"
+                   [attr.aria-label]="t('shareOf') + ' ' + person">
+          </div>
+        </div>
+        <div class="amounts-status" [class.ok]="sharesStatus().ok" aria-live="polite">
+          <span>{{ sharesStatus().text }}</span>
+          <button type="button" class="link-btn" (click)="fillSharesEqually()">{{ t('splitEvenly') }}</button>
+        </div>
+      </div>
+
       <button type="submit" class="btn-primary btn-block" [class.incomplete]="!canSubmitExpense()">
         <i class="fas" [ngClass]="editingExpenseId !== null ? 'fa-check' : 'fa-plus'" aria-hidden="true"></i>
         {{ editingExpenseId !== null ? t('saveChanges') : t('addExpense') }}
@@ -167,13 +209,11 @@
   </section>
 
   <!-- ── 3. Lista de gastos ─────────────────────────────────────────── -->
-  <section class="card list-card" *ngIf="people.length > 0 || expenseItems.length > 0">
+  <section class="card list-card" *ngIf="expenseItems.length > 0">
     <div class="card-head">
       <h2 class="card-title">{{ t('expensesTitle') }}</h2>
       <span class="count-badge" *ngIf="expenseItems.length > 0">{{ expenseItems.length }}</span>
     </div>
-
-    <p class="empty-line" *ngIf="expenseItems.length === 0">{{ t('emptyExpenses') }}</p>
 
     <ul class="expense-list" *ngIf="expenseItems.length > 0">
       <li class="expense-item" *ngFor="let item of expenseItems; trackBy: trackByExpenseItem"
@@ -259,7 +299,10 @@
         </span>
         <span class="party">
           <span class="avatar creditor">{{ result.creditor.charAt(0) }}</span>
-          <span class="party-name">{{ result.creditor }}</span>
+          <span class="party-text">
+            <span class="party-name">{{ result.creditor }}</span>
+            <span class="party-alias" *ngIf="aliasOf(result.creditor)">{{ aliasOf(result.creditor) }}</span>
+          </span>
         </span>
       </li>
     </ul>

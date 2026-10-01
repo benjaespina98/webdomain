@@ -96,4 +96,31 @@ describe('calculateSettlement', () => {
     expect(summary.results).toContain(jasmine.objectContaining({ debtor: 'Caro', creditor: 'Ana', amount: 40 }));
     expect(summary.results).toContain(jasmine.objectContaining({ debtor: 'Beto', creditor: 'Ana', amount: 10 }));
   });
+
+  it('respeta los montos exactos de un gasto con shares', () => {
+    const result = calculateSettlement(['Ana', 'Beto', 'Caro'], [
+      { id: 1, description: 'Cena', amount: 100, paidBy: 'Ana', participants: ['Ana', 'Beto'], shares: { Ana: 30, Beto: 70 } }
+    ]);
+
+    expect(result.personBalances.find((p) => p.person === 'Beto')?.totalConsumed).toBe(70);
+    expect(result.results).toEqual([{ debtor: 'Beto', creditor: 'Ana', amount: 70 }]);
+  });
+
+  it('si los shares no suman el total, cae al reparto en partes iguales', () => {
+    const result = calculateSettlement(['Ana', 'Beto'], [
+      { id: 1, description: 'Cena', amount: 100, paidBy: 'Ana', participants: ['Ana', 'Beto'], shares: { Ana: 10, Beto: 10 } }
+    ]);
+
+    expect(result.results).toEqual([{ debtor: 'Beto', creditor: 'Ana', amount: 50 }]);
+  });
+
+  it('combina gastos parejos y gastos con montos exactos', () => {
+    const result = calculateSettlement(['Ana', 'Beto'], [
+      { id: 1, description: 'Pizza', amount: 100, paidBy: 'Ana', participants: ['Ana', 'Beto'] },
+      { id: 2, description: 'Vino', amount: 60, paidBy: 'Beto', participants: ['Beto'], shares: { Beto: 60 } }
+    ]);
+
+    expect(result.totalExpense).toBe(160);
+    expect(result.results).toEqual([{ debtor: 'Beto', creditor: 'Ana', amount: 50 }]);
+  });
 });

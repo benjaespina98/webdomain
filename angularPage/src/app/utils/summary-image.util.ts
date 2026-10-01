@@ -156,6 +156,14 @@ export function renderSummaryCanvas(view: SummaryView, t: TranslateFn, format: F
       ctx.font = 'bold 13px sans-serif';
       ctx.fillText(res.creditor, cardX + 48 + debtorW + paysW, curY + 24);
 
+    const alias = view.aliases[res.creditor];
+    if (alias) {
+      const creditorW = ctx.measureText(res.creditor).width;
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px sans-serif';
+      ctx.fillText(`· ${alias.slice(0, 28)}`, cardX + 48 + debtorW + paysW + creditorW + 6, curY + 24);
+    }
+
       ctx.textAlign = 'right';
       ctx.fillStyle = '#c084fc';
       ctx.font = 'bold 14px sans-serif';

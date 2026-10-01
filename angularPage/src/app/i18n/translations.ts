@@ -5,7 +5,6 @@ export interface TranslationMap {
   personPlaceholder: string;
   addPerson: string;
   addButton: string;
-  emptyPeople: string;
   removePerson: string;
   expenseTitle: string;
   expensePlaceholder: string;
@@ -18,13 +17,28 @@ export interface TranslationMap {
   selectAll: string;
   selectNone: string;
   payerNotIncluded: string;
+  splitModeAmounts: string;
+  amountsMissing: string;
+  amountsOver: string;
+  amountsOk: string;
+  splitEvenly: string;
+  shareOf: string;
+  amountsMismatch: string;
+  editPerson: string;
+  personNameLabel: string;
+  aliasLabel: string;
+  aliasPlaceholder: string;
+  aliasHint: string;
+  savePerson: string;
+  personUpdated: string;
+  aliasShort: string;
+  hasAlias: string;
   addExpense: string;
   saveChanges: string;
   cancel: string;
   edit: string;
   remove: string;
   expensesTitle: string;
-  emptyExpenses: string;
   editingExpense: string;
   everyone: string;
   paidByShort: string;
@@ -39,10 +53,8 @@ export interface TranslationMap {
   currencyAria: string;
   copyLink: string;
   copied: string;
-  linkCopied: string;
   clipboardUnavailable: string;
   shareWhatsapp: string;
-  whatsappOpened: string;
   noExpensesToShare: string;
   shareTotal: string;
   shareAllSettled: string;
@@ -58,9 +70,7 @@ export interface TranslationMap {
   enterValidAmount: string;
   selectWhoPaid: string;
   addParticipantsToSplit: string;
-  personAdded: string;
   personRemoved: string;
-  expenseAdded: string;
   expenseRemoved: string;
   expenseEdited: string;
   allCleared: string;
@@ -103,10 +113,9 @@ export interface TranslationMap {
 export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
   es: {
     peopleTitle: 'Personas',
-    personPlaceholder: 'Sumar persona',
+    personPlaceholder: '¿Quién va? Ej: Ana',
     addPerson: 'Agregar persona',
     addButton: 'Agregar',
-    emptyPeople: 'Empezá sumando a las personas del grupo',
     removePerson: 'Quitar',
     expenseTitle: 'Nuevo gasto',
     expensePlaceholder: 'Cena, nafta, Uber…',
@@ -119,20 +128,35 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     selectAll: 'Marcar todos',
     selectNone: 'Limpiar',
     payerNotIncluded: 'pagó pero no entra en el reparto',
+    splitModeAmounts: 'Personalizado',
+    amountsMissing: 'Faltan',
+    amountsOver: 'Te pasaste por',
+    amountsOk: 'El total cierra',
+    splitEvenly: 'Repartir parejo',
+    shareOf: 'Monto de',
+    amountsMismatch: 'Los montos tienen que sumar el total',
+    editPerson: 'Editar a',
+    personNameLabel: 'Nombre',
+    aliasLabel: 'Alias o CBU (opcional)',
+    aliasPlaceholder: 'Ej: ana.mp o CBU',
+    aliasHint: 'Se ve en los resultados y en WhatsApp. No viaja en el enlace.',
+    savePerson: 'Guardar',
+    personUpdated: 'Datos actualizados',
+    aliasShort: 'alias',
+    hasAlias: 'Tiene alias cargado',
     addExpense: 'Sumar gasto',
     saveChanges: 'Guardar',
     cancel: 'Cancelar',
     edit: 'Editar',
     remove: 'Eliminar',
     expensesTitle: 'Gastos',
-    emptyExpenses: 'Todavía no cargaste gastos',
     editingExpense: 'Editando gasto',
     everyone: 'Todos',
     paidByShort: 'Pagó',
     resultsTitle: 'Resultados',
     totalSpent: 'Gasto total',
     perPerson: 'Promedio por persona',
-    allSettled: 'Todo saldado, no hay pagos pendientes',
+    allSettled: 'Todo saldado 🎉',
     settlementsTitle: 'Quién le paga a quién',
     clearAll: 'Borrar todo',
     clearAllFull: 'Borrar todo y empezar de nuevo',
@@ -140,10 +164,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     currencyAria: 'Elegir moneda',
     copyLink: 'Copiar enlace',
     copied: 'Copiado',
-    linkCopied: 'Enlace copiado',
     clipboardUnavailable: 'No se pudo copiar. Copiá el enlace manualmente.',
     shareWhatsapp: 'Compartir por WhatsApp',
-    whatsappOpened: 'WhatsApp abierto',
     noExpensesToShare: 'No hay gastos para compartir',
     shareTotal: 'Total',
     shareAllSettled: 'Todo saldado 😎 no quedan cuentas pendientes.',
@@ -159,9 +181,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     enterValidAmount: 'Falta un monto válido',
     selectWhoPaid: 'Falta indicar quién pagó',
     addParticipantsToSplit: 'Elegí al menos una persona',
-    personAdded: 'Persona agregada',
     personRemoved: 'Persona eliminada',
-    expenseAdded: 'Gasto agregado',
     expenseRemoved: 'Gasto eliminado',
     expenseEdited: 'Gasto modificado',
     allCleared: 'Se borró todo',
@@ -169,16 +189,16 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     undo: 'Deshacer',
     undoApplied: 'Cambio deshecho',
     dismissNotice: 'Cerrar aviso',
-    confirmTitle: '¿Borrar todo y empezar de nuevo?',
-    confirmClearAll: 'Se van a borrar todas las personas y todos los gastos de esta sesión. Si te arrepentís, vas a poder deshacerlo desde el aviso que aparece después.',
-    confirmClear: 'Sí, borrar todo',
+    confirmTitle: '¿Borrar todo?',
+    confirmClearAll: 'Se borran las personas y los gastos. Podés deshacerlo enseguida.',
+    confirmClear: 'Sí, borrar',
     confirmImportTitle: 'Reemplazar tu sesión',
-    confirmImportMessage: 'Abriste un enlace compartido, pero ya tenés datos cargados. Si continuás, se reemplaza todo lo actual por la información compartida.',
+    confirmImportMessage: 'Ya tenés datos cargados. Si abrís este enlace, se reemplazan por los compartidos.',
     confirmImportAccept: 'Sí, reemplazar',
     shareImported: 'Sesión compartida importada',
     languageAria: 'Cambiar idioma',
     homeAria: 'Ir al inicio',
-    sharedViewBanner: 'Estás viendo una sesión compartida',
+    sharedViewBanner: 'Sesión compartida',
     importAndEdit: 'Editar una copia',
     staleSessionBanner: 'Retomaste una sesión de hace {{days}} días.',
     staleSessionContinue: 'Continuar',
@@ -201,10 +221,9 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
   },
   en: {
     peopleTitle: 'People',
-    personPlaceholder: 'Add person',
+    personPlaceholder: 'Who is in? E.g. Ana',
     addPerson: 'Add person',
     addButton: 'Add',
-    emptyPeople: 'Start by adding the people in the group',
     removePerson: 'Remove',
     expenseTitle: 'New expense',
     expensePlaceholder: 'Dinner, fuel, Uber…',
@@ -217,20 +236,35 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     selectAll: 'Select all',
     selectNone: 'Clear',
     payerNotIncluded: 'paid but is not part of the split',
+    splitModeAmounts: 'Custom',
+    amountsMissing: 'Missing',
+    amountsOver: 'Over by',
+    amountsOk: 'The total adds up',
+    splitEvenly: 'Split evenly',
+    shareOf: 'Amount for',
+    amountsMismatch: 'Amounts must add up to the total',
+    editPerson: 'Edit',
+    personNameLabel: 'Name',
+    aliasLabel: 'Alias or bank ID (optional)',
+    aliasPlaceholder: 'E.g. ana.mp or account number',
+    aliasHint: 'Shown in the results and on WhatsApp. Not included in the link.',
+    savePerson: 'Save',
+    personUpdated: 'Details updated',
+    aliasShort: 'alias',
+    hasAlias: 'Has an alias saved',
     addExpense: 'Add expense',
     saveChanges: 'Save',
     cancel: 'Cancel',
     edit: 'Edit',
     remove: 'Delete',
     expensesTitle: 'Expenses',
-    emptyExpenses: 'No expenses added yet',
     editingExpense: 'Editing expense',
     everyone: 'Everyone',
     paidByShort: 'Paid by',
     resultsTitle: 'Results',
     totalSpent: 'Total spent',
     perPerson: 'Average per person',
-    allSettled: 'All settled, no pending payments',
+    allSettled: 'All settled 🎉',
     settlementsTitle: 'Who pays whom',
     clearAll: 'Delete all',
     clearAllFull: 'Delete everything and start over',
@@ -238,10 +272,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     currencyAria: 'Choose currency',
     copyLink: 'Copy link',
     copied: 'Copied',
-    linkCopied: 'Link copied',
     clipboardUnavailable: 'Could not copy. Please copy the link manually.',
     shareWhatsapp: 'Share on WhatsApp',
-    whatsappOpened: 'WhatsApp opened',
     noExpensesToShare: 'There are no expenses to share',
     shareTotal: 'Total',
     shareAllSettled: 'All settled 😎 no pending payments.',
@@ -257,9 +289,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     enterValidAmount: 'A valid amount is missing',
     selectWhoPaid: 'Select who paid',
     addParticipantsToSplit: 'Pick at least one person',
-    personAdded: 'Person added',
     personRemoved: 'Person removed',
-    expenseAdded: 'Expense added',
     expenseRemoved: 'Expense deleted',
     expenseEdited: 'Expense updated',
     allCleared: 'Everything was cleared',
@@ -267,16 +297,16 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     undo: 'Undo',
     undoApplied: 'Change undone',
     dismissNotice: 'Dismiss',
-    confirmTitle: 'Delete everything and start over?',
-    confirmClearAll: 'This will delete every person and expense in this session. If you change your mind, you can undo it from the notice that appears afterwards.',
-    confirmClear: 'Yes, delete everything',
+    confirmTitle: 'Delete everything?',
+    confirmClearAll: 'People and expenses will be deleted. You can undo it right after.',
+    confirmClear: 'Yes, delete',
     confirmImportTitle: 'Replace your session',
-    confirmImportMessage: 'You opened a shared link, but you already have data loaded. Continuing will replace everything current with the shared info.',
+    confirmImportMessage: 'You already have data. Opening this link will replace it with the shared data.',
     confirmImportAccept: 'Yes, replace',
     shareImported: 'Shared session imported',
     languageAria: 'Change language',
     homeAria: 'Go to home',
-    sharedViewBanner: "You're viewing a shared session",
+    sharedViewBanner: 'Shared session',
     importAndEdit: 'Edit a copy',
     staleSessionBanner: 'You picked up a session from {{days}} days ago.',
     staleSessionContinue: 'Continue',
