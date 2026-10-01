@@ -60,7 +60,7 @@ A diferencia de otras aplicaciones de gastos compartidos, **dividimos?** está p
 
 ## Tecnologías
 
-* Angular 17
+* Angular 21
 * TypeScript
 * Bootstrap 5
 * SCSS
