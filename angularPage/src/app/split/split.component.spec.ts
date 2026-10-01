@@ -15,9 +15,8 @@ describe('SplitComponent', () => {
     localStorage.clear();
 
     TestBed.configureTestingModule({
-      declarations: [SplitComponent],
-      imports: [FormsModule, RouterTestingModule]
-    });
+    imports: [FormsModule, RouterTestingModule, SplitComponent]
+});
 
     fixture = TestBed.createComponent(SplitComponent);
     component = fixture.componentInstance;

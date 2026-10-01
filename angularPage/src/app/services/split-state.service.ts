@@ -1,4 +1,4 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, computed, effect, signal, inject } from '@angular/core';
 import { CurrencySymbol, ExpenseItem, SplitMode, cloneExpense } from '../models/expense.model';
 import { calculateSettlement, SettlementSummary } from '../utils/settlement.util';
 import { AppState, PersistableState, PersistenceService } from './persistence.service';
@@ -22,6 +22,8 @@ import { LanguageCode } from './language.service';
   providedIn: 'root'
 })
 export class SplitStateService {
+  private readonly persistenceService = inject(PersistenceService);
+
   readonly people = signal<string[]>([]);
   readonly expenseItems = signal<ExpenseItem[]>([]);
   readonly newPersonName = signal('');
@@ -61,7 +63,7 @@ export class SplitStateService {
    */
   private isInitialized = false;
 
-  constructor(private readonly persistenceService: PersistenceService) {
+  constructor() {
     effect(() => {
       const snapshot = this.buildSnapshot();
       const savedAt = this.pendingSavedAt ?? Date.now();

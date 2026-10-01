@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { LanguageCode } from './language.service';
 
@@ -57,9 +57,9 @@ interface SpeechRecognitionLike {
   providedIn: 'root'
 })
 export class VoiceInputService {
-  private recognition: SpeechRecognitionLike | null = null;
+  private readonly zone = inject(NgZone);
 
-  constructor(private readonly zone: NgZone) {}
+  private recognition: SpeechRecognitionLike | null = null;
 
   get isSupported(): boolean {
     return typeof window !== 'undefined' && !!getSpeechRecognitionCtor();

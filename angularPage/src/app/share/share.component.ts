@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ShareService } from '../services/share.service';
 import { PersistenceService } from '../services/persistence.service';
@@ -34,19 +34,18 @@ import { LanguageService } from '../services/language.service';
       font-weight: 600;
       color: var(--text, #e2e8f0);
     }
-  `],
-    standalone: false
+  `]
 })
 export class ShareComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly shareService = inject(ShareService);
+  private readonly persistenceService = inject(PersistenceService);
+  private readonly languageService = inject(LanguageService);
+
   readonly isSpanish: boolean;
 
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly router: Router,
-    private readonly shareService: ShareService,
-    private readonly persistenceService: PersistenceService,
-    private readonly languageService: LanguageService
-  ) {
+  constructor() {
     this.isSpanish = this.languageService.isSpanish;
   }
 

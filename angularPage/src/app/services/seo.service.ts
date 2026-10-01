@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 
 export interface SeoData {
@@ -10,10 +10,9 @@ export interface SeoData {
   providedIn: 'root'
 })
 export class SeoService {
-  constructor(
-    private readonly titleService: Title,
-    private readonly meta: Meta
-  ) {}
+  private readonly titleService = inject(Title);
+  private readonly meta = inject(Meta);
+
 
   update(data: SeoData, path: string): void {
     this.titleService.setTitle(data.title);

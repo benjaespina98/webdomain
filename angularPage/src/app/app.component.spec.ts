@@ -17,12 +17,13 @@ describe('AppComponent', () => {
 
   beforeEach(() => TestBed.configureTestingModule({
     imports: [
-      FormsModule,
-      RouterTestingModule.withRoutes([{ path: '', component: SplitComponent }])
+        FormsModule,
+        RouterTestingModule.withRoutes([{ path: '', component: SplitComponent }]),
+        SplitComponent,
+        AppComponent
     ],
-    declarations: [AppComponent, SplitComponent],
     providers: [{ provide: SwUpdate, useValue: swUpdateMock }]
-  }));
+}));
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(AppComponent);
