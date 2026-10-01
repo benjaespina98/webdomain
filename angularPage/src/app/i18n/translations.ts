@@ -113,7 +113,7 @@ export interface TranslationMap {
 export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
   es: {
     peopleTitle: 'Personas',
-    personPlaceholder: '¿Quién va? Ej: Ana',
+    personPlaceholder: 'Agregar persona. Ej: Ana',
     addPerson: 'Agregar persona',
     addButton: 'Agregar',
     removePerson: 'Quitar',
@@ -221,7 +221,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
   },
   en: {
     peopleTitle: 'People',
-    personPlaceholder: 'Who is in? E.g. Ana',
+    personPlaceholder: 'Add person. E.g. Ana',
     addPerson: 'Add person',
     addButton: 'Add',
     removePerson: 'Remove',
