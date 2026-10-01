@@ -1,9 +1,16 @@
 {
   "root": true,
-  "ignorePatterns": ["dist/**", "node_modules/**", ".angular/**", "coverage/**"],
+  "ignorePatterns": [
+    "dist/**",
+    "node_modules/**",
+    ".angular/**",
+    "coverage/**"
+  ],
   "overrides": [
     {
-      "files": ["*.ts"],
+      "files": [
+        "*.ts"
+      ],
       "parser": "@typescript-eslint/parser",
       "extends": [
         "eslint:recommended",
@@ -12,20 +19,48 @@
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
-        "@angular-eslint/component-selector": ["error", { "type": "element", "prefix": "app", "style": "kebab-case" }],
+        "@angular-eslint/component-selector": [
+          "error",
+          {
+            "type": "element",
+            "prefix": "app",
+            "style": "kebab-case"
+          }
+        ],
         "@typescript-eslint/no-explicit-any": "error",
-        "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "argsIgnorePattern": "^_"
+          }
+        ],
         "@typescript-eslint/no-non-null-assertion": "off",
-        "no-console": ["warn", { "allow": ["error", "warn"] }]
+        "no-console": [
+          "warn",
+          {
+            "allow": [
+              "error",
+              "warn"
+            ]
+          }
+        ]
       }
     },
     {
-      "files": ["*.spec.ts"],
-      "rules": { "@typescript-eslint/no-explicit-any": "off" }
+      "files": [
+        "*.spec.ts"
+      ],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
     },
     {
-      "files": ["*.html"],
-      "extends": ["plugin:@angular-eslint/template/recommended"],
+      "files": [
+        "*.html"
+      ],
+      "extends": [
+        "plugin:@angular-eslint/template/recommended"
+      ],
       "rules": {}
     }
   ]

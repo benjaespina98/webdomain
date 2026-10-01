@@ -2,8 +2,8 @@
 
 > Dividí gastos grupales en segundos. Sin registro, sin servidores, 100% en tu navegador.
 
-[![Angular](https://img.shields.io/badge/Angular-17-DD0031?logo=angular\&logoColor=white)](https://angular.io/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?logo=typescript\&logoColor=white)](https://www.typescriptlang.org/)
+[![Angular](https://img.shields.io/badge/Angular-21-DD0031?logo=angular\&logoColor=white)](https://angular.io/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript\&logoColor=white)](https://www.typescriptlang.org/)
 [![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8?logo=pwa\&logoColor=white)](https://web.dev/progressive-web-apps/)
 [![Deploy](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel\&logoColor=white)](https://dividimos.vercel.app/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -60,7 +60,7 @@ A diferencia de otras aplicaciones de gastos compartidos, **dividimos?** está p
 
 ## Tecnologías
 
-* Angular 17
+* Angular 21
 * TypeScript
 * Bootstrap 5
 * SCSS

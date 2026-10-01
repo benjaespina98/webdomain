@@ -1,11 +1,10 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { SplitComponent } from './split/split.component';
 import { LandingComponent } from './landing/landing.component';
 import { ShareComponent } from './share/share.component';
 import { landingGuard } from './landing/landing.guard';
 
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: '',
     component: LandingComponent,
@@ -44,9 +43,3 @@ const routes: Routes = [
   { path: 'split', redirectTo: 'app', pathMatch: 'full' },
   { path: '**', redirectTo: '' }
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
-})
-export class AppRoutingModule { }

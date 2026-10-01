@@ -1,5 +1,5 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, effect } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, effect, inject } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PersistenceService } from '../services/persistence.service';
 import { ShareService, SharePayload } from '../services/share.service';
@@ -13,6 +13,8 @@ import { TRANSLATIONS, TranslationMap } from '../i18n/translations';
 import { buildShareMessage } from '../utils/share-message.util';
 import { SummaryView } from '../utils/summary-view';
 import { renderSummaryCanvas } from '../utils/summary-image.util';
+import { FormsModule } from '@angular/forms';
+import { NgClass } from '@angular/common';
 
 type NoticeType = 'success' | 'info' | 'warning';
 
@@ -50,11 +52,22 @@ interface AppSnapshot {
 }
 
 @Component({
-  selector: 'app-split',
-  templateUrl: './split.component.html',
-  styleUrls: ['./split.component.scss']
+    selector: 'app-split',
+    templateUrl: './split.component.html',
+    styleUrls: ['./split.component.scss'],
+    imports: [RouterLink, FormsModule, NgClass]
 })
 export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
+  private readonly stateService = inject(SplitStateService);
+  private readonly persistenceService = inject(PersistenceService);
+  private readonly shareService = inject(ShareService);
+  private readonly analyticsService = inject(AnalyticsService);
+  private readonly languageService = inject(LanguageService);
+  private readonly voiceInputService = inject(VoiceInputService);
+  private readonly changeDetector = inject(ChangeDetectorRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+
   private readonly publicAppUrl = 'https://dividimos.vercel.app/';
   private readonly staleSessionDaysThreshold = 7;
   /** Duración de la transición de salida en la lista de personas/gastos (ver `.removing` en el SCSS). */
@@ -98,17 +111,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
   private voiceSubscription: Subscription | null = null;
   private hasTrackedResults = false;
 
-  constructor(
-    private readonly stateService: SplitStateService,
-    private readonly persistenceService: PersistenceService,
-    private readonly shareService: ShareService,
-    private readonly analyticsService: AnalyticsService,
-    private readonly languageService: LanguageService,
-    private readonly voiceInputService: VoiceInputService,
-    private readonly changeDetector: ChangeDetectorRef,
-    private readonly route: ActivatedRoute,
-    private readonly router: Router
-  ) {
+  constructor() {
     // El motor de liquidación vive en SplitStateService como un `computed()`: se
     // recalcula solo cuando cambian personas o gastos. Este effect solo se ocupa
     // de disparar el evento de analítica la primera vez que hay resultados.
@@ -1090,19 +1093,4 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     this.showNotice(this.t('imageDownloaded'), 'success');
     this.analyticsService.track('summary_image_downloaded');
   }
-
-  // ------------------------------------------------------------- trackBy
-
-  trackByPerson(_index: number, person: string): string {
-    return person;
-  }
-
-  trackByExpenseItem(_index: number, expenseItem: ExpenseItem): number {
-    return expenseItem.id;
-  }
-
-  trackByResult(_index: number, result: SettlementResult): string {
-    return `${result.debtor}→${result.creditor}`;
-  }
 }
-

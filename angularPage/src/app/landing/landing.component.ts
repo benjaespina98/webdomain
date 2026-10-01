@@ -1,20 +1,20 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, inject } from '@angular/core';
 import { LanguageService, LanguageCode } from '../services/language.service';
 import { markLandingSeen } from './landing.guard';
+import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-landing',
-  templateUrl: './landing.component.html',
-  styleUrls: ['./landing.component.scss']
+    selector: 'app-landing',
+    templateUrl: './landing.component.html',
+    styleUrls: ['./landing.component.scss'],
+    imports: [RouterLink]
 })
 export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly languageService = inject(LanguageService);
+
   readonly currentYear = new Date().getFullYear();
   private revealObserver: IntersectionObserver | null = null;
-
-  constructor(
-    private readonly elementRef: ElementRef<HTMLElement>,
-    private readonly languageService: LanguageService
-  ) {}
 
   get currentLanguage(): LanguageCode {
     return this.languageService.current;

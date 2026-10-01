@@ -1,5 +1,5 @@
-import { Component, OnDestroy } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { Component, OnDestroy, inject } from '@angular/core';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { Subscription, interval, merge, fromEvent } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -7,21 +7,22 @@ import { AnalyticsService } from './services/analytics.service';
 import { SeoService } from './services/seo.service';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    imports: [RouterOutlet]
 })
 export class AppComponent implements OnDestroy {
+  private readonly swUpdate = inject(SwUpdate);
+  private readonly analyticsService = inject(AnalyticsService);
+  private readonly seoService = inject(SeoService);
+  private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
+
   private readonly subscriptions = new Subscription();
   private isReloadingForUpdate = false;
 
-  constructor(
-    private readonly swUpdate: SwUpdate,
-    private readonly analyticsService: AnalyticsService,
-    private readonly seoService: SeoService,
-    private readonly router: Router,
-    private readonly activatedRoute: ActivatedRoute
-  ) {
+  constructor() {
     this.analyticsService.init();
     this.analyticsService.track('app_opened');
     this.initializeAutoUpdates();
