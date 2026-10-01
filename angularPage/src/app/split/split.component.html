@@ -213,10 +213,17 @@
         <span class="kpi-label">{{ t('totalSpent') }}</span>
         <strong class="kpi-value">{{ formatCurrency(totalExpense) }}</strong>
       </div>
-      <div class="kpi">
+      <div class="kpi" *ngIf="hasEvenSplit; else expenseCountKpi">
         <span class="kpi-label">{{ t('perPerson') }}</span>
         <strong class="kpi-value">{{ formatCurrency(averageSpent) }}</strong>
       </div>
+      <!-- Con gastos entre grupos distintos de personas, un promedio por persona confunde: mostramos la cantidad de gastos. -->
+      <ng-template #expenseCountKpi>
+        <div class="kpi">
+          <span class="kpi-label">{{ t('expensesTitle') }}</span>
+          <strong class="kpi-value">{{ expenseItems.length }}</strong>
+        </div>
+      </ng-template>
     </div>
 
     <!-- Resumen de balances por persona -->
