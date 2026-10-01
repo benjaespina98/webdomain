@@ -23,6 +23,16 @@ export interface ExpenseItem {
   paidBy: string;
   participants: string[];
   category?: ExpenseCategory;
+  /**
+   * Reparto por montos exactos (persona → monto que consumió). Cuando existe, `participants` son
+   * quienes tienen monto > 0 y los montos suman `amount`; si no, el gasto se divide en partes iguales.
+   */
+  shares?: Record<string, number>;
+}
+
+/** Copia profunda de un gasto (arrays y `shares`), para snapshots de undo y para no compartir referencias con las signals. */
+export function cloneExpense(item: ExpenseItem): ExpenseItem {
+  return { ...item, participants: [...item.participants], ...(item.shares ? { shares: { ...item.shares } } : {}) };
 }
 
 export interface SettlementResult {
@@ -31,7 +41,8 @@ export interface SettlementResult {
   amount: number;
 }
 
-export type SplitMode = 'all' | 'custom';
+/** `all`: partes iguales entre todos · `custom`: partes iguales entre algunos · `amounts`: monto exacto por persona. */
+export type SplitMode = 'all' | 'custom' | 'amounts';
 
 /** Símbolos de moneda soportados por el selector. Es solo una etiqueta visual: no hay conversión entre ellos. */
 export type CurrencySymbol = '$' | 'US$' | '€';

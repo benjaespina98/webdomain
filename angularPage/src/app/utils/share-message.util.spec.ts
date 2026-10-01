@@ -14,7 +14,8 @@ describe('buildShareMessage', () => {
       { person: 'Ana', totalPaid: 100, totalConsumed: 50, netBalance: 50 },
       { person: 'Beto', totalPaid: 0, totalConsumed: 50, netBalance: -50 }
     ],
-    results: [{ debtor: 'Beto', creditor: 'Ana', amount: 50 }]
+    results: [{ debtor: 'Beto', creditor: 'Ana', amount: 50 }],
+    aliases: {}
   };
 
   it('incluye personas, gastos, balances, pagos y el enlace', () => {
@@ -34,5 +35,11 @@ describe('buildShareMessage', () => {
 
   it('avisa que está todo saldado cuando no hay pagos pendientes', () => {
     expect(buildShareMessage({ ...view, results: [] }, t as never, money, 'l')).toContain('shareAllSettled');
+  });
+
+  it('agrega el alias de quien cobra si lo tiene cargado', () => {
+    const message = buildShareMessage({ ...view, aliases: { Ana: 'ana.mp' } }, t as never, money, 'l');
+
+    expect(message).toContain('*Ana* (aliasShort: ana.mp)');
   });
 });

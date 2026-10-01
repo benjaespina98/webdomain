@@ -576,7 +576,7 @@
     color: var(--text-muted);
     font-size: var(--font-sm);
     font-weight: 600;
-    padding: 0.55rem 1.25rem;
+    padding: 0.55rem 0.9rem;
     border-radius: var(--radius-pill);
     cursor: pointer;
     transition: background 0.18s ease, color 0.18s ease;
@@ -1564,4 +1564,138 @@
         color: var(--accent-light);
         text-decoration: underline;
     }
+}
+
+
+/* ── Editar persona y alias ─────────────────────────────────────────── */
+
+.person-chip-edit {
+    padding: 0;
+    height: 100%;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover {
+        color: var(--accent-light);
+    }
+}
+
+.person-chip.editing {
+    border-color: var(--accent-border);
+    background: var(--accent-soft);
+}
+
+.chip-alias {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+}
+
+.person-editor {
+    margin-top: 0.9rem;
+    padding: 0.9rem;
+    display: grid;
+    gap: 0.7rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--accent-border);
+    background: var(--bg-inset);
+}
+
+.person-editor-field {
+    display: grid;
+    gap: 0.3rem;
+    color: var(--text-muted);
+    font-size: var(--font-xs);
+    font-weight: 600;
+}
+
+.person-editor-hint {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: var(--font-xs);
+}
+
+.person-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+
+    .btn-primary {
+        min-height: 2.5rem;
+        padding: 0 1.1rem;
+    }
+}
+
+/* ── Montos personalizados ──────────────────────────────────────────── */
+
+.amounts {
+    margin-top: 0.8rem;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.amounts-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 9.5rem);
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.amounts-name {
+    color: var(--text);
+    font-size: var(--font-sm);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.amounts-field {
+    position: relative;
+
+    .input {
+        width: 100%;
+        text-align: right;
+    }
+}
+
+.amounts-currency {
+    position: absolute;
+    left: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    font-size: var(--font-sm);
+    pointer-events: none;
+}
+
+.amounts-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.7rem;
+    padding-top: 0.3rem;
+    color: var(--warning-light);
+    font-size: var(--font-sm);
+    font-weight: 600;
+
+    &.ok {
+        color: var(--success-light);
+    }
+}
+
+.party-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.party-alias {
+    color: var(--text-dim);
+    font-size: var(--font-xs);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

@@ -81,4 +81,26 @@ describe('ShareService', () => {
 
     expect(service.parseShareLink(data, 1)).toBeNull();
   });
+
+  it('ida y vuelta de un gasto con montos exactos', () => {
+    const payload = { p: ['Ana', 'Beto', 'Caro'], e: [{ d: 'Cena', a: 100, b: 0, s: [30, 70, 0] }] };
+    const fragment = service.parseFragment(new URL(service.buildShareUrl(payload)).hash)!;
+    const decoded = service.parseShareLink(fragment.data, fragment.version)!;
+    const state = service.buildImportedState(decoded, 'es');
+
+    expect(state.expenseItems[0].shares).toEqual({ Ana: 30, Beto: 70 });
+    expect(state.expenseItems[0].participants).toEqual(['Ana', 'Beto']);
+  });
+
+  it('rechaza montos exactos que no suman el total o con largo incorrecto', () => {
+    const link = (s: number[]) => {
+      const f = service.parseFragment(new URL(service.buildShareUrl({ p: ['Ana', 'Beto'], e: [{ d: 'X', a: 100, b: 0, s }] })).hash)!;
+      return service.parseShareLink(f.data, f.version);
+    };
+
+    expect(link([30, 70])).not.toBeNull();
+    expect(link([30, 60])).toBeNull();
+    expect(link([100])).toBeNull();
+    expect(link([-10, 110])).toBeNull();
+  });
 });

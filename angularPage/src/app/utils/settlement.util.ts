@@ -49,24 +49,23 @@ export function calculateSettlement(people: string[], expenseItems: ExpenseItem[
   let totalExpenseInCents = 0;
 
   expenseItems.forEach((expense) => {
-    const validParticipants = expense.participants.filter((participant) => people.includes(participant));
-    if (validParticipants.length === 0 || !people.includes(expense.paidBy)) {
+    if (!people.includes(expense.paidBy)) {
       return;
     }
 
     const amountInCents = Math.round(expense.amount * 100);
+    const consumption = splitInCents(expense, amountInCents, people);
+    if (consumption.length === 0) {
+      return;
+    }
+
     totalExpenseInCents += amountInCents;
     balancesInCents[expense.paidBy] += amountInCents;
     paidInCents[expense.paidBy] += amountInCents;
 
-    // El resto en centavos se reparte de a uno para que los saldos cierren exactos.
-    const baseShare = Math.floor(amountInCents / validParticipants.length);
-    const remainder = amountInCents % validParticipants.length;
-
-    validParticipants.forEach((participant, index) => {
-      const share = baseShare + (index < remainder ? 1 : 0);
-      balancesInCents[participant] -= share;
-      consumedInCents[participant] += share;
+    consumption.forEach(({ person, cents }) => {
+      balancesInCents[person] -= cents;
+      consumedInCents[person] += cents;
     });
   });
 
@@ -85,6 +84,35 @@ export function calculateSettlement(people: string[], expenseItems: ExpenseItem[
     totalExpense: fromCents(totalExpenseInCents),
     averageSpent: fromCents(Math.round(totalExpenseInCents / people.length))
   };
+}
+
+/**
+ * Cuánto consumió cada persona de un gasto, en centavos. Con `shares` se respetan los montos exactos
+ * (siempre que sumen el total); si no suman —un dato corrupto— se cae al reparto en partes iguales
+ * en vez de inventar o perder plata.
+ */
+function splitInCents(expense: ExpenseItem, amountInCents: number, people: string[]): { person: string; cents: number }[] {
+  if (expense.shares) {
+    const entries = Object.entries(expense.shares)
+      .filter(([person, amount]) => people.includes(person) && Number.isFinite(amount) && amount > 0)
+      .map(([person, amount]) => ({ person, cents: Math.round(amount * 100) }));
+    const sum = entries.reduce((total, entry) => total + entry.cents, 0);
+
+    if (entries.length > 0 && sum === amountInCents) {
+      return entries;
+    }
+  }
+
+  const validParticipants = expense.participants.filter((participant) => people.includes(participant));
+  if (validParticipants.length === 0) {
+    return [];
+  }
+
+  // El resto en centavos se reparte de a uno para que los saldos cierren exactos.
+  const baseShare = Math.floor(amountInCents / validParticipants.length);
+  const remainder = amountInCents % validParticipants.length;
+
+  return validParticipants.map((person, index) => ({ person, cents: baseShare + (index < remainder ? 1 : 0) }));
 }
 
 /** Greedy sobre saldos ordenados: minimiza la cantidad de transferencias. */

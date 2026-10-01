@@ -7,7 +7,7 @@ import { AnalyticsService } from '../services/analytics.service';
 import { LanguageService, LanguageCode } from '../services/language.service';
 import { VoiceInputService } from '../services/voice-input.service';
 import { SplitStateService } from '../services/split-state.service';
-import { CURRENCY_OPTIONS, CategoryOption, CurrencySymbol, EXPENSE_CATEGORIES, ExpenseCategory, ExpenseItem, SettlementResult, SplitMode } from '../models/expense.model';
+import { CURRENCY_OPTIONS, CategoryOption, CurrencySymbol, EXPENSE_CATEGORIES, ExpenseCategory, ExpenseItem, SettlementResult, SplitMode, cloneExpense } from '../models/expense.model';
 import { PersonBalance } from '../utils/settlement.util';
 import { TRANSLATIONS, TranslationMap } from '../i18n/translations';
 import { buildShareMessage } from '../utils/share-message.util';
@@ -24,6 +24,16 @@ interface PendingConfirm {
   action: () => void;
 }
 
+/** Copia `record` sin la clave `key`. */
+function omitKey<T>(record: Record<string, T>, key: string): Record<string, T> {
+  return Object.fromEntries(Object.entries(record).filter(([entryKey]) => entryKey !== key));
+}
+
+/** Copia `record` aplicando `rename` a cada clave (para renombrar personas). */
+function renameKeys<T>(record: Record<string, T>, rename: (key: string) => string): Record<string, T> {
+  return Object.fromEntries(Object.entries(record).map(([key, value]) => [rename(key), value]));
+}
+
 interface AppSnapshot {
   people: string[];
   expenseItems: ExpenseItem[];
@@ -35,6 +45,8 @@ interface AppSnapshot {
   nextExpenseId: number;
   editingExpenseId: number | null;
   currency: CurrencySymbol;
+  newExpenseShares: Record<string, number | null>;
+  aliases: Record<string, string>;
 }
 
 @Component({
@@ -52,12 +64,18 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('newPersonInput') private newPersonInput?: ElementRef<HTMLInputElement>;
   @ViewChild('expenseDescriptionInput') private expenseDescriptionInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('personNameInput') private personNameInput?: ElementRef<HTMLInputElement>;
 
   readonly currencyOptions = CURRENCY_OPTIONS;
   readonly expenseCategories = EXPENSE_CATEGORIES;
 
   selectedCategory: ExpenseCategory = 'other';
   editingExpenseId: number | null = null;
+
+  /** Persona cuyo nombre/alias se está editando (null = editor cerrado). */
+  editingPerson: string | null = null;
+  personDraftName = '';
+  personDraftAlias = '';
 
   uiNotice = '';
   uiNoticeType: NoticeType = 'info';
@@ -130,6 +148,12 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get splitMode(): SplitMode { return this.stateService.splitMode(); }
   set splitMode(value: SplitMode) { this.stateService.splitMode.set(value); }
+
+  get newExpenseShares(): Record<string, number | null> { return this.stateService.newExpenseShares(); }
+  set newExpenseShares(value: Record<string, number | null>) { this.stateService.newExpenseShares.set(value); }
+
+  get aliases(): Record<string, string> { return this.stateService.aliases(); }
+  set aliases(value: Record<string, string>) { this.stateService.aliases.set(value); }
 
   get selectedParticipants(): string[] { return this.stateService.selectedParticipants(); }
   set selectedParticipants(value: string[]) { this.stateService.selectedParticipants.set(value); }
@@ -290,7 +314,6 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       this.selectAllParticipants();
     }
 
-    this.showNotice(this.t('personAdded'), 'success');
     this.analyticsService.track('participant_added');
     this.newPersonInput?.nativeElement.focus({ preventScroll: true });
   }
@@ -322,9 +345,21 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       this.newExpensePaidBy = '';
     }
 
+    this.newExpenseShares = omitKey(this.newExpenseShares, person);
+    this.aliases = omitKey(this.aliases, person);
+    if (this.editingPerson === person) {
+      this.editingPerson = null;
+    }
+
+    // Si la persona tenía un monto exacto en un gasto, ese reparto ya no cierra: el gasto
+    // pasa a dividirse en partes iguales entre quienes quedan.
     this.expenseItems = this.expenseItems
       .filter((item) => item.paidBy !== person)
-      .map((item) => ({ ...item, participants: item.participants.filter((p) => p !== person) }))
+      .map((item) => {
+        const { shares, ...rest } = item;
+        const keepsShares = !!shares && !(person in shares);
+        return { ...rest, participants: item.participants.filter((p) => p !== person), ...(keepsShares ? { shares } : {}) };
+      })
       .filter((item) => item.participants.length > 0);
 
     if (this.editingExpenseId !== null && !this.expenseItems.some((item) => item.id === this.editingExpenseId)) {
@@ -363,6 +398,10 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
   setSplitMode(mode: SplitMode): void {
     this.splitMode = mode;
 
+    if (mode === 'amounts') {
+      return;
+    }
+
     if (this.people.length > 0 && (mode === 'all' || this.selectedParticipants.length === 0)) {
       this.selectAllParticipants();
     }
@@ -370,6 +409,132 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isPayerIncludedInParticipants(): boolean {
     return !this.newExpensePaidBy || this.selectedParticipants.includes(this.newExpensePaidBy);
+  }
+
+  // ------------------------------------------------- montos personalizados
+
+  getShare(person: string): number | null {
+    return this.newExpenseShares[person] ?? null;
+  }
+
+  setShare(person: string, value: number | string | null): void {
+    const parsed = value === null || value === '' ? null : Number(value);
+    this.newExpenseShares = {
+      ...this.newExpenseShares,
+      [person]: parsed !== null && Number.isFinite(parsed) && parsed >= 0 ? parsed : null
+    };
+  }
+
+  /** Lo que falta (+) o sobra (−) para que los montos cierren con el total del gasto, en centavos. */
+  private get sharesDifferenceInCents(): number {
+    const totalInCents = Math.round((this.newExpenseAmount ?? 0) * 100);
+    const assignedInCents = this.people.reduce((sum, person) => sum + Math.round((this.newExpenseShares[person] ?? 0) * 100), 0);
+    return totalInCents - assignedInCents;
+  }
+
+  sharesAreValid(): boolean {
+    const hasAmount = this.newExpenseAmount !== null && this.newExpenseAmount > 0;
+    const someoneHasShare = this.people.some((person) => (this.newExpenseShares[person] ?? 0) > 0);
+    return hasAmount && someoneHasShare && this.sharesDifferenceInCents === 0;
+  }
+
+  /** Texto de estado bajo la lista de montos: "Faltan $ 500", "Te pasaste por $ 20" o "El total cierra". */
+  sharesStatus(): { text: string; ok: boolean } {
+    if (!this.newExpenseAmount || this.newExpenseAmount <= 0) {
+      return { text: '', ok: false };
+    }
+
+    const difference = this.sharesDifferenceInCents;
+    if (difference === 0) {
+      return { text: this.t('amountsOk'), ok: this.sharesAreValid() };
+    }
+
+    const label = difference > 0 ? this.t('amountsMissing') : this.t('amountsOver');
+    return { text: `${label} ${this.formatCurrency(Math.abs(difference) / 100)}`, ok: false };
+  }
+
+  /** Reparte el total del gasto en partes iguales entre todas las personas, centavo por centavo. */
+  fillSharesEqually(): void {
+    const totalInCents = Math.round((this.newExpenseAmount ?? 0) * 100);
+    if (totalInCents <= 0 || this.people.length === 0) {
+      return;
+    }
+
+    const base = Math.floor(totalInCents / this.people.length);
+    const remainder = totalInCents % this.people.length;
+    this.newExpenseShares = Object.fromEntries(
+      this.people.map((person, index) => [person, (base + (index < remainder ? 1 : 0)) / 100])
+    );
+  }
+
+  // ------------------------------------------------- editar persona y alias
+
+  aliasOf(person: string): string {
+    return this.aliases[person] ?? '';
+  }
+
+  startPersonEdit(person: string): void {
+    if (this.isSharedView) {
+      return;
+    }
+
+    this.editingPerson = person;
+    this.personDraftName = person;
+    this.personDraftAlias = this.aliasOf(person);
+    setTimeout(() => this.personNameInput?.nativeElement.focus());
+  }
+
+  cancelPersonEdit(): void {
+    this.editingPerson = null;
+  }
+
+  /** Renombra a la persona en todos lados (gastos, reparto, montos) y guarda su alias; se puede deshacer. */
+  savePersonEdit(): void {
+    const oldName = this.editingPerson;
+    if (oldName === null) {
+      return;
+    }
+
+    const newName = this.personDraftName.trim().replace(/\s+/g, ' ');
+    const alias = this.personDraftAlias.trim().slice(0, 40);
+
+    if (!newName) {
+      this.showNotice(this.t('enterValidName'), 'warning');
+      return;
+    }
+
+    const isTaken = this.people.some((person) => person !== oldName && person.toLocaleLowerCase() === newName.toLocaleLowerCase());
+    if (isTaken) {
+      this.showNotice(this.t('personAlreadyExists'), 'warning');
+      return;
+    }
+
+    if (newName === oldName && alias === this.aliasOf(oldName)) {
+      this.editingPerson = null;
+      return;
+    }
+
+    this.saveSnapshotForUndo();
+
+    const rename = (name: string): string => (name === oldName ? newName : name);
+    this.people = this.people.map(rename);
+    this.selectedParticipants = this.selectedParticipants.map(rename);
+    if (this.newExpensePaidBy === oldName) {
+      this.newExpensePaidBy = newName;
+    }
+    this.expenseItems = this.expenseItems.map((item) => ({
+      ...cloneExpense(item),
+      paidBy: rename(item.paidBy),
+      participants: item.participants.map(rename),
+      ...(item.shares ? { shares: renameKeys(item.shares, rename) } : {})
+    }));
+    this.newExpenseShares = renameKeys(this.newExpenseShares, rename);
+
+    const remainingAliases = omitKey(this.aliases, oldName);
+    this.aliases = alias ? { ...remainingAliases, [newName]: alias } : remainingAliases;
+
+    this.editingPerson = null;
+    this.showNotice(this.t('personUpdated'), 'success', true);
   }
 
   // --------------------------------------------------------------- gastos
@@ -391,7 +556,22 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    if (this.splitMode === 'all') {
+    let shares: Record<string, number> | undefined;
+
+    if (this.splitMode === 'amounts') {
+      if (!this.sharesAreValid()) {
+        this.showNotice(this.t('amountsMismatch'), 'warning');
+        return;
+      }
+
+      shares = {};
+      this.people.forEach((person) => {
+        const value = this.newExpenseShares[person];
+        if (value && value > 0) {
+          shares![person] = Math.round(value * 100) / 100;
+        }
+      });
+    } else if (this.splitMode === 'all') {
       this.selectAllParticipants();
     } else if (this.selectedParticipants.length === 0) {
       this.showNotice(this.t('addParticipantsToSplit'), 'warning');
@@ -402,8 +582,9 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       description: this.newExpenseDescription.trim(),
       amount: Math.round(this.newExpenseAmount * 100) / 100,
       paidBy: this.newExpensePaidBy,
-      participants: [...this.selectedParticipants],
-      category: this.selectedCategory
+      participants: shares ? Object.keys(shares) : [...this.selectedParticipants],
+      category: this.selectedCategory,
+      ...(shares ? { shares } : {})
     };
 
     if (this.editingExpenseId !== null) {
@@ -414,7 +595,6 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       this.editingExpenseId = null;
     } else {
       this.expenseItems = [...this.expenseItems, { id: this.nextExpenseId++, ...draft }];
-      this.showNotice(this.t('expenseAdded'), 'success');
       this.analyticsService.track('expense_added');
     }
 
@@ -455,7 +635,8 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     this.newExpensePaidBy = item.paidBy;
     this.selectedCategory = item.category || 'other';
     this.selectedParticipants = [...item.participants];
-    this.splitMode = this.areAllPeopleIncluded(item.participants) ? 'all' : 'custom';
+    this.newExpenseShares = item.shares ? { ...item.shares } : {};
+    this.splitMode = item.shares ? 'amounts' : this.areAllPeopleIncluded(item.participants) ? 'all' : 'custom';
 
     setTimeout(() => {
       const input = this.expenseDescriptionInput?.nativeElement;
@@ -474,6 +655,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     this.newExpenseAmount = null;
     this.newExpensePaidBy = '';
     this.selectedCategory = 'other';
+    this.newExpenseShares = {};
     this.splitMode = 'all';
     this.selectAllParticipants();
   }
@@ -484,12 +666,16 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       && this.newExpenseAmount !== null
       && this.newExpenseAmount > 0
       && !!this.newExpensePaidBy
-      && (this.splitMode === 'all' || this.selectedParticipants.length > 0);
+      && (this.splitMode === 'amounts' ? this.sharesAreValid() : (this.splitMode === 'all' || this.selectedParticipants.length > 0));
   }
 
   formatExpenseParticipants(expenseItem: ExpenseItem): string {
     if (expenseItem.participants.length === 0) {
       return '—';
+    }
+
+    if (expenseItem.shares) {
+      return Object.entries(expenseItem.shares).map(([person, amount]) => `${person} ${this.formatCurrency(amount)}`).join(' · ');
     }
 
     if (this.areAllPeopleIncluded(expenseItem.participants)) {
@@ -615,7 +801,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const snapshot = this.lastSnapshot;
     this.people = [...snapshot.people];
-    this.expenseItems = snapshot.expenseItems.map((item) => ({ ...item, participants: [...item.participants] }));
+    this.expenseItems = snapshot.expenseItems.map(cloneExpense);
     this.newExpenseDescription = snapshot.newExpenseDescription;
     this.newExpenseAmount = snapshot.newExpenseAmount;
     this.newExpensePaidBy = snapshot.newExpensePaidBy;
@@ -624,6 +810,9 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     this.nextExpenseId = snapshot.nextExpenseId;
     this.editingExpenseId = snapshot.editingExpenseId;
     this.currency = snapshot.currency;
+    this.newExpenseShares = { ...snapshot.newExpenseShares };
+    this.aliases = { ...snapshot.aliases };
+    this.editingPerson = null;
 
     this.lastSnapshot = null;
     this.canUndoLastAction = false;
@@ -633,7 +822,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
   private saveSnapshotForUndo(): void {
     this.lastSnapshot = {
       people: [...this.people],
-      expenseItems: this.expenseItems.map((item) => ({ ...item, participants: [...item.participants] })),
+      expenseItems: this.expenseItems.map(cloneExpense),
       newExpenseDescription: this.newExpenseDescription,
       newExpenseAmount: this.newExpenseAmount,
       newExpensePaidBy: this.newExpensePaidBy,
@@ -641,7 +830,9 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       selectedParticipants: [...this.selectedParticipants],
       nextExpenseId: this.nextExpenseId,
       editingExpenseId: this.editingExpenseId,
-      currency: this.currency
+      currency: this.currency,
+      newExpenseShares: { ...this.newExpenseShares },
+      aliases: { ...this.aliases }
     };
   }
 
@@ -732,7 +923,6 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     window.open(`https://wa.me/?text=${encodeURIComponent(this.buildShareMessage())}`, '_blank', 'noopener');
-    this.showNotice(this.t('whatsappOpened'), 'success');
     this.analyticsService.track('share_clicked');
   }
 
@@ -744,7 +934,6 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (await this.copyTextToClipboard(this.getShareAppLink())) {
       this.triggerCopyFeedback();
-      this.showNotice(this.t('linkCopied'), 'success');
       this.analyticsService.track('summary_copied');
     } else {
       this.showNotice(this.t('clipboardUnavailable'), 'warning');
@@ -806,7 +995,8 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       totalExpense: this.totalExpense,
       averageSpent: this.hasEvenSplit ? this.averageSpent : null,
       personBalances: this.personBalances,
-      results: this.results
+      results: this.results,
+      aliases: Object.fromEntries(Object.entries(this.aliases).filter(([person, alias]) => this.people.includes(person) && !!alias))
     };
   }
 
@@ -818,9 +1008,11 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
         a: item.amount,
         b: Math.max(0, this.people.indexOf(item.paidBy)),
         ...(item.category ? { k: item.category } : {}),
-        ...(this.areAllPeopleIncluded(item.participants)
-          ? {}
-          : { r: item.participants.map((p) => this.people.indexOf(p)).filter((i) => i >= 0) })
+        ...(item.shares
+          ? { s: this.people.map((person) => item.shares?.[person] ?? 0) }
+          : this.areAllPeopleIncluded(item.participants)
+            ? {}
+            : { r: item.participants.map((p) => this.people.indexOf(p)).filter((i) => i >= 0) })
       })),
       c: this.currency
     };

@@ -31,7 +31,8 @@ export function buildShareMessage(view: SummaryView, t: TranslateFn, format: For
   if (view.results.length > 0) {
     lines.push(`💸 *${t('sharePaymentsHeader')}*`);
     view.results.forEach((result) => {
-      lines.push(`• *${result.debtor}* ${t('sharePays')} *${format(result.amount)}* ${t('shareTo')} *${result.creditor}*`);
+      const alias = view.aliases[result.creditor];
+      lines.push(`• *${result.debtor}* ${t('sharePays')} *${format(result.amount)}* ${t('shareTo')} *${result.creditor}*${alias ? ` (${t('aliasShort')}: ${alias})` : ''}`);
     });
   } else {
     lines.push(`✅ *${t('shareAllSettled')}*`);

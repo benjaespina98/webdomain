@@ -17,6 +17,10 @@ export interface AppState {
   isSharedView: boolean;
   /** Opcional: las sesiones guardadas antes de agregar el selector de moneda no lo traen. */
   currency?: CurrencySymbol;
+  /** Opcional: montos por persona del gasto que se está cargando en modo "Personalizado". */
+  newExpenseShares?: Record<string, number | null>;
+  /** Opcional: alias/CBU por persona. Solo vive en este dispositivo; no viaja en el enlace compartido. */
+  aliases?: Record<string, string>;
   savedAt?: number;
 }
 
@@ -93,7 +97,11 @@ export class PersistenceService {
         && typeof item.amount === 'number' && Number.isFinite(item.amount)
         && typeof item.paidBy === 'string'
         && Array.isArray(item.participants))
-      .map((item) => ({ ...item, participants: item.participants.filter((participant) => typeof participant === 'string') }));
+      .map((item) => ({
+        ...item,
+        participants: item.participants.filter((participant) => typeof participant === 'string'),
+        ...(item.shares && typeof item.shares === 'object' ? { shares: this.sanitizeShares(item.shares) } : {})
+      }));
 
     const nextId = Math.max(saved.nextExpenseId ?? 1, ...expenseItems.map((item) => item.id + 1), 1);
 
@@ -105,14 +113,35 @@ export class PersistenceService {
       newExpenseDescription: saved.newExpenseDescription ?? '',
       newExpenseAmount: typeof saved.newExpenseAmount === 'number' ? saved.newExpenseAmount : null,
       newExpensePaidBy: saved.newExpensePaidBy ?? '',
-      splitMode: saved.splitMode === 'custom' ? 'custom' : 'all',
+      splitMode: saved.splitMode === 'custom' || saved.splitMode === 'amounts' ? saved.splitMode : 'all',
       selectedParticipants: Array.isArray(saved.selectedParticipants) ? saved.selectedParticipants : [...people],
       nextExpenseId: nextId,
       currentLanguage: saved.currentLanguage === 'en' ? 'en' : 'es',
       isSharedView: saved.isSharedView === true,
       currency: saved.currency,
+      newExpenseShares: this.sanitizeRecord(saved.newExpenseShares, 'number'),
+      aliases: this.sanitizeRecord(saved.aliases, 'string'),
       savedAt: saved.savedAt
     };
+  }
+
+  private sanitizeShares(value: Record<string, number>): Record<string, number> {
+    return Object.fromEntries(Object.entries(value).filter(([, amount]) => typeof amount === 'number' && Number.isFinite(amount)));
+  }
+
+  /** Deja solo las entradas cuyo valor es del tipo esperado (el storage lo puede haber tocado cualquiera). */
+  private sanitizeRecord<T extends 'number' | 'string'>(value: unknown, type: T): Record<string, T extends 'number' ? number | null : string> {
+    const result: Record<string, number | string | null> = {};
+
+    if (value && typeof value === 'object') {
+      Object.entries(value as Record<string, unknown>).forEach(([key, entry]) => {
+        if (typeof entry === type || (type === 'number' && entry === null)) {
+          result[key] = entry as number | string | null;
+        }
+      });
+    }
+
+    return result as Record<string, T extends 'number' ? number | null : string>;
   }
 
   clearState(): void {

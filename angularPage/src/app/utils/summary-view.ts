@@ -11,6 +11,8 @@ export interface SummaryView {
   averageSpent: number | null;
   personBalances: PersonBalance[];
   results: SettlementResult[];
+  /** Alias/CBU opcional por persona; se muestra junto a quien cobra. */
+  aliases: Record<string, string>;
 }
 
 export type TranslateFn = (key: keyof TranslationMap) => string;
