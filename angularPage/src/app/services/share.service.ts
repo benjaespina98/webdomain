@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as LZString from 'lz-string';
-import { CURRENCY_OPTIONS, CurrencySymbol, ExpenseItem } from '../models/expense.model';
+import { CURRENCY_OPTIONS, CurrencySymbol, EXPENSE_CATEGORIES, ExpenseCategory, ExpenseItem } from '../models/expense.model';
 import { LanguageCode } from './language.service';
 import { PersistableState } from './persistence.service';
 
@@ -9,6 +9,8 @@ export interface ShareExpenseDto {
   a: number;
   b: number;
   r?: number[];
+  /** Categoría del gasto. Opcional: los enlaces anteriores no la traen. */
+  k?: ExpenseCategory;
 }
 
 export interface SharePayload {
@@ -46,7 +48,36 @@ export class ShareService {
 
   buildShareUrl(state: unknown): string {
     const encoded = this.encodeState(state);
-    return `${window.location.origin}/share?data=${encoded}&v=${this.schemaVersion}`;
+    // Va en el fragmento (#) y no en el query string: el fragmento nunca viaja al
+    // servidor, así que los nombres y gastos no quedan en logs de hosting ni de proxies.
+    return `${window.location.origin}/share#data=${encoded}&v=${this.schemaVersion}`;
+  }
+
+  /**
+   * Lee `data` y `v` de un fragmento con forma `data=...&v=4`. Devuelve `null` si no hay
+   * datos. No usamos `URLSearchParams` porque convertiría los `+` del base64 de lz-string en espacios.
+   */
+  parseFragment(fragment: string | null | undefined): { data: string; version: number } | null {
+    if (!fragment) {
+      return null;
+    }
+
+    let data: string | null = null;
+    let version = 0;
+    for (const part of fragment.replace(/^#/, '').split('&')) {
+      if (part.startsWith('data=')) {
+        data = part.slice('data='.length);
+      } else if (part.startsWith('v=')) {
+        version = Number.parseInt(part.slice('v='.length), 10) || 0;
+      }
+    }
+
+    return data ? { data, version } : null;
+  }
+
+  /** Arma el fragmento equivalente a `buildShareUrl` para navegar internamente con el Router. */
+  buildFragment(data: string, version: number): string {
+    return `data=${data}&v=${version}`;
   }
 
   /**
@@ -133,7 +164,9 @@ export class ShareService {
       description: item.d,
       amount: item.a,
       paidBy: people[item.b],
-      participants: item.r ? item.r.map((personIndex) => people[personIndex]) : [...people]
+      participants: item.r ? item.r.map((personIndex) => people[personIndex]) : [...people],
+      // Cosmético, igual que la moneda: una categoría desconocida se ignora en vez de invalidar el enlace.
+      ...(item.k && EXPENSE_CATEGORIES.some((category) => category.id === item.k) ? { category: item.k } : {})
     }));
 
     return {

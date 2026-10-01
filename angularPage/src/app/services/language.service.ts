@@ -42,7 +42,10 @@ export class LanguageService {
    */
   formatCurrency(amount: number, currencySymbol: CurrencySymbol = '$'): string {
     const safeAmount = Number.isFinite(amount) ? amount : 0;
-    return `${currencySymbol} ${this.numberFormatter.format(safeAmount)}`;
+    // El signo va antes del símbolo ("-$ 3.000,00"), no entre símbolo y número ("$ -3.000,00").
+    const formatted = this.numberFormatter.format(Math.abs(safeAmount));
+    const sign = safeAmount < 0 && Number(formatted.replace(/[^0-9]/g, '')) !== 0 ? '-' : '';
+    return `${sign}${currencySymbol} ${formatted}`;
   }
 
   private apply(language: LanguageCode, persist: boolean): void {
