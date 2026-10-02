@@ -402,6 +402,12 @@
 
   <footer class="app-footer">
     <a routerLink="/about" class="about-link">{{ t('aboutLink') }}</a>
+    <!-- Solo aparece después de usar la app (hay datos) y no en una sesión compartida que se está mirando. -->
+    @if (coffeeUrl && hasData && !isSharedView) {
+      <span class="footer-dot" aria-hidden="true">·</span>
+      <a class="about-link coffee-link" [href]="coffeeUrl" target="_blank" rel="noopener noreferrer"
+        (click)="trackCoffeeClick()">☕ {{ t('coffeeLink') }}</a>
+    }
   </footer>
 
   <!-- ── Toast flotante ─────────────────────────────────────────────── -->

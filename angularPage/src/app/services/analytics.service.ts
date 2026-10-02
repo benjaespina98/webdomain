@@ -11,7 +11,8 @@ export type AnalyticsEvent =
   | 'summary_copied'
   | 'session_cleared'
   | 'voice_expense_dictated'
-  | 'summary_image_downloaded';
+  | 'summary_image_downloaded'
+  | 'coffee_clicked';
 
 @Injectable({
   providedIn: 'root'

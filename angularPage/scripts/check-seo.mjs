@@ -21,7 +21,12 @@ if (!/<noscript>[\s\S]*<h1>/.test(html)) errors.push('Falta el contenido <noscri
 const ld = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1];
 try {
   const data = JSON.parse(ld ?? '');
-  if (data['@type'] !== 'WebApplication' || !data.name || !data.description) errors.push('El JSON-LD no tiene @type/name/description');
+  const nodes = data['@graph'] ?? [data];
+  const app = nodes.find((node) => node['@type'] === 'WebApplication');
+  const site = nodes.find((node) => node['@type'] === 'WebSite');
+  if (!app?.name || !app?.description) errors.push('El JSON-LD no tiene un WebApplication con name y description');
+  // Google usa el WebSite de la home para decidir el nombre del sitio en los resultados.
+  if (site?.name !== 'dividimos?') errors.push('El JSON-LD no tiene un WebSite con name "dividimos?" (nombre del sitio en Google)');
 } catch {
   errors.push('Falta el JSON-LD o no es JSON válido');
 }
