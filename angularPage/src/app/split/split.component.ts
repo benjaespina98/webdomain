@@ -14,6 +14,7 @@ import { buildShareMessage } from '../utils/share-message.util';
 import { SummaryView } from '../utils/summary-view';
 import { renderSummaryCanvas } from '../utils/summary-image.util';
 import { openExternalLink } from '../utils/open-external.util';
+import { environment } from '../../environments/environment';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 
@@ -81,6 +82,11 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('personNameInput') private personNameInput?: ElementRef<HTMLInputElement>;
 
   readonly currencyOptions = CURRENCY_OPTIONS;
+  readonly coffeeUrl = environment.coffeeUrl;
+
+  trackCoffeeClick(): void {
+    this.analyticsService.track('coffee_clicked');
+  }
 
   /** Nombre de cada moneda para el selector: el símbolo solo ($) no dice si son pesos, dólares o euros. */
   currencyName(option: CurrencySymbol): string {

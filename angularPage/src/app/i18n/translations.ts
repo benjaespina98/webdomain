@@ -49,6 +49,7 @@ export interface TranslationMap {
   clearAll: string;
   clearAllFull: string;
   aboutLink: string;
+  coffeeLink: string;
   currencyAria: string;
   currencyLabel: string;
   currencyPesos: string;
@@ -164,6 +165,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     clearAll: 'Borrar todo',
     clearAllFull: 'Borrar todo y empezar de nuevo',
     aboutLink: '¿Qué es dividimos?',
+    coffeeLink: 'Invitame un café',
     currencyAria: 'Elegir moneda',
     currencyLabel: 'Moneda',
     currencyPesos: 'Pesos',
@@ -276,6 +278,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     clearAll: 'Delete all',
     clearAllFull: 'Delete everything and start over',
     aboutLink: 'What is dividimos?',
+    coffeeLink: 'Buy me a coffee',
     currencyAria: 'Choose currency',
     currencyLabel: 'Currency',
     currencyPesos: 'Pesos',
