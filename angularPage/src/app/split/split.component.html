@@ -142,12 +142,7 @@
             }
           </div>
           <div class="field field-amount">
-            <select class="currency-select" [(ngModel)]="currency" name="currencySymbol"
-              [attr.aria-label]="t('currencyAria')" [title]="t('currencyAria')">
-              @for (currencyOption of currencyOptions; track currencyOption) {
-                <option [value]="currencyOption">{{ currencyOption }}</option>
-              }
-            </select>
+            <span class="currency-prefix" aria-hidden="true">{{ currency }}</span>
             <input type="number" class="input has-prefix" [(ngModel)]="newExpenseAmount" name="expenseAmount"
               [placeholder]="t('amountPlaceholder')" [attr.aria-label]="t('amountPlaceholder')"
               step="0.01" min="0" inputmode="decimal">
@@ -163,7 +158,20 @@
           </div>
         </div>
         <!-- Categoría de gasto -->
-        <div class="category-row">
+        <div class="split-row currency-row">
+        <span class="split-label">{{ t('currencyLabel') }}</span>
+        <div class="segmented currency-segmented" role="group" [attr.aria-label]="t('currencyAria')">
+          @for (option of currencyOptions; track option) {
+            <button type="button" class="segment" [class.active]="currency === option"
+              [attr.aria-pressed]="currency === option" (click)="currency = option">
+              <span class="currency-symbol">{{ option }}</span>
+              <span class="currency-name">{{ currencyName(option) }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="category-row">
           <span class="category-label">{{ t('categoryTitle') }}</span>
           <div class="category-chips" role="radiogroup" [attr.aria-label]="t('categoryTitle')">
             @for (cat of expenseCategories; track cat.id) {

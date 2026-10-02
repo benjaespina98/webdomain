@@ -50,6 +50,10 @@ export interface TranslationMap {
   clearAllFull: string;
   aboutLink: string;
   currencyAria: string;
+  currencyLabel: string;
+  currencyPesos: string;
+  currencyDollars: string;
+  currencyEuros: string;
   copyLink: string;
   copied: string;
   clipboardUnavailable: string;
@@ -161,6 +165,10 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     clearAllFull: 'Borrar todo y empezar de nuevo',
     aboutLink: '¿Qué es dividimos?',
     currencyAria: 'Elegir moneda',
+    currencyLabel: 'Moneda',
+    currencyPesos: 'Pesos',
+    currencyDollars: 'Dólares',
+    currencyEuros: 'Euros',
     copyLink: 'Copiar enlace',
     copied: 'Copiado',
     clipboardUnavailable: 'No se pudo copiar. Copiá el enlace manualmente.',
@@ -269,6 +277,10 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     clearAllFull: 'Delete everything and start over',
     aboutLink: 'What is dividimos?',
     currencyAria: 'Choose currency',
+    currencyLabel: 'Currency',
+    currencyPesos: 'Pesos',
+    currencyDollars: 'Dollars',
+    currencyEuros: 'Euros',
     copyLink: 'Copy link',
     copied: 'Copied',
     clipboardUnavailable: 'Could not copy. Please copy the link manually.',

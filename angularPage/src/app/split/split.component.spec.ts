@@ -158,6 +158,45 @@ describe('SplitComponent', () => {
     expect(component.expenseItems.length).toBe(1);
   });
 
+  describe('moneda según el idioma', () => {
+    beforeEach(() => {
+      languageService.set('es');
+      component.currency = '$';
+      component.expenseItems = [];
+    });
+
+    afterEach(() => languageService.set('es'));
+
+    it('pasa a dólares al cambiar a inglés y vuelve a pesos al volver a español', () => {
+      component.setLanguage('en');
+      expect(component.currency).toBe('US$');
+
+      component.setLanguage('es');
+      expect(component.currency).toBe('$');
+    });
+
+    it('no pisa una moneda elegida a mano', () => {
+      component.currency = '€';
+
+      component.setLanguage('en');
+
+      expect(component.currency).toBe('€');
+    });
+
+    it('no cambia la moneda si ya hay gastos cargados (los montos dejarían de significar lo mismo)', () => {
+      component.people = ['Ana'];
+      component.expenseItems = [{ id: 1, description: 'Cena', amount: 100, paidBy: 'Ana', participants: ['Ana'] }];
+
+      component.setLanguage('en');
+
+      expect(component.currency).toBe('$');
+    });
+
+    it('el selector de moneda tiene un nombre para cada opción', () => {
+      expect(component.currencyOptions.map((option) => component.currencyName(option))).toEqual(['Pesos', 'Dólares', 'Euros']);
+    });
+  });
+
   describe('editar persona, alias y montos personalizados', () => {
     beforeEach(() => {
       component.people = ['Ana', 'Beto', 'Caro'];

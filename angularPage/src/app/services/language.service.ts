@@ -3,6 +3,11 @@ import { CurrencySymbol } from '../models/expense.model';
 
 export type LanguageCode = 'es' | 'en';
 
+/** Moneda con la que arranca una sesión nueva: pesos en español, dólares en inglés. */
+export function defaultCurrencyFor(language: LanguageCode): CurrencySymbol {
+  return language === 'en' ? 'US$' : '$';
+}
+
 /**
  * Única fuente de verdad del idioma: detección, persistencia y formateo de moneda.
  * Antes esta lógica estaba duplicada en landing, split y share.

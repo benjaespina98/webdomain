@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { PersistenceService } from '../services/persistence.service';
 import { ShareService, SharePayload } from '../services/share.service';
 import { AnalyticsService } from '../services/analytics.service';
-import { LanguageService, LanguageCode } from '../services/language.service';
+import { LanguageService, LanguageCode, defaultCurrencyFor } from '../services/language.service';
 import { VoiceInputService } from '../services/voice-input.service';
 import { SplitStateService } from '../services/split-state.service';
 import { CURRENCY_OPTIONS, CategoryOption, CurrencySymbol, EXPENSE_CATEGORIES, ExpenseCategory, ExpenseItem, SettlementResult, SplitMode, cloneExpense } from '../models/expense.model';
@@ -81,6 +81,11 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('personNameInput') private personNameInput?: ElementRef<HTMLInputElement>;
 
   readonly currencyOptions = CURRENCY_OPTIONS;
+
+  /** Nombre de cada moneda para el selector: el símbolo solo ($) no dice si son pesos, dólares o euros. */
+  currencyName(option: CurrencySymbol): string {
+    return this.t(option === '€' ? 'currencyEuros' : option === 'US$' ? 'currencyDollars' : 'currencyPesos');
+  }
   readonly expenseCategories = EXPENSE_CATEGORIES;
 
   selectedCategory: ExpenseCategory = 'other';
@@ -222,8 +227,16 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
+    const previous = this.currentLanguage;
     this.languageService.set(language);
     this.stateService.currentLanguage.set(language);
+
+    // La moneda acompaña al idioma (pesos en español, dólares en inglés) mientras sea la que viene por
+    // defecto y todavía no haya gastos: con gastos cargados cambiar la etiqueta de $ a US$ la volvería
+    // engañosa, y una moneda elegida a mano (por ejemplo €) nunca se pisa.
+    if (this.expenseItems.length === 0 && this.currency === defaultCurrencyFor(previous)) {
+      this.currency = defaultCurrencyFor(language);
+    }
   }
 
   formatCurrency(amount: number): string {
@@ -236,12 +249,17 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     const saved = this.persistenceService.loadState();
     this.stateService.initialize(saved);
 
-    if (!saved) {
-      return;
+    if (saved && (saved.currentLanguage === 'es' || saved.currentLanguage === 'en')) {
+      this.languageService.set(saved.currentLanguage);
     }
 
-    if (saved.currentLanguage === 'es' || saved.currentLanguage === 'en') {
-      this.languageService.set(saved.currentLanguage);
+    // Una sesión nueva (o una vacía) arranca con la moneda del idioma: dólares si la app está en inglés.
+    if (!saved || (saved.people.length === 0 && saved.expenseItems.length === 0)) {
+      this.currency = defaultCurrencyFor(this.languageService.current);
+    }
+
+    if (!saved) {
+      return;
     }
 
     // Una sesión vacía (recién abierta, sin datos) no cuenta como "sesión vieja".
