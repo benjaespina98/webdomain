@@ -415,43 +415,20 @@
     }
 
     &.has-prefix {
-        padding-left: 2.7rem;
+        padding-left: 3.2rem;
     }
 }
 
-/* Selector de moneda: ocupa el lugar del antiguo prefijo "$" fijo, pero es
-   interactivo. Ultra minimalista a propósito: sin conversión entre monedas,
-   es solo la etiqueta que se antepone a cada monto en toda la app. */
-.currency-select {
+/* Prefijo del monto: muestra la moneda elegida. Se cambia en el selector "Moneda" (más abajo),
+   sin conversión entre monedas: es solo la etiqueta que se antepone a cada monto en la app. */
+.currency-prefix {
     position: absolute;
-    left: 0.5rem;
+    left: 0.95rem;
     z-index: 1;
-    max-width: 3.9rem;
-    border: 0;
-    background: transparent;
     color: var(--text-muted);
     font-size: 0.92rem;
     font-weight: 600;
-    padding: 0.3rem 0.2rem;
-    border-radius: var(--radius-sm);
-    appearance: none;
-    cursor: pointer;
-    transition: color 0.15s ease;
-
-    &:hover,
-    &:focus {
-        color: var(--text);
-    }
-
-    &:focus {
-        outline: none;
-        box-shadow: 0 0 0 2px var(--accent-soft);
-    }
-
-    option {
-        background: var(--surface-2);
-        color: var(--text);
-    }
+    pointer-events: none;
 }
 
 .select {
@@ -568,6 +545,26 @@
     border-radius: var(--radius-pill);
     background: var(--surface-2);
     border: 1px solid var(--border);
+}
+
+.currency-segmented {
+    .segment {
+        display: inline-flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 0.3rem;
+        padding-inline: 0.7rem;
+    }
+
+    .currency-symbol {
+        font-weight: 700;
+    }
+
+    .currency-name {
+        font-size: var(--font-xs);
+        font-weight: 600;
+        opacity: 0.85;
+    }
 }
 
 .segment {
@@ -1496,6 +1493,16 @@
         padding: 0.3rem 0.5rem;
     }
 
+    .app-shell {
+        width: min(100% - 1rem, 720px);
+    }
+}
+
+
+/* El botón del header pierde su texto (queda el ícono y el aria-label) por debajo de 420px: con el
+   texto, brand + botón + selector de idioma no entran en teléfonos de ~390px y el header desborda.
+   El botón "Borrar todo y empezar de nuevo" al final de los resultados sigue con texto completo. */
+@media (max-width: 420px) {
     /* El texto del botón de reiniciar se oculta visualmente (sigue en el aria-label)
        para que el header no desborde en pantallas muy angostas. */
     .restart-btn {
@@ -1516,12 +1523,7 @@
         white-space: nowrap;
         border: 0;
     }
-
-    .app-shell {
-        width: min(100% - 1rem, 720px);
-    }
 }
-
 
 /* ── Borrar todo (acción destructiva, bien visible al final de los resultados) ── */
 
