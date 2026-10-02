@@ -35,17 +35,17 @@ describe('SplitComponent', () => {
       { id: 1, description: 'Cena', amount: 3000, paidBy: 'Pepe', participants: ['Pepe', 'Juan', 'Ana'] }
     ];
 
-    const openSpy = spyOn(window, 'open');
+    const openSpy = spyOn(window, 'open').and.returnValue({ opener: null } as unknown as Window);
     component.shareWhatsApp();
 
     expect(openSpy).toHaveBeenCalledTimes(1);
     const message = decodeURIComponent((openSpy.calls.mostRecent().args[0] as string).split('text=')[1]);
 
     expect(message).toContain('🧾 *dividimos?*');
-    expect(message).toContain('👥 *Personas*: Pepe, Juan, Ana');
-    expect(message).toContain('💰 *Total*: $ 3.000,00');
-    expect(message).toContain('*Juan* le paga *$ 1.000,00* a *Pepe*');
-    expect(message).toContain('Hecho con dividimos? 🤙');
+    expect(message).toContain('Cena · 3 personas');
+    expect(message).toContain('Total *$ 3.000*');
+    expect(message).toContain('Juan → Pepe: *$ 1.000*');
+    expect(message).toContain('Detalle completo 👇');
     expect(message).toContain('/share#data=');
   });
 
@@ -210,12 +210,12 @@ describe('SplitComponent', () => {
 
     it('el mensaje de WhatsApp incluye el alias de quien cobra', () => {
       component.aliases = { Ana: 'ana.mp' };
-      const openSpy = spyOn(window, 'open');
+      const openSpy = spyOn(window, 'open').and.returnValue({ opener: null } as unknown as Window);
 
       component.shareWhatsApp();
 
       const message = decodeURIComponent((openSpy.calls.mostRecent().args[0] as string).split('text=')[1]);
-      expect(message).toContain('(alias: ana.mp)');
+      expect(message).toContain('💳 *Ana*: ana.mp');
     });
 
     it('valida que los montos personalizados sumen el total', () => {

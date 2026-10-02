@@ -1,4 +1,4 @@
-import { buildShareMessage } from './share-message.util';
+import { buildShareMessage, listExpenseNames } from './share-message.util';
 import { SummaryView } from './summary-view';
 
 describe('buildShareMessage', () => {
@@ -18,28 +18,68 @@ describe('buildShareMessage', () => {
     aliases: {}
   };
 
-  it('incluye personas, gastos, balances, pagos y el enlace', () => {
+  it('arma un mensaje corto: total, nombres de los gastos, pagos y enlace', () => {
     const message = buildShareMessage(view, t as never, money, 'https://x/share#data=abc');
 
-    expect(message).toContain('Ana, Beto');
-    expect(message).toContain('🍕 *Cena*: $100');
-    expect(message).toContain('+$50');
-    expect(message).toContain('*Beto* sharePays *$50* shareTo *Ana*');
-    expect(message.endsWith('https://x/share#data=abc')).toBeTrue();
+    expect(message).toBe([
+      '🧾 *dividimos?* · shareTotal *$100*',
+      'Cena · 2 peopleWord',
+      '',
+      '*sharePaymentsHeader*',
+      '• Beto → Ana: *$50*',
+      '',
+      'shareLinkHint',
+      'https://x/share#data=abc'
+    ].join('\n'));
   });
 
-  it('omite el promedio por persona cuando el reparto es desigual', () => {
-    expect(buildShareMessage({ ...view, averageSpent: null }, t as never, money, 'l')).not.toContain('perPerson');
-    expect(buildShareMessage(view, t as never, money, 'l')).toContain('perPerson');
+  it('no incluye el detalle que ya está en el enlace (gastos, saldos, promedio)', () => {
+    const message = buildShareMessage(view, t as never, money, 'l');
+
+    expect(message).not.toContain('perPerson');
+    expect(message).not.toContain('personBalancesTitle');
+    expect(message).not.toContain('🍕');
+  });
+
+  it('quita los centavos en cero pero conserva los que no lo son', () => {
+    const cents = (amount: number) => `$ ${amount.toFixed(2).replace('.', ',')}`;
+    const message = buildShareMessage({ ...view, totalExpense: 15000, results: [{ debtor: 'Beto', creditor: 'Ana', amount: 33.33 }] }, t as never, cents, 'l');
+
+    expect(message).toContain('*$ 15000*');
+    expect(message).toContain('*$ 33,33*');
+  });
+
+  it('agrega el alias de quien cobra, una sola vez aunque cobre de varios', () => {
+    const many = { ...view, aliases: { Ana: 'ana.mp' }, results: [
+      { debtor: 'Beto', creditor: 'Ana', amount: 30 }, { debtor: 'Caro', creditor: 'Ana', amount: 20 }
+    ] };
+    const message = buildShareMessage(many, t as never, money, 'l');
+
+    expect(message.match(/ana\.mp/g)?.length).toBe(1);
+    expect(message).toContain('💳 *Ana*: ana.mp');
   });
 
   it('avisa que está todo saldado cuando no hay pagos pendientes', () => {
     expect(buildShareMessage({ ...view, results: [] }, t as never, money, 'l')).toContain('shareAllSettled');
   });
+});
 
-  it('agrega el alias de quien cobra si lo tiene cargado', () => {
-    const message = buildShareMessage({ ...view, aliases: { Ana: 'ana.mp' } }, t as never, money, 'l');
+describe('listExpenseNames', () => {
+  it('une los nombres de todos los gastos, sin repetidos', () => {
+    expect(listExpenseNames(['Asado'], 'y')).toBe('Asado');
+    expect(listExpenseNames(['Asado', 'Uber'], 'y')).toBe('Asado y Uber');
+    expect(listExpenseNames(['Asado', 'Uber', 'Vino'], 'y')).toBe('Asado, Uber y Vino');
+    expect(listExpenseNames(['Cena', 'cena', ' Cena '], 'y')).toBe('Cena');
+  });
 
-    expect(message).toContain('*Ana* (aliasShort: ana.mp)');
+  it('nunca resume con "+N más": si no entra, no dice nada', () => {
+    const many = Array.from({ length: 12 }, (_, index) => `Gasto número ${index + 1}`);
+
+    expect(listExpenseNames(many, 'y')).toBe('');
+    expect(listExpenseNames(many, 'y')).not.toMatch(/más|more|\+/);
+  });
+
+  it('devuelve vacío si no hay gastos', () => {
+    expect(listExpenseNames([], 'y')).toBe('');
   });
 });

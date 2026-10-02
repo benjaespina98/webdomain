@@ -13,6 +13,7 @@ import { TRANSLATIONS, TranslationMap } from '../i18n/translations';
 import { buildShareMessage } from '../utils/share-message.util';
 import { SummaryView } from '../utils/summary-view';
 import { renderSummaryCanvas } from '../utils/summary-image.util';
+import { openExternalLink } from '../utils/open-external.util';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 
@@ -925,8 +926,8 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    window.open(`https://wa.me/?text=${encodeURIComponent(this.buildShareMessage())}`, '_blank', 'noopener');
     this.analyticsService.track('share_clicked');
+    openExternalLink(`https://wa.me/?text=${encodeURIComponent(this.buildShareMessage())}`);
   }
 
   async copyShareLink(): Promise<void> {
