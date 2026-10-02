@@ -32,6 +32,15 @@ for (const url of ['https://dividimos.vercel.app/', 'https://dividimos.vercel.ap
 }
 if (!readFileSync(join(dist, 'robots.txt'), 'utf8').includes('Sitemap: https://dividimos.vercel.app/sitemap.xml')) errors.push('robots.txt no apunta al sitemap');
 
+// Verificación de propiedad de Google Search Console (método "archivo HTML"): si este archivo
+// desaparece del sitio, Google deja de considerarlo verificado.
+const googleFile = 'googlecece0d7eb7d6e18a.html';
+try {
+  if (readFileSync(join(dist, googleFile), 'utf8').trim() !== `google-site-verification: ${googleFile}`) errors.push(`${googleFile} no tiene el contenido que pide Google`);
+} catch {
+  errors.push(`Falta ${googleFile} en el build (verificación de Google Search Console)`);
+}
+
 if (errors.length) {
   console.error('SEO ✗\n - ' + errors.join('\n - '));
   process.exit(1);
