@@ -26,6 +26,7 @@ A diferencia de otras aplicaciones de gastos compartidos, **dividimos?** está p
 * Sin backend.
 * Todo funciona en el navegador.
 * Los datos permanecen en tu dispositivo (localStorage).
+* Contador de uso anónimo (PostHog): solo eventos con nombre, sin gastos ni nombres de personas, sin grabación de sesiones y con las URL recortadas (nunca se envía el contenido de un enlace compartido).
 * Compartir resultados mediante un único enlace.
 * Compatible con WhatsApp y cualquier otra aplicación de mensajería.
 * Español e Inglés.
