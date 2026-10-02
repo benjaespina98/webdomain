@@ -30,7 +30,8 @@
               "src/assets",
               "src/manifest.webmanifest",
               "src/robots.txt",
-              "src/sitemap.xml"
+              "src/sitemap.xml",
+              "src/googlecece0d7eb7d6e18a.html"
             ],
             "styles": [
               "node_modules/@fortawesome/fontawesome-free/css/fontawesome.min.css",
