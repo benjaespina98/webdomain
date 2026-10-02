@@ -10,8 +10,8 @@ export const routes: Routes = [
     component: LandingComponent,
     canActivate: [landingGuard],
     data: {
-      title: 'dividimos? - Dividí gastos grupales fácil y rápido',
-      description: 'Sin registros, sin backend y 100% offline. Dividí gastos grupales en segundos y compartí los resultados al instante.'
+      title: 'Dividir gastos entre amigos: calculadora gratis | dividimos?',
+      description: 'Dividí los gastos de un asado, un viaje o una salida en segundos. Mirá quién le paga a quién y compartilo por WhatsApp. Gratis y sin registro.'
     }
   },
   {
@@ -20,23 +20,23 @@ export const routes: Routes = [
     component: LandingComponent,
     data: {
       canonical: '/',
-      title: 'dividimos? - Qué es y cómo funciona',
-      description: 'Sin registros, sin backend y 100% offline. Dividí gastos grupales en segundos y compartí los resultados al instante.'
+      title: 'Cómo funciona dividimos? | Dividir gastos sin registro',
+      description: 'Cómo funciona dividimos?: sumá a la gente, cargá los gastos y mirá quién le paga a quién. Sin registro y con tus datos en tu navegador.'
     }
   },
   {
     path: 'app',
     component: SplitComponent,
     data: {
-      title: 'dividimos? - Calculadora de gastos compartidos',
-      description: 'Sumá participantes, cargá gastos y calculá quién le debe a quién en segundos.'
+      title: 'Calculadora de gastos compartidos | dividimos?',
+      description: 'Sumá a la gente, cargá los gastos y mirá quién le paga a quién. Reparto parejo o por montos, en pesos, dólares o euros.'
     }
   },
   {
     path: 'share',
     component: ShareComponent,
     data: {
-      title: 'dividimos? - Sesión compartida',
+      title: 'Resumen de gastos compartido | dividimos?',
       description: 'Estás abriendo una división de gastos compartida por WhatsApp.'
     }
   },
