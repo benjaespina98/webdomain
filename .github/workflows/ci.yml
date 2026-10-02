@@ -47,3 +47,5 @@ jobs:
           test -f dist/angular-page/share.html
           grep -q 'og:image" content="https://dividimos.vercel.app/assets/icons/icon-192x192.png"' dist/angular-page/share.html
 
+      - name: SEO básico (title, description, JSON-LD, sitemap)
+        run: npm run check:seo
