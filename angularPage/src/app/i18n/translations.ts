@@ -31,7 +31,6 @@ export interface TranslationMap {
   aliasHint: string;
   savePerson: string;
   personUpdated: string;
-  aliasShort: string;
   hasAlias: string;
   addExpense: string;
   saveChanges: string;
@@ -61,7 +60,8 @@ export interface TranslationMap {
   shareGeneratedWith: string;
   shareLinkHint: string;
   sharePays: string;
-  shareTo: string;
+  peopleWord: string;
+  andWord: string;
   sharePaymentsHeader: string;
   shareLinkError: string;
   enterValidName: string;
@@ -142,7 +142,6 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     aliasHint: 'Se ve en los resultados y en WhatsApp. No viaja en el enlace.',
     savePerson: 'Guardar',
     personUpdated: 'Datos actualizados',
-    aliasShort: 'alias',
     hasAlias: 'Tiene alias cargado',
     addExpense: 'Sumar gasto',
     saveChanges: 'Guardar',
@@ -168,12 +167,13 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     shareWhatsapp: 'Compartir por WhatsApp',
     noExpensesToShare: 'No hay gastos para compartir',
     shareTotal: 'Total',
-    shareAllSettled: 'Todo saldado 😎 no quedan cuentas pendientes.',
+    shareAllSettled: 'Todo saldado 🎉',
     shareGeneratedWith: 'Hecho con dividimos? 🤙',
-    shareLinkHint: 'Tocá el link para ver todos los gastos 👇',
+    shareLinkHint: 'Detalle completo 👇',
     sharePays: 'le paga',
-    shareTo: 'a',
-    sharePaymentsHeader: 'quién le paga a quién 👇',
+    peopleWord: 'personas',
+    andWord: 'y',
+    sharePaymentsHeader: 'Quién paga a quién',
     shareLinkError: 'Ese enlace no es válido o es de una versión anterior',
     enterValidName: 'Escribí un nombre',
     personAlreadyExists: 'Esa persona ya está en la lista',
@@ -250,7 +250,6 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     aliasHint: 'Shown in the results and on WhatsApp. Not included in the link.',
     savePerson: 'Save',
     personUpdated: 'Details updated',
-    aliasShort: 'alias',
     hasAlias: 'Has an alias saved',
     addExpense: 'Add expense',
     saveChanges: 'Save',
@@ -276,12 +275,13 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     shareWhatsapp: 'Share on WhatsApp',
     noExpensesToShare: 'There are no expenses to share',
     shareTotal: 'Total',
-    shareAllSettled: 'All settled 😎 no pending payments.',
+    shareAllSettled: 'All settled 🎉',
     shareGeneratedWith: 'Made with dividimos? 🤙',
-    shareLinkHint: 'Tap the link to see all expenses 👇',
+    shareLinkHint: 'Full breakdown 👇',
     sharePays: 'pays',
-    shareTo: 'to',
-    sharePaymentsHeader: 'who pays whom 👇',
+    peopleWord: 'people',
+    andWord: 'and',
+    sharePaymentsHeader: 'Who pays whom',
     shareLinkError: 'That link is invalid or from an older version',
     enterValidName: 'Type a name',
     personAlreadyExists: 'That person is already on the list',

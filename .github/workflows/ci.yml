@@ -39,3 +39,11 @@ jobs:
       # un `onload=` (carga diferida del CSS de Angular), el navegador lo bloquea.
       - name: El index.html no tiene handlers inline (CSP)
         run: "! grep -q 'onload=' dist/angular-page/index.html"
+
+      # /share usa share.html (vercel.json) para que WhatsApp muestre una tarjeta chica con el ícono
+      # en lugar de la imagen grande de la landing.
+      - name: share.html con la vista previa chica
+        run: |
+          test -f dist/angular-page/share.html
+          grep -q 'og:image" content="https://dividimos.vercel.app/assets/icons/icon-192x192.png"' dist/angular-page/share.html
+

@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/share",
+      "destination": "/share.html"
+    },
+    {
       "source": "/((?!assets/|.*\\.[a-zA-Z0-9]+$).*)",
       "destination": "/index.html"
     }
