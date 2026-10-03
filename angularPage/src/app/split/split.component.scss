@@ -1712,3 +1712,24 @@
 .coffee-link {
     color: var(--accent-light);
 }
+
+.made-by {
+    display: flex;
+    flex: 0 0 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    max-width: 100%;
+    margin-top: 0.4rem;
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    text-decoration: none;
+    opacity: 0.9;
+
+    img {
+        display: block;
+        height: 26px;
+        width: auto;
+        max-width: 100%;
+    }
+}
