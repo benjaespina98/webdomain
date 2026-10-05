@@ -17,13 +17,13 @@
         <h1 class="hero-title">Nunca más hagas cuentas después de un <span class="accent-text">asado, una cena o una salida</span></h1>
         <p class="hero-subtitle">Cargá los gastos y mirá quién le paga a quién.</p>
         <div class="hero-ctas">
-          <a routerLink="/app" class="btn-cta-primary"><i class="fas fa-calculator" aria-hidden="true"></i>Empezar</a>
+          <a routerLink="/app" class="btn-cta-primary"><i class="fas fa-arrow-right" aria-hidden="true"></i>Empezar</a>
         </div>
       } @else {
         <h1 class="hero-title">Stop doing the math after a <span class="accent-text">BBQ, dinner, or night out</span></h1>
         <p class="hero-subtitle">Add the expenses and see who pays whom.</p>
         <div class="hero-ctas">
-          <a routerLink="/app" class="btn-cta-primary"><i class="fas fa-calculator" aria-hidden="true"></i>Get started</a>
+          <a routerLink="/app" class="btn-cta-primary"><i class="fas fa-arrow-right" aria-hidden="true"></i>Get started</a>
         </div>
       }
     </div>
@@ -36,17 +36,17 @@
 
       @if (currentLanguage === 'es') {
         <ul class="what-is-list">
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Sin registro ni cuenta.</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Funciona en tu navegador, hasta sin conexión.</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Tus gastos no pasan por ningún servidor.</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Dictá un gasto: «Ana pagó 12500 de cena».</li>
+          <li><i class="fas fa-user-slash accent-icon" aria-hidden="true"></i>Sin registro ni cuenta.</li>
+          <li><i class="fas fa-bolt accent-icon" aria-hidden="true"></i>Funciona en tu navegador, hasta sin conexión.</li>
+          <li><i class="fas fa-lock accent-icon" aria-hidden="true"></i>Tus gastos se quedan en tu dispositivo.</li>
+          <li><i class="fas fa-microphone accent-icon" aria-hidden="true"></i>Dictá un gasto en voz alta: «Ana pagó 12500 de cena».</li>
         </ul>
       } @else {
         <ul class="what-is-list">
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>No sign-up, no account.</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Runs in your browser, even offline.</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Your expenses never touch a server.</li>
-          <li><i class="fas fa-check accent-icon" aria-hidden="true"></i>Dictate an expense: "Ana paid 120 for dinner".</li>
+          <li><i class="fas fa-user-slash accent-icon" aria-hidden="true"></i>No sign-up, no account.</li>
+          <li><i class="fas fa-bolt accent-icon" aria-hidden="true"></i>Runs in your browser, even offline.</li>
+          <li><i class="fas fa-lock accent-icon" aria-hidden="true"></i>Your expenses stay on your device.</li>
+          <li><i class="fas fa-microphone accent-icon" aria-hidden="true"></i>Dictate an expense out loud: "Ana paid 120 for dinner".</li>
         </ul>
       }
     </div>
@@ -76,7 +76,7 @@
           </div>
           <div class="preview-form">
             <span class="preview-input preview-input-sm">$ 326,00</span>
-            <span class="preview-input preview-input-sm">Ana</span>
+            <span class="preview-input preview-input-sm">{{ currentLanguage === 'es' ? 'Pagó Ana' : 'Paid by Ana' }}</span>
           </div>
 
           <div class="preview-kpis">
@@ -169,10 +169,10 @@
         <div>
           @if (currentLanguage === 'es') {
             <h3 class="no-account-title">Tus datos son tuyos</h3>
-            <p class="no-account-body">Tus gastos quedan en tu navegador y no pasan por ningún servidor. Solo contamos visitas de forma anónima. Cerrás la página y seguís cuando quieras.</p>
+            <p class="no-account-body">Tus gastos quedan en tu navegador y no pasan por ningún servidor. Solo contamos visitas, de forma anónima. Cerrás la página y seguís cuando quieras.</p>
           } @else {
             <h3 class="no-account-title">Your data stays with you</h3>
-            <p class="no-account-body">Your expenses stay in your browser and never go through a server. We only count visits anonymously. Close the page and pick up whenever.</p>
+            <p class="no-account-body">Your expenses stay in your browser and never go through a server. We only count visits, anonymously. Close the page and pick up whenever.</p>
           }
         </div>
       </div>
@@ -184,17 +184,17 @@
     <div>
       @if (currentLanguage === 'es') {
         <h2>¿Quién le debe a quién?</h2>
-        <a routerLink="/app" class="btn-cta-primary cta-spaced"><i class="fas fa-check-circle" aria-hidden="true"></i>Empezar</a>
+        <a routerLink="/app" class="btn-cta-primary cta-spaced"><i class="fas fa-arrow-right" aria-hidden="true"></i>Empezar</a>
       } @else {
         <h2>Who owes who?</h2>
-        <a routerLink="/app" class="btn-cta-primary cta-spaced"><i class="fas fa-check-circle" aria-hidden="true"></i>Get started</a>
+        <a routerLink="/app" class="btn-cta-primary cta-spaced"><i class="fas fa-arrow-right" aria-hidden="true"></i>Get started</a>
       }
     </div>
   </section>
 
   <!-- Footer -->
   <footer class="landing-footer">
-    <p>&copy; {{ currentYear }} dividimos?. {{ currentLanguage === 'es' ? 'Hecho con 💜' : 'Made with 💜' }}</p>
+    <p>&copy; {{ currentYear }} dividimos? · {{ currentLanguage === 'es' ? 'Hecho con 💜' : 'Made with 💜' }}</p>
     <a class="made-by" href="https://www.instagram.com/200ok.dev/" target="_blank" rel="noopener" aria-label="200ok.dev en Instagram">
       <span>made by</span>
       <img src="assets/200ok-logo.svg" alt="200ok.dev" loading="lazy" height="26" />
