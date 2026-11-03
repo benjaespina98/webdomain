@@ -10,9 +10,9 @@
     <div class="header-actions">
       @if (hasData) {
         <button type="button" class="restart-btn"
-          (click)="clearAll()" [title]="t('clearAll')" [attr.aria-label]="t('clearAll')">
+          (click)="clearAll()" [title]="t('startOver')" [attr.aria-label]="t('startOver')">
           <i class="fas fa-trash-can" aria-hidden="true"></i>
-          <span class="restart-btn-label">{{ t('clearAll') }}</span>
+          <span class="restart-btn-label">{{ t('startOver') }}</span>
         </button>
       }
       <div class="lang-switch" role="group" [attr.aria-label]="t('languageAria')">
@@ -394,12 +394,6 @@
           <span>{{ t('downloadImage') }}</span>
         </button>
       </div>
-      @if (hasData) {
-        <button type="button" class="btn-clear-all" (click)="clearAll()">
-          <i class="fas fa-trash-can" aria-hidden="true"></i>
-          <span>{{ t('clearAllFull') }}</span>
-        </button>
-      }
     </section>
 
     <a class="made-by" href="https://www.instagram.com/200ok.dev/" target="_blank" rel="noopener" aria-label="200ok.dev en Instagram">

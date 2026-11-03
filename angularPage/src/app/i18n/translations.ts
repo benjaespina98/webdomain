@@ -46,8 +46,6 @@ export interface TranslationMap {
   perPerson: string;
   allSettled: string;
   settlementsTitle: string;
-  clearAll: string;
-  clearAllFull: string;
   startOver: string;
   aboutLink: string;
   coffeeLink: string;
@@ -163,8 +161,6 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     perPerson: 'Promedio por persona',
     allSettled: 'Todo saldado 🎉',
     settlementsTitle: 'Quién le paga a quién',
-    clearAll: 'Borrar todo',
-    clearAllFull: 'Borrar todo y empezar de nuevo',
     startOver: 'Empezar de cero',
     aboutLink: '¿Qué es dividimos?',
     coffeeLink: 'Invitame un café',
@@ -277,8 +273,6 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     perPerson: 'Average per person',
     allSettled: 'All settled 🎉',
     settlementsTitle: 'Who pays whom',
-    clearAll: 'Delete all',
-    clearAllFull: 'Delete everything and start over',
     startOver: 'Start from scratch',
     aboutLink: 'What is dividimos?',
     coffeeLink: 'Buy me a coffee',
