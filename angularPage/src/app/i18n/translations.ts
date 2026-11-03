@@ -48,6 +48,7 @@ export interface TranslationMap {
   settlementsTitle: string;
   clearAll: string;
   clearAllFull: string;
+  startOver: string;
   aboutLink: string;
   coffeeLink: string;
   currencyAria: string;
@@ -164,6 +165,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     settlementsTitle: 'Quién le paga a quién',
     clearAll: 'Borrar todo',
     clearAllFull: 'Borrar todo y empezar de nuevo',
+    startOver: 'Empezar de cero',
     aboutLink: '¿Qué es dividimos?',
     coffeeLink: 'Invitame un café',
     currencyAria: 'Elegir moneda',
@@ -277,6 +279,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     settlementsTitle: 'Who pays whom',
     clearAll: 'Delete all',
     clearAllFull: 'Delete everything and start over',
+    startOver: 'Start from scratch',
     aboutLink: 'What is dividimos?',
     coffeeLink: 'Buy me a coffee',
     currencyAria: 'Choose currency',

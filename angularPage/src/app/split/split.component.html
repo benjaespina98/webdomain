@@ -8,7 +8,7 @@
     </a>
 
     <div class="header-actions">
-      @if (hasData && !isSharedView) {
+      @if (hasData) {
         <button type="button" class="restart-btn"
           (click)="clearAll()" [title]="t('clearAll')" [attr.aria-label]="t('clearAll')">
           <i class="fas fa-trash-can" aria-hidden="true"></i>
@@ -28,7 +28,10 @@
   @if (isSharedView) {
     <div class="banner banner-shared">
       <span><i class="fas fa-eye" aria-hidden="true"></i>{{ t('sharedViewBanner') }}</span>
-      <button type="button" class="banner-btn accent" (click)="importAndEdit()">{{ t('importAndEdit') }}</button>
+      <span class="banner-actions">
+        <button type="button" class="banner-btn accent" (click)="importAndEdit()">{{ t('importAndEdit') }}</button>
+        <button type="button" class="banner-btn warn" (click)="clearAll()">{{ t('startOver') }}</button>
+      </span>
     </div>
   }
 
@@ -391,7 +394,7 @@
           <span>{{ t('downloadImage') }}</span>
         </button>
       </div>
-      @if (hasData && !isSharedView) {
+      @if (hasData) {
         <button type="button" class="btn-clear-all" (click)="clearAll()">
           <i class="fas fa-trash-can" aria-hidden="true"></i>
           <span>{{ t('clearAllFull') }}</span>
