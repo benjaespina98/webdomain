@@ -158,6 +158,54 @@ describe('SplitComponent', () => {
     expect(component.expenseItems.length).toBe(1);
   });
 
+  it('empezar de cero también borra los alias, pero deshacer los devuelve', () => {
+    component.people = ['Ana', 'Beto'];
+    component.aliases = { Ana: 'ana.mp' };
+    component.expenseItems = [
+      { id: 1, description: 'Cena', amount: 100, paidBy: 'Ana', participants: ['Ana', 'Beto'] }
+    ];
+
+    component.clearAll();
+    component.acceptConfirm();
+    expect(component.aliases).toEqual({});
+
+    component.newPersonName = 'Ana';
+    component.addPerson();
+    expect(component.aliasOf('Ana')).toBe('');
+
+    component.undoLastAction();
+    expect(component.aliasOf('Ana')).toBe('ana.mp');
+  });
+
+  it('guarda el alias opcional que se escribe al agregar una persona', () => {
+    component.newPersonName = 'Ana';
+    component.newPersonAlias = '  ana.mp ';
+    component.addPerson();
+
+    component.newPersonName = 'Beto';
+    component.addPerson();
+
+    expect(component.aliasOf('Ana')).toBe('ana.mp');
+    expect(component.aliasOf('Beto')).toBe('');
+    expect(component.newPersonAlias).toBe('');
+  });
+
+  it('por WhatsApp solo manda el alias de quienes cobran', () => {
+    component.people = ['Ana', 'Beto', 'Caro'];
+    component.aliases = { Ana: 'ana.mp', Beto: 'beto.cbu', Caro: 'caro.uala' };
+    component.expenseItems = [
+      { id: 1, description: 'Cena', amount: 300, paidBy: 'Ana', participants: ['Ana', 'Beto', 'Caro'] }
+    ];
+
+    const openSpy = spyOn(window, 'open').and.returnValue({ opener: null } as unknown as Window);
+    component.shareWhatsApp();
+    const message = decodeURIComponent((openSpy.calls.mostRecent().args[0] as string).split('text=')[1]);
+
+    expect(message).toContain('ana.mp');
+    expect(message).not.toContain('beto.cbu');
+    expect(message).not.toContain('caro.uala');
+  });
+
   describe('moneda según el idioma', () => {
     beforeEach(() => {
       languageService.set('es');

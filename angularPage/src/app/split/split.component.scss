@@ -70,9 +70,8 @@
     padding: 0 0.75rem;
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-pill);
-    background: rgba(239, 68, 68, 0.08);
-    border-color: rgba(239, 68, 68, 0.3);
-    color: var(--danger-light);
+    background: var(--surface);
+    color: var(--text-muted, #a7b0c8);
     font-size: var(--font-xs);
     font-weight: 600;
     white-space: nowrap;
@@ -83,11 +82,17 @@
         font-size: 0.78rem;
     }
 
-    &:hover {
-        background: rgba(239, 68, 68, 0.18);
-        border-color: rgba(239, 68, 68, 0.5);
+    &:hover,
+    &:focus-visible {
+        background: rgba(239, 68, 68, 0.12);
+        border-color: rgba(239, 68, 68, 0.45);
         color: var(--danger-light);
     }
+}
+
+/* Texto corto solo para pantallas angostas (ver media query de 420px). */
+.restart-btn-short {
+    display: none;
 }
 
 .lang-switch {
@@ -335,6 +340,12 @@
 }
 
 .person-input {
+    width: 100%;
+}
+
+/* Alias/CBU opcional al agregar: segunda fila, a todo el ancho. */
+.person-alias-input {
+    grid-column: 1 / -1;
     width: 100%;
 }
 
@@ -1499,28 +1510,20 @@
 }
 
 
-/* El botón del header pierde su texto (queda el ícono y el aria-label) por debajo de 420px: con el
-   texto, brand + botón + selector de idioma no entran en teléfonos de ~390px y el header desborda. */
+/* En teléfonos angostos el texto completo ("Empezar de cero") no entra junto a la marca y al selector
+   de idioma, pero un ícono solo no se entiende: se muestra una versión corta con texto. */
 @media (max-width: 420px) {
-    /* El texto del botón de reiniciar se oculta visualmente (sigue en el aria-label)
-       para que el header no desborde en pantallas muy angostas. */
     .restart-btn {
-        width: 2.1rem;
-        padding: 0;
-        justify-content: center;
-        border-radius: var(--radius-sm);
+        padding: 0 0.6rem;
+        gap: 0.3rem;
     }
 
     .restart-btn-label {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        margin: -1px;
-        padding: 0;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
+        display: none;
+    }
+
+    .restart-btn-short {
+        display: inline;
     }
 }
 

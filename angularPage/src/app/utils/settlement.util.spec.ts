@@ -97,6 +97,50 @@ describe('calculateSettlement', () => {
     expect(summary.results).toContain(jasmine.objectContaining({ debtor: 'Beto', creditor: 'Ana', amount: 10 }));
   });
 
+  it('usa el mínimo de transferencias cuando hay grupos independientes que se saldan entre sí', () => {
+    // Ana +5 / Yago -5 se saldan solos; Beto +4 y Caro +3 le deben cobrar a Xavi -7.
+    // Un greedy global pide 4 transferencias; lo óptimo son 3.
+    const summary = calculateSettlement(['Ana', 'Beto', 'Caro', 'Xavi', 'Yago'], [
+      { id: 1, description: 'a', amount: 5, paidBy: 'Ana', participants: ['Yago'], shares: { Yago: 5 } },
+      { id: 2, description: 'b', amount: 4, paidBy: 'Beto', participants: ['Xavi'], shares: { Xavi: 4 } },
+      { id: 3, description: 'c', amount: 3, paidBy: 'Caro', participants: ['Xavi'], shares: { Xavi: 3 } }
+    ]);
+
+    expect(summary.results.length).toBe(3);
+    expect(summary.results).toContain({ debtor: 'Yago', creditor: 'Ana', amount: 5 });
+  });
+
+  it('las transferencias dejan a todos en cero y nunca superan (personas con saldo − 1)', () => {
+    const people = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+    let seed = 7;
+    const rnd = (max: number): number => (seed = (seed * 1103515245 + 12345) % 2147483648) % max;
+
+    for (let round = 0; round < 60; round++) {
+      const expenses = Array.from({ length: 1 + rnd(8) }, (_, i) => {
+        const participants = people.filter(() => rnd(3) > 0);
+        return {
+          id: i + 1,
+          description: `g${i}`,
+          amount: (1 + rnd(200000)) / 100,
+          paidBy: people[rnd(people.length)],
+          participants: participants.length > 0 ? participants : ['A']
+        };
+      });
+
+      const summary = calculateSettlement(people, expenses);
+      const net: Record<string, number> = {};
+      summary.personBalances.forEach((p) => (net[p.person] = Math.round(p.netBalance * 100)));
+      summary.results.forEach((r) => {
+        net[r.debtor] += Math.round(r.amount * 100);
+        net[r.creditor] -= Math.round(r.amount * 100);
+      });
+
+      expect(Object.values(net).every((value) => value === 0)).toBeTrue();
+      const withBalance = summary.personBalances.filter((p) => p.netBalance !== 0).length;
+      expect(summary.results.length).toBeLessThanOrEqual(Math.max(0, withBalance - 1));
+    }
+  });
+
   it('respeta los montos exactos de un gasto con shares', () => {
     const result = calculateSettlement(['Ana', 'Beto', 'Caro'], [
       { id: 1, description: 'Cena', amount: 100, paidBy: 'Ana', participants: ['Ana', 'Beto'], shares: { Ana: 30, Beto: 70 } }

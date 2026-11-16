@@ -47,6 +47,7 @@ export interface TranslationMap {
   allSettled: string;
   settlementsTitle: string;
   startOver: string;
+  startOverShort: string;
   aboutLink: string;
   coffeeLink: string;
   currencyAria: string;
@@ -117,7 +118,7 @@ export interface TranslationMap {
 export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
   es: {
     peopleTitle: 'Personas',
-    personPlaceholder: 'Agregar persona. Ej: Ana',
+    personPlaceholder: 'Nombre. Ej: Ana',
     addPerson: 'Agregar persona',
     addButton: 'Agregar',
     removePerson: 'Quitar',
@@ -162,6 +163,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     allSettled: 'Todo saldado 🎉',
     settlementsTitle: 'Quién le paga a quién',
     startOver: 'Empezar de cero',
+    startOverShort: 'De cero',
     aboutLink: '¿Qué es dividimos?',
     coffeeLink: 'Invitame un café',
     currencyAria: 'Elegir moneda',
@@ -192,14 +194,14 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     personRemoved: 'Persona eliminada',
     expenseRemoved: 'Gasto eliminado',
     expenseEdited: 'Gasto modificado',
-    allCleared: 'Se borró todo',
-    nothingToClear: 'No hay nada para borrar',
+    allCleared: 'Listo, arrancás de cero',
+    nothingToClear: 'Todavía no hay nada cargado',
     undo: 'Deshacer',
     undoApplied: 'Cambio deshecho',
     dismissNotice: 'Cerrar aviso',
-    confirmTitle: '¿Borrar todo?',
-    confirmClearAll: 'Se borran las personas y los gastos. Podés deshacerlo enseguida.',
-    confirmClear: 'Sí, borrar',
+    confirmTitle: '¿Empezar de cero?',
+    confirmClearAll: 'Se borran las personas, los gastos y los alias cargados. Podés deshacerlo enseguida.',
+    confirmClear: 'Sí, empezar de cero',
     confirmImportTitle: 'Reemplazar tu sesión',
     confirmImportMessage: 'Ya tenés datos cargados. Si abrís este enlace, se reemplazan por los compartidos.',
     confirmImportAccept: 'Sí, reemplazar',
@@ -229,7 +231,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
   },
   en: {
     peopleTitle: 'People',
-    personPlaceholder: 'Add person. E.g. Ana',
+    personPlaceholder: 'Name. E.g. Ana',
     addPerson: 'Add person',
     addButton: 'Add',
     removePerson: 'Remove',
@@ -274,6 +276,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     allSettled: 'All settled 🎉',
     settlementsTitle: 'Who pays whom',
     startOver: 'Start from scratch',
+    startOverShort: 'Reset',
     aboutLink: 'What is dividimos?',
     coffeeLink: 'Buy me a coffee',
     currencyAria: 'Choose currency',
@@ -304,14 +307,14 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     personRemoved: 'Person removed',
     expenseRemoved: 'Expense deleted',
     expenseEdited: 'Expense updated',
-    allCleared: 'Everything was cleared',
-    nothingToClear: 'There is nothing to clear',
+    allCleared: 'Done, fresh start',
+    nothingToClear: 'Nothing has been added yet',
     undo: 'Undo',
     undoApplied: 'Change undone',
     dismissNotice: 'Dismiss',
-    confirmTitle: 'Delete everything?',
-    confirmClearAll: 'People and expenses will be deleted. You can undo it right after.',
-    confirmClear: 'Yes, delete',
+    confirmTitle: 'Start from scratch?',
+    confirmClearAll: 'People, expenses and aliases will be deleted. You can undo it right after.',
+    confirmClear: 'Yes, start over',
     confirmImportTitle: 'Replace your session',
     confirmImportMessage: 'You already have data. Opening this link will replace it with the shared data.',
     confirmImportAccept: 'Yes, replace',

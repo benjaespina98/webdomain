@@ -8,11 +8,12 @@
     </a>
 
     <div class="header-actions">
-      @if (hasData) {
+      @if (hasData && !isSharedView) {
         <button type="button" class="restart-btn"
           (click)="clearAll()" [title]="t('startOver')" [attr.aria-label]="t('startOver')">
-          <i class="fas fa-trash-can" aria-hidden="true"></i>
+          <i class="fas fa-rotate-left" aria-hidden="true"></i>
           <span class="restart-btn-label">{{ t('startOver') }}</span>
+          <span class="restart-btn-short" aria-hidden="true">{{ t('startOverShort') }}</span>
         </button>
       }
       <div class="lang-switch" role="group" [attr.aria-label]="t('languageAria')">
@@ -90,6 +91,9 @@
           <i class="fas fa-plus" aria-hidden="true"></i>
           <span>{{ t('addButton') }}</span>
         </button>
+        <input type="text" class="input person-alias-input" [(ngModel)]="newPersonAlias" name="newPersonAlias"
+          [placeholder]="t('aliasLabel')" [attr.aria-label]="t('aliasLabel')"
+          maxlength="40" autocomplete="off" autocapitalize="off">
       </form>
     }
 

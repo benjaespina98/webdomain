@@ -101,6 +101,8 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
   editingPerson: string | null = null;
   personDraftName = '';
   personDraftAlias = '';
+  /** Alias/CBU opcional que se escribe junto al nombre al agregar una persona. */
+  newPersonAlias = '';
 
   uiNotice = '';
   uiNoticeType: NoticeType = 'info';
@@ -335,8 +337,14 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
+    const alias = this.newPersonAlias.trim().slice(0, 40);
+
     this.people = [...this.people, cleanPersonName];
+    if (alias) {
+      this.aliases = { ...this.aliases, [cleanPersonName]: alias };
+    }
     this.newPersonName = '';
+    this.newPersonAlias = '';
 
     if (this.splitMode === 'all') {
       this.selectAllParticipants();
@@ -730,7 +738,10 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.people = [];
       this.expenseItems = [];
+      this.aliases = {};
       this.newPersonName = '';
+      this.newPersonAlias = '';
+      this.editingPerson = null;
       this.selectedParticipants = [];
       this.nextExpenseId = 1;
       this.editingExpenseId = null;
