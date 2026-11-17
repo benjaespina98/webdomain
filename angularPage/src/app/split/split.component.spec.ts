@@ -364,7 +364,7 @@ describe('SplitComponent', () => {
       component.shareWhatsApp();
 
       const message = decodeURIComponent((openSpy.calls.mostRecent().args[0] as string).split('text=')[1]);
-      expect(message).toContain('Alias para transferir:');
+      expect(message).toContain('💳 Alias Ana: *ana.mp*');
     });
 
     it('valida que los montos personalizados sumen el total', () => {

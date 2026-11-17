@@ -34,7 +34,7 @@ export function listExpenseNames(descriptions: string[], andWord: string): strin
 
 /**
  * Mensaje de WhatsApp corto. Es lo primero que ve alguien que todavía no conoce la app: total, quién le
- * paga a quién (una línea por transferencia) y, al final, el alias de quienes cobran. Los gastos y saldos
+ * paga a quién (una línea por transferencia) y, antes del enlace, el alias de quienes cobran (una línea por persona). Los gastos y saldos
  * por persona se ven al abrir el enlace.
  */
 export function buildShareMessage(view: SummaryView, t: TranslateFn, format: FormatMoneyFn, link: string): string {
@@ -59,8 +59,8 @@ export function buildShareMessage(view: SummaryView, t: TranslateFn, format: For
     // Los alias van al final y solo de quienes tienen que recibir plata, una vez cada uno.
     const creditorsWithAlias = [...new Set(view.results.map((result) => result.creditor))].filter((person) => !!view.aliases[person]);
     if (creditorsWithAlias.length > 0) {
-      lines.push('', `💳 ${t('shareAliasHeader')}`);
-      creditorsWithAlias.forEach((person) => lines.push(`• ${person}: *${view.aliases[person]}*`));
+      lines.push('');
+      creditorsWithAlias.forEach((person) => lines.push(`💳 ${t('shareAlias')} ${person}: *${view.aliases[person]}*`));
     }
   } else {
     lines.push(`✅ *${t('shareAllSettled')}*`);
