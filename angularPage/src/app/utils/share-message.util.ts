@@ -51,9 +51,9 @@ export function buildShareMessage(view: SummaryView, t: TranslateFn, format: For
   lines.push('');
 
   if (view.results.length > 0) {
-    // Una línea por transferencia ("Carla le paga a Ana: $ 13.667"): lo normal es que sean varias.
+    // Una línea por transferencia ("Carla → Ana: $ 13.667"): lo normal es que sean varias.
     view.results.forEach((result) => {
-      lines.push(`• ${result.debtor} ${t('sharePasses')} ${result.creditor}: ${money(result.amount)}`);
+      lines.push(`• ${result.debtor} → ${result.creditor}: ${money(result.amount)}`);
     });
 
     // Los alias van al final y solo de quienes tienen que recibir plata, una vez cada uno.

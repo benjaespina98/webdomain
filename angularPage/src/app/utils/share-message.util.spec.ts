@@ -25,7 +25,7 @@ describe('buildShareMessage', () => {
       '🧾 *shareTitle* · shareTotal $100',
       'Cena · 2 peopleWord',
       '',
-      '• Beto sharePasses Ana: $50',
+      '• Beto → Ana: $50',
       '',
       'shareLinkHint',
       'https://x/share#data=abc',
@@ -46,7 +46,7 @@ describe('buildShareMessage', () => {
     const message = buildShareMessage({ ...view, totalExpense: 15000, results: [{ debtor: 'Beto', creditor: 'Ana', amount: 33.33 }] }, t as never, cents, 'l');
 
     expect(message).toContain('shareTotal $ 15000');
-    expect(message).toContain('• Beto sharePasses Ana: $ 33,33');
+    expect(message).toContain('• Beto → Ana: $ 33,33');
   });
 
   it('lista una línea por transferencia, sin agrupar', () => {
@@ -55,7 +55,7 @@ describe('buildShareMessage', () => {
     ] };
     const message = buildShareMessage(many, t as never, money, 'l');
 
-    expect(message).toContain('• Beto sharePasses Ana: $30\n• Caro sharePasses Ana: $20\n• Beto sharePasses Dani: $5');
+    expect(message).toContain('• Beto → Ana: $30\n• Caro → Ana: $20\n• Beto → Dani: $5');
   });
 
   it('pone antes del enlace una línea de alias por cada persona que cobra, y no los de quienes pagan', () => {
@@ -64,7 +64,7 @@ describe('buildShareMessage', () => {
     ] };
     const message = buildShareMessage(many, t as never, money, 'l');
 
-    expect(message).toContain('• Caro sharePasses Dani: $5\n\n💳 shareAlias Ana: *ana.mp*\n💳 shareAlias Dani: *dani.uala*\n\nshareLinkHint');
+    expect(message).toContain('• Caro → Dani: $5\n\n💳 shareAlias Ana: *ana.mp*\n💳 shareAlias Dani: *dani.uala*\n\nshareLinkHint');
     expect(message.match(/ana\.mp/g)?.length).toBe(1);
     expect(message).not.toContain('beto.cbu');
   });

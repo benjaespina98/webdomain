@@ -45,8 +45,8 @@ describe('SplitComponent', () => {
     expect(message).toContain('🧾 *Cuentas claras*');
     expect(message).toContain('Cena · 3 personas');
     expect(message).toContain('Total $ 3.000');
-    expect(message).toContain('• Ana le paga a Pepe: $ 1.000');
-    expect(message).toContain('• Juan le paga a Pepe: $ 1.000');
+    expect(message).toContain('• Ana → Pepe: $ 1.000');
+    expect(message).toContain('• Juan → Pepe: $ 1.000');
     expect(message).toContain('👀 Detalle de cada gasto:');
     expect(message).toContain('/share#data=');
   });

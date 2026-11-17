@@ -69,7 +69,6 @@ export interface TranslationMap {
   andWord: string;
   shareTitle: string;
   shareAlias: string;
-  sharePasses: string;
   shareSignature: string;
   shareLinkError: string;
   enterValidName: string;
@@ -187,7 +186,6 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     andWord: 'y',
     shareTitle: 'Cuentas claras',
     shareAlias: 'Alias',
-    sharePasses: 'le paga a',
     shareSignature: 'dividimos? · dividí gastos gratis, sin registro',
     shareLinkError: 'Ese enlace no es válido o es de una versión anterior',
     enterValidName: 'Escribí un nombre',
@@ -302,7 +300,6 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     andWord: 'and',
     shareTitle: 'Accounts settled',
     shareAlias: 'Alias',
-    sharePasses: 'pays',
     shareSignature: 'dividimos? · split expenses for free, no sign-up',
     shareLinkError: 'That link is invalid or from an older version',
     enterValidName: 'Type a name',
