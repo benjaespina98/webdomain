@@ -214,7 +214,12 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     if (!this.isSharedView && this.people.length === 0) {
-      setTimeout(() => this.newPersonInput?.nativeElement.focus({ preventScroll: true }));
+      // En el celular no se enfoca solo: abriría el teclado apenas se carga la página.
+      setTimeout(() => {
+        if (this.hasFinePointer()) {
+          this.newPersonInput?.nativeElement.focus({ preventScroll: true });
+        }
+      });
     }
   }
 
@@ -635,7 +640,24 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.resetExpenseForm();
-    this.expenseDescriptionInput?.nativeElement.focus({ preventScroll: true });
+    this.refocusOrDismissKeyboard(this.expenseDescriptionInput?.nativeElement);
+  }
+
+  /**
+   * Con mouse y teclado conviene dejar el cursor listo para cargar lo siguiente; en un celular enfocar un
+   * input abre el teclado (tapando la pantalla) sin que nadie lo haya pedido, así que ahí se hace al revés:
+   * se cierra el teclado que pudiera haber quedado abierto del campo anterior.
+   */
+  private refocusOrDismissKeyboard(input?: HTMLElement | null): void {
+    if (this.hasFinePointer()) {
+      input?.focus({ preventScroll: true });
+    } else if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  }
+
+  private hasFinePointer(): boolean {
+    return typeof matchMedia === 'function' && matchMedia('(hover: hover) and (pointer: fine)').matches;
   }
 
   /** Dispara el fade-out del ítem; la mutación real de datos se hace en `commitRemoveExpenseItem`. */
@@ -750,7 +772,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.showNotice(this.t('allCleared'), 'warning', true);
       this.analyticsService.track('session_cleared');
-      setTimeout(() => this.newPersonInput?.nativeElement.focus({ preventScroll: true }));
+      setTimeout(() => this.refocusOrDismissKeyboard(this.newPersonInput?.nativeElement));
     });
   }
 

@@ -177,6 +177,36 @@ describe('SplitComponent', () => {
     expect(component.aliasOf('Ana')).toBe('ana.mp');
   });
 
+  it('en un celular, sumar un gasto no enfoca ningún campo (no abre el teclado)', () => {
+    component.people = ['Ana', 'Beto'];
+    fixture.detectChanges();
+    const description = fixture.nativeElement.querySelector('.field-description input') as HTMLInputElement;
+    description.focus();
+    spyOn(window, 'matchMedia').and.returnValue({ matches: false } as MediaQueryList);
+
+    component.newExpenseDescription = 'Cena';
+    component.newExpenseAmount = 100;
+    component.newExpensePaidBy = 'Ana';
+    component.addExpenseItem();
+
+    expect(component.expenseItems.length).toBe(1);
+    expect(document.activeElement).not.toBe(description);
+  });
+
+  it('con mouse, sumar un gasto deja el cursor en la descripción para cargar el siguiente', () => {
+    component.people = ['Ana', 'Beto'];
+    fixture.detectChanges();
+    const description = fixture.nativeElement.querySelector('.field-description input') as HTMLInputElement;
+    spyOn(window, 'matchMedia').and.returnValue({ matches: true } as MediaQueryList);
+
+    component.newExpenseDescription = 'Cena';
+    component.newExpenseAmount = 100;
+    component.newExpensePaidBy = 'Ana';
+    component.addExpenseItem();
+
+    expect(document.activeElement).toBe(description);
+  });
+
   it('guarda el alias opcional que se escribe al agregar una persona', () => {
     component.newPersonName = 'Ana';
     component.newPersonAlias = '  ana.mp ';
