@@ -33,9 +33,9 @@ export function listExpenseNames(descriptions: string[], andWord: string): strin
 }
 
 /**
- * Mensaje de WhatsApp corto. Es lo primero que ve alguien que todavía no conoce la app, así que va
- * ordenado por quien cobra: cuánto recibe, su alias (al lado, fácil de copiar) y quiénes le pagan.
- * Los gastos y saldos por persona se ven al abrir el enlace.
+ * Mensaje de WhatsApp corto. Es lo primero que ve alguien que todavía no conoce la app: total, quién le
+ * paga a quién (una línea por transferencia) y, al final, el alias de quienes cobran. Los gastos y saldos
+ * por persona se ven al abrir el enlace.
  */
 export function buildShareMessage(view: SummaryView, t: TranslateFn, format: FormatMoneyFn, link: string): string {
   const money = (amount: number): string => compactMoney(format(amount));
@@ -51,22 +51,17 @@ export function buildShareMessage(view: SummaryView, t: TranslateFn, format: For
   lines.push('');
 
   if (view.results.length > 0) {
-    // Agrupado por quien cobra, en el orden en que aparece (el que más cobra primero).
-    const byCreditor = new Map<string, { debtor: string; amount: number }[]>();
+    // Una línea por transferencia ("Carla le paga a Ana: $ 13.667"): lo normal es que sean varias.
     view.results.forEach((result) => {
-      byCreditor.set(result.creditor, [...(byCreditor.get(result.creditor) ?? []), { debtor: result.debtor, amount: result.amount }]);
+      lines.push(`• ${result.debtor} ${t('sharePasses')} ${result.creditor}: ${money(result.amount)}`);
     });
 
-    const blocks = [...byCreditor.entries()].map(([creditor, payments]) => {
-      const collected = Math.round(payments.reduce((sum, payment) => sum + payment.amount * 100, 0)) / 100;
-      const alias = view.aliases[creditor] ? ` · ${t('shareAlias')}: *${view.aliases[creditor]}*` : '';
-      return [
-        `*${creditor}* ${t('shareCollects')} ${money(collected)}${alias}`,
-        ...payments.map((payment) => `• ${payment.debtor} ${t('sharePasses')} ${money(payment.amount)}`)
-      ].join('\n');
-    });
-
-    lines.push(blocks.join('\n\n'));
+    // Los alias van al final y solo de quienes tienen que recibir plata, una vez cada uno.
+    const creditorsWithAlias = [...new Set(view.results.map((result) => result.creditor))].filter((person) => !!view.aliases[person]);
+    if (creditorsWithAlias.length > 0) {
+      lines.push('', `💳 ${t('shareAliasHeader')}`);
+      creditorsWithAlias.forEach((person) => lines.push(`• ${person}: *${view.aliases[person]}*`));
+    }
   } else {
     lines.push(`✅ *${t('shareAllSettled')}*`);
   }

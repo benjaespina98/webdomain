@@ -18,15 +18,14 @@ describe('buildShareMessage', () => {
     aliases: {}
   };
 
-  it('arma un mensaje corto: total, nombres de los gastos, quién cobra, enlace y firma', () => {
+  it('arma un mensaje corto: total, nombres de los gastos, quién le paga a quién, enlace y firma', () => {
     const message = buildShareMessage(view, t as never, money, 'https://x/share#data=abc');
 
     expect(message).toBe([
       '🧾 *shareTitle* · shareTotal $100',
       'Cena · 2 peopleWord',
       '',
-      '*Ana* shareCollects $50',
-      '• Beto sharePasses $50',
+      '• Beto sharePasses Ana: $50',
       '',
       'shareLinkHint',
       'https://x/share#data=abc',
@@ -47,28 +46,34 @@ describe('buildShareMessage', () => {
     const message = buildShareMessage({ ...view, totalExpense: 15000, results: [{ debtor: 'Beto', creditor: 'Ana', amount: 33.33 }] }, t as never, cents, 'l');
 
     expect(message).toContain('shareTotal $ 15000');
-    expect(message).toContain('shareCollects $ 33,33');
-    expect(message).toContain('sharePasses $ 33,33');
+    expect(message).toContain('• Beto sharePasses Ana: $ 33,33');
   });
 
-  it('pone el alias de quien cobra al lado de su nombre, una sola vez, y no el de quien paga', () => {
-    const many = { ...view, aliases: { Ana: 'ana.mp', Beto: 'beto.cbu' }, results: [
-      { debtor: 'Beto', creditor: 'Ana', amount: 30 }, { debtor: 'Caro', creditor: 'Ana', amount: 20 }
+  it('lista una línea por transferencia, sin agrupar', () => {
+    const many = { ...view, results: [
+      { debtor: 'Beto', creditor: 'Ana', amount: 30 }, { debtor: 'Caro', creditor: 'Ana', amount: 20 }, { debtor: 'Beto', creditor: 'Dani', amount: 5 }
     ] };
     const message = buildShareMessage(many, t as never, money, 'l');
 
+    expect(message).toContain('• Beto sharePasses Ana: $30\n• Caro sharePasses Ana: $20\n• Beto sharePasses Dani: $5');
+  });
+
+  it('pone al final los alias de quienes cobran, una sola vez cada uno, y no los de quienes pagan', () => {
+    const many = { ...view, aliases: { Ana: 'ana.mp', Beto: 'beto.cbu', Dani: 'dani.uala' }, results: [
+      { debtor: 'Beto', creditor: 'Ana', amount: 30 }, { debtor: 'Caro', creditor: 'Ana', amount: 20 }, { debtor: 'Caro', creditor: 'Dani', amount: 5 }
+    ] };
+    const message = buildShareMessage(many, t as never, money, 'l');
+
+    expect(message).toContain('• Caro sharePasses Dani: $5\n\n💳 shareAliasHeader\n• Ana: *ana.mp*\n• Dani: *dani.uala*\n\nshareLinkHint');
     expect(message.match(/ana\.mp/g)?.length).toBe(1);
-    expect(message).toContain('*Ana* shareCollects $50 · shareAlias: *ana.mp*\n• Beto sharePasses $30\n• Caro sharePasses $20');
     expect(message).not.toContain('beto.cbu');
   });
 
-  it('con varios que cobran arma un bloque por cada uno, con alias solo si lo tienen', () => {
-    const two = { ...view, aliases: { Caro: 'caro.uala' }, results: [
-      { debtor: 'Beto', creditor: 'Ana', amount: 40 }, { debtor: 'Beto', creditor: 'Caro', amount: 10 }
-    ] };
-    const message = buildShareMessage(two, t as never, money, 'l');
+  it('sin alias de quienes cobran no agrega la sección de alias', () => {
+    const message = buildShareMessage({ ...view, aliases: { Beto: 'beto.cbu' } }, t as never, money, 'l');
 
-    expect(message).toContain('*Ana* shareCollects $40\n• Beto sharePasses $40\n\n*Caro* shareCollects $10 · shareAlias: *caro.uala*\n• Beto sharePasses $10');
+    expect(message).not.toContain('shareAliasHeader');
+    expect(message).not.toContain('beto.cbu');
   });
 
   it('avisa que está todo saldado cuando no hay pagos pendientes', () => {
