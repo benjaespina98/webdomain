@@ -68,7 +68,6 @@ export interface TranslationMap {
   peopleWord: string;
   andWord: string;
   shareTitle: string;
-  shareSettleHeader: string;
   shareCollects: string;
   shareAlias: string;
   sharePasses: string;
@@ -91,9 +90,8 @@ export interface TranslationMap {
   confirmTitle: string;
   confirmClearAll: string;
   confirmClear: string;
-  confirmImportTitle: string;
-  confirmImportMessage: string;
-  confirmImportAccept: string;
+  backToMySession: string;
+  ownSessionRestored: string;
   shareImported: string;
   languageAria: string;
   homeAria: string;
@@ -184,16 +182,15 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     shareTotal: 'Total',
     shareAllSettled: 'Todo saldado 🎉',
     shareGeneratedWith: 'Hecho con dividimos? 🤙',
-    shareLinkHint: 'Mirá el detalle de cada gasto 👇',
+    shareLinkHint: '👀 Detalle de cada gasto:',
     sharePays: 'le paga',
     peopleWord: 'personas',
     andWord: 'y',
-    shareTitle: 'Cuentas del grupo',
-    shareSettleHeader: 'Para quedar a mano:',
+    shareTitle: 'Cuentas claras',
     shareCollects: 'cobra',
-    shareAlias: 'Alias',
-    sharePasses: 'le pasa',
-    shareSignature: 'dividimos? · gratis y sin registro',
+    shareAlias: 'alias',
+    sharePasses: 'le paga',
+    shareSignature: 'dividimos? · dividí gastos gratis, sin registro',
     shareLinkError: 'Ese enlace no es válido o es de una versión anterior',
     enterValidName: 'Escribí un nombre',
     personAlreadyExists: 'Esa persona ya está en la lista',
@@ -212,9 +209,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     confirmTitle: '¿Empezar de cero?',
     confirmClearAll: 'Se borran las personas, los gastos y los alias cargados. Podés deshacerlo enseguida.',
     confirmClear: 'Sí, empezar de cero',
-    confirmImportTitle: 'Reemplazar tu sesión',
-    confirmImportMessage: 'Ya tenés datos cargados. Si abrís este enlace, se reemplazan por los compartidos.',
-    confirmImportAccept: 'Sí, reemplazar',
+    backToMySession: 'Volver a mi sesión',
+    ownSessionRestored: 'Volviste a tu sesión',
     shareImported: 'Sesión compartida importada',
     languageAria: 'Cambiar idioma',
     homeAria: 'Ir al inicio',
@@ -302,16 +298,15 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     shareTotal: 'Total',
     shareAllSettled: 'All settled 🎉',
     shareGeneratedWith: 'Made with dividimos? 🤙',
-    shareLinkHint: 'See every expense here 👇',
+    shareLinkHint: '👀 Every expense, itemized:',
     sharePays: 'pays',
     peopleWord: 'people',
     andWord: 'and',
-    shareTitle: 'Group expenses',
-    shareSettleHeader: 'To settle up:',
+    shareTitle: 'Accounts settled',
     shareCollects: 'collects',
-    shareAlias: 'Alias',
-    sharePasses: 'sends',
-    shareSignature: 'dividimos? · free, no sign-up',
+    shareAlias: 'alias',
+    sharePasses: 'pays',
+    shareSignature: 'dividimos? · split expenses for free, no sign-up',
     shareLinkError: 'That link is invalid or from an older version',
     enterValidName: 'Type a name',
     personAlreadyExists: 'That person is already on the list',
@@ -330,9 +325,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     confirmTitle: 'Start from scratch?',
     confirmClearAll: 'People, expenses and aliases will be deleted. You can undo it right after.',
     confirmClear: 'Yes, start over',
-    confirmImportTitle: 'Replace your session',
-    confirmImportMessage: 'You already have data. Opening this link will replace it with the shared data.',
-    confirmImportAccept: 'Yes, replace',
+    backToMySession: 'Back to my session',
+    ownSessionRestored: 'Back to your session',
     shareImported: 'Shared session imported',
     languageAria: 'Change language',
     homeAria: 'Go to home',

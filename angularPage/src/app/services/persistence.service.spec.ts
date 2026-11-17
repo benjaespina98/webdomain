@@ -23,6 +23,34 @@ describe('PersistenceService', () => {
     expect(service.loadState()?.people).toEqual(['Ana']);
   });
 
+  it('respalda la sesión propia y la devuelve una sola vez', () => {
+    service.saveState({
+      people: ['Ana'], expenseItems: [], newPersonName: '', newExpenseDescription: '', newExpenseAmount: null,
+      newExpensePaidBy: '', splitMode: 'all', selectedParticipants: ['Ana'], nextExpenseId: 1,
+      currentLanguage: 'es', isSharedView: false, currency: '$'
+    });
+    expect(service.hasBackup()).toBeFalse();
+
+    service.backupState();
+    service.saveState({
+      people: ['Otro'], expenseItems: [], newPersonName: '', newExpenseDescription: '', newExpenseAmount: null,
+      newExpensePaidBy: '', splitMode: 'all', selectedParticipants: ['Otro'], nextExpenseId: 1,
+      currentLanguage: 'es', isSharedView: true, currency: '$'
+    });
+
+    expect(service.hasBackup()).toBeTrue();
+    expect(service.takeBackup()?.people).toEqual(['Ana']);
+    expect(service.hasBackup()).toBeFalse();
+    expect(service.takeBackup()).toBeNull();
+  });
+
+  it('descarta un respaldo dañado sin romper nada', () => {
+    localStorage.setItem('dividimos_app_state_backup', '{no es json');
+
+    expect(service.takeBackup()).toBeNull();
+    expect(service.hasBackup()).toBeFalse();
+  });
+
   it('migra una sesión de una versión anterior en vez de borrarla', () => {
     localStorage.setItem(key, JSON.stringify({
       schemaVersion: 1,

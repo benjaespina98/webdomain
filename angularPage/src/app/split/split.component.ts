@@ -7,6 +7,7 @@ import { AnalyticsService } from '../services/analytics.service';
 import { LanguageService, LanguageCode, defaultCurrencyFor } from '../services/language.service';
 import { VoiceInputService } from '../services/voice-input.service';
 import { SplitStateService } from '../services/split-state.service';
+import { expenseEmoji, guessExpense } from '../utils/expense-guess.util';
 import { CURRENCY_OPTIONS, CategoryOption, CurrencySymbol, EXPENSE_CATEGORIES, ExpenseCategory, ExpenseItem, SettlementResult, SplitMode, cloneExpense } from '../models/expense.model';
 import { PersonBalance } from '../utils/settlement.util';
 import { TRANSLATIONS, TranslationMap } from '../i18n/translations';
@@ -103,6 +104,9 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
   personDraftAlias = '';
   /** Alias/CBU opcional que se escribe junto al nombre al agregar una persona. */
   newPersonAlias = '';
+
+  /** Hay una sesión propia respaldada (se abrió un enlace compartido sobre datos ya cargados). */
+  canRestoreOwnSession = false;
 
   uiNotice = '';
   uiNoticeType: NoticeType = 'info';
@@ -209,6 +213,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.restorePersistedState();
+    this.canRestoreOwnSession = this.isSharedView && this.persistenceService.hasBackup();
     this.handleIncomingShareQueryParams();
   }
 
@@ -286,45 +291,28 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  /**
-   * Si venimos de un enlace compartido que entraba en conflicto con una sesión local
-   * con datos (ver ShareComponent), acá se pide confirmación explícita antes de
-   * aplicar nada: mientras el usuario no acepta, no se toca el estado ni el storage.
-   */
+  /** Un enlace compartido inválido, corrupto o de una versión vieja llega acá desde ShareComponent. */
   private handleIncomingShareQueryParams(): void {
-    const params = this.route.snapshot.queryParamMap;
-
-    if (!params.has('shareError') && !params.has('shareConflict')) {
+    if (!this.route.snapshot.queryParamMap.has('shareError')) {
       return;
     }
 
-    const hadConflict = params.has('shareConflict');
-    const fromFragment = this.shareService.parseFragment(this.route.snapshot.fragment);
-    const conflictData = fromFragment?.data ?? params.get('data');
-    const conflictVersion = fromFragment?.version ?? Number.parseInt(params.get('v') ?? '0', 10);
-
-    // Limpiamos la URL para que un refresh no repita el aviso ni la importación.
+    // Limpiamos la URL para que un refresh no repita el aviso.
     void this.router.navigate([], { relativeTo: this.route, queryParams: {}, fragment: undefined, replaceUrl: true });
+    this.showNotice(this.t('shareLinkError'), 'warning');
+  }
 
-    if (!hadConflict) {
-      this.showNotice(this.t('shareLinkError'), 'warning');
+  /** Vuelve a la sesión propia que se respaldó al abrir un enlace compartido. */
+  restoreOwnSession(): void {
+    const backup = this.persistenceService.takeBackup();
+    this.canRestoreOwnSession = false;
+
+    if (!backup) {
       return;
     }
 
-    const payload = conflictData ? this.shareService.parseShareLink(conflictData, conflictVersion) : null;
-    if (!payload) {
-      this.showNotice(this.t('shareLinkError'), 'warning');
-      return;
-    }
-
-    this.showConfirm(
-      this.t('confirmImportMessage'),
-      () => {
-        this.stateService.applyState(this.shareService.buildImportedState(payload, this.currentLanguage));
-        this.showNotice(this.t('shareImported'), 'success');
-      },
-      { title: this.t('confirmImportTitle'), acceptLabel: this.t('confirmImportAccept') }
-    );
+    this.stateService.applyState({ ...backup, isSharedView: false });
+    this.showNotice(this.t('ownSessionRestored'), 'success');
   }
 
   // ------------------------------------------------------------- personas
@@ -1051,7 +1039,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
         description: item.description,
         amount: item.amount,
         paidBy: item.paidBy,
-        emoji: this.getCategoryOption(item.category).emoji
+        emoji: this.getExpenseEmoji(item)
       })),
       totalExpense: this.totalExpense,
       averageSpent: this.hasEvenSplit ? this.averageSpent : null,
@@ -1089,6 +1077,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
   importAndEdit(): void {
     this.isSharedView = false;
+    this.canRestoreOwnSession = false;
   }
 
   dismissStaleBanner(): void {
@@ -1114,20 +1103,17 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedCategory = cat;
   }
 
+  /** Al escribir la descripción se sugiere la categoría (solo con palabras completas: "bar" no es "barrio"). */
   onDescriptionChange(value: string): void {
-    const clean = value.toLowerCase().trim();
-    if (!clean) return;
-    if (/cena|comida|almuerzo|pizza|burger|hamburguesa|restauran|asado|parrilla|mcdonald|empana|postre|sushi/i.test(clean)) {
-      this.selectedCategory = 'food';
-    } else if (/birra|cerveza|trago|bebida|vino|alcohol|bar|pub|café|cafe|coffee|tragos|gaseosa/i.test(clean)) {
-      this.selectedCategory = 'drink';
-    } else if (/super|mercado|compras|chinos|verduleria|carne|chino|coto|dia|carrefour|vea/i.test(clean)) {
-      this.selectedCategory = 'supermarket';
-    } else if (/uber|taxi|nafta|combustible|peaje|estacionamiento|colectivo|remis|gasolina|gasoil|cabify|didi|pasaje/i.test(clean)) {
-      this.selectedCategory = 'transport';
-    } else if (/hotel|airbnb|alquiler|hospedaje|cabaña|resort|depto|hostel|camping/i.test(clean)) {
-      this.selectedCategory = 'stay';
+    const guess = guessExpense(value);
+    if (guess) {
+      this.selectedCategory = guess.category;
     }
+  }
+
+  /** Emoji de un gasto: el que mejor describe lo que se escribió ("Hamburguesa" → 🍔), o el de su categoría. */
+  getExpenseEmoji(item: { description: string; category?: ExpenseCategory }): string {
+    return expenseEmoji(item.description, item.category);
   }
 
   // ----------------------------------------------------- exportación png

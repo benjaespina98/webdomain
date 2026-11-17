@@ -8,12 +8,12 @@ export interface CategoryOption {
 }
 
 export const EXPENSE_CATEGORIES: readonly CategoryOption[] = [
-  { id: 'food', emoji: '🍕', labelEs: 'Comida', labelEn: 'Food' },
+  { id: 'food', emoji: '🍽️', labelEs: 'Comida', labelEn: 'Food' },
   { id: 'drink', emoji: '🍻', labelEs: 'Bebidas', labelEn: 'Drinks' },
   { id: 'supermarket', emoji: '🛒', labelEs: 'Supermercado', labelEn: 'Supermarket' },
-  { id: 'transport', emoji: '⛽', labelEs: 'Transporte', labelEn: 'Transport' },
+  { id: 'transport', emoji: '🚗', labelEs: 'Transporte', labelEn: 'Transport' },
   { id: 'stay', emoji: '🏨', labelEs: 'Hospedaje', labelEn: 'Lodging' },
-  { id: 'other', emoji: '💸', labelEs: 'Otros', labelEn: 'Other' },
+  { id: 'other', emoji: '📦', labelEs: 'Otros', labelEn: 'Other' },
 ];
 
 export interface ExpenseItem {

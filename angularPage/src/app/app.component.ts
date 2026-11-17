@@ -120,6 +120,19 @@ export class AppComponent implements OnDestroy {
   }
 
   private safeReload(): void {
+    // Freno: si una recarga por actualización no resuelve el problema, recargar de nuevo en bucle deja la
+    // pantalla en blanco. Máximo una recarga automática cada 30 segundos.
+    try {
+      const last = Number(sessionStorage.getItem('dividimos_last_auto_reload') ?? 0);
+      if (Date.now() - last < 30_000) {
+        this.isReloadingForUpdate = false;
+        return;
+      }
+      sessionStorage.setItem('dividimos_last_auto_reload', String(Date.now()));
+    } catch {
+      // Sin sessionStorage no se puede frenar el bucle, pero tampoco hay motivo para no actualizar.
+    }
+
     this.isReloadingForUpdate = true;
     document.location.reload();
   }

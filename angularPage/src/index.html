@@ -90,7 +90,15 @@
 </head>
 
 <body>
-  <app-root></app-root>
+  <app-root>
+    <!-- Angular lo reemplaza al arrancar. Si el JavaScript no llega a cargar (red lenta, navegador integrado
+         de una app, caché vieja), en vez de una pantalla vacía queda este aviso con una salida. -->
+    <div class="boot-fallback" role="status">
+      <p class="boot-fallback-brand">dividimos?</p>
+      <p class="boot-fallback-text">Cargando…</p>
+      <a class="boot-fallback-link" href="/app">Si no carga, tocá acá</a>
+    </div>
+  </app-root>
   <noscript>
     <h1>dividimos? · Dividir gastos entre amigos</h1>
     <p>Calculadora gratis para dividir los gastos de un asado, un viaje o una salida. Cargá quién pagó qué, mirá quién le paga a quién y compartilo por WhatsApp. Sin registro, y tus datos quedan en tu navegador.</p>

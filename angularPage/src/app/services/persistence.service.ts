@@ -31,6 +31,7 @@ export type PersistableState = Omit<AppState, 'schemaVersion' | 'savedAt'>;
 })
 export class PersistenceService {
   private readonly storageKey = 'dividimos_app_state';
+  private readonly backupKey = 'dividimos_app_state_backup';
   private readonly currentSchemaVersion = 2;
 
   /**
@@ -57,8 +58,47 @@ export class PersistenceService {
    * deploy viejo) se ignora sin borrarla, para no destruir datos de una versión que sí los entiende.
    */
   loadState(): AppState | null {
+    return this.readKey(this.storageKey);
+  }
+
+  /**
+   * Al abrir un enlace compartido en un navegador que ya tiene una sesión propia, esa sesión se guarda
+   * acá antes de mostrar la compartida, así se puede volver a ella (en vez de pisarla o de pedir una
+   * confirmación antes de mostrar lo que el enlace prometía).
+   */
+  backupState(): void {
     try {
       const serialized = localStorage.getItem(this.storageKey);
+      if (serialized) {
+        localStorage.setItem(this.backupKey, serialized);
+      }
+    } catch (error) {
+      console.error('Failed to back up state in localStorage:', error);
+    }
+  }
+
+  hasBackup(): boolean {
+    try {
+      return localStorage.getItem(this.backupKey) !== null;
+    } catch {
+      return false;
+    }
+  }
+
+  /** Devuelve la sesión respaldada y borra el respaldo (`null` si no hay o está dañado). */
+  takeBackup(): AppState | null {
+    const backup = this.readKey(this.backupKey);
+    try {
+      localStorage.removeItem(this.backupKey);
+    } catch {
+      // Sin acceso al storage no hay nada más que limpiar.
+    }
+    return backup;
+  }
+
+  private readKey(key: string): AppState | null {
+    try {
+      const serialized = localStorage.getItem(key);
       if (!serialized) {
         return null;
       }
@@ -66,7 +106,7 @@ export class PersistenceService {
       const parsed = JSON.parse(serialized) as Partial<AppState> | null;
 
       if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.people)) {
-        this.clearState();
+        localStorage.removeItem(key);
         return null;
       }
 
@@ -78,7 +118,11 @@ export class PersistenceService {
       return this.migrate(parsed);
     } catch (error) {
       console.error('Failed to read state from localStorage:', error);
-      this.clearState();
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        // Sin acceso al storage no hay nada más que limpiar.
+      }
       return null;
     }
   }

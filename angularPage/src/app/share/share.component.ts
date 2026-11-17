@@ -62,19 +62,15 @@ export class ShareComponent implements OnInit {
       return;
     }
 
+    // Quien toca un enlace espera ver lo que le mandaron, no un cartel sobre su propia sesión. Si ya tenía
+    // datos propios (y no eran otra vista compartida), se respaldan para poder volver con un toque.
     const existingSession = this.persistenceService.loadState();
-    const hasExistingSession = !!existingSession
+    const hasOwnSession = !!existingSession
+      && !existingSession.isSharedView
       && (existingSession.people.length > 0 || existingSession.expenseItems.length > 0);
 
-    if (hasExistingSession) {
-      // Ya hay una sesión con datos: no la pisamos en silencio. Mandamos el enlace,
-      // todavía sin aplicar, a /app para que SplitComponent pida confirmación antes
-      // de reemplazar nada (ver `handleIncomingShareQueryParams`).
-      void this.router.navigate(['/app'], {
-        queryParams: { shareConflict: 1 },
-        fragment: this.shareService.buildFragment(data as string, version)
-      });
-      return;
+    if (hasOwnSession) {
+      this.persistenceService.backupState();
     }
 
     this.persistenceService.saveState(this.shareService.buildImportedState(payload, this.languageService.current));

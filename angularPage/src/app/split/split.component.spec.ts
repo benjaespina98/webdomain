@@ -5,6 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { SplitComponent } from './split.component';
 import { LanguageService } from '../services/language.service';
 import { VoiceInputService } from '../services/voice-input.service';
+import { PersistenceService } from '../services/persistence.service';
 
 describe('SplitComponent', () => {
   let component: SplitComponent;
@@ -41,12 +42,12 @@ describe('SplitComponent', () => {
     expect(openSpy).toHaveBeenCalledTimes(1);
     const message = decodeURIComponent((openSpy.calls.mostRecent().args[0] as string).split('text=')[1]);
 
-    expect(message).toContain('🧾 *Cuentas del grupo*');
+    expect(message).toContain('🧾 *Cuentas claras*');
     expect(message).toContain('Cena · 3 personas');
-    expect(message).toContain('Total *$ 3.000*');
-    expect(message).toContain('💸 *Pepe* cobra *$ 2.000*');
-    expect(message).toContain('• Juan le pasa *$ 1.000*');
-    expect(message).toContain('Mirá el detalle de cada gasto 👇');
+    expect(message).toContain('Total $ 3.000');
+    expect(message).toContain('*Pepe* cobra $ 2.000');
+    expect(message).toContain('• Juan le paga $ 1.000');
+    expect(message).toContain('👀 Detalle de cada gasto:');
     expect(message).toContain('/share#data=');
   });
 
@@ -208,6 +209,36 @@ describe('SplitComponent', () => {
     expect(document.activeElement).toBe(description);
   });
 
+  it('"Volver a mi sesión" restaura la sesión respaldada al abrir un enlace compartido', () => {
+    component.people = ['Ana'];
+    component.isSharedView = true;
+    component.canRestoreOwnSession = true;
+    const backup = TestBed.inject(PersistenceService);
+    spyOn(backup, 'takeBackup').and.returnValue({
+      schemaVersion: 2, people: ['Mi', 'Grupo'], expenseItems: [], newPersonName: '', newExpenseDescription: '',
+      newExpenseAmount: null, newExpensePaidBy: '', splitMode: 'all', selectedParticipants: ['Mi', 'Grupo'],
+      nextExpenseId: 1, currentLanguage: 'es', isSharedView: true, currency: '$'
+    });
+
+    component.restoreOwnSession();
+
+    expect(component.people).toEqual(['Mi', 'Grupo']);
+    expect(component.isSharedView).toBeFalse();
+    expect(component.canRestoreOwnSession).toBeFalse();
+  });
+
+  it('sugiere la categoría por palabras completas al escribir la descripción', () => {
+    component.onDescriptionChange('Uber al aeropuerto');
+    expect(component.selectedCategory).toBe('transport');
+
+    component.onDescriptionChange('Barrio norte');
+    expect(component.selectedCategory).toBe('transport');
+
+    component.onDescriptionChange('Hamburguesas');
+    expect(component.selectedCategory).toBe('food');
+    expect(component.getExpenseEmoji({ description: 'Hamburguesas', category: 'food' })).toBe('🍔');
+  });
+
   it('guarda el alias opcional que se escribe al agregar una persona', () => {
     component.newPersonName = 'Ana';
     component.newPersonAlias = '  ana.mp ';
@@ -333,7 +364,7 @@ describe('SplitComponent', () => {
       component.shareWhatsApp();
 
       const message = decodeURIComponent((openSpy.calls.mostRecent().args[0] as string).split('text=')[1]);
-      expect(message).toContain('💳 Alias: *ana.mp*');
+      expect(message).toContain('alias: *ana.mp*');
     });
 
     it('valida que los montos personalizados sumen el total', () => {

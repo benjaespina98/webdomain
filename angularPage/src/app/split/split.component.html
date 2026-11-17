@@ -31,6 +31,9 @@
       <span><i class="fas fa-eye" aria-hidden="true"></i>{{ t('sharedViewBanner') }}</span>
       <span class="banner-actions">
         <button type="button" class="banner-btn accent" (click)="importAndEdit()">{{ t('importAndEdit') }}</button>
+        @if (canRestoreOwnSession) {
+          <button type="button" class="banner-btn" (click)="restoreOwnSession()">{{ t('backToMySession') }}</button>
+        }
         <button type="button" class="banner-btn warn" (click)="clearAll()">{{ t('startOver') }}</button>
       </span>
     </div>
@@ -277,7 +280,7 @@
               <div class="expense-main">
                 <span class="expense-name">
                   <span class="cat-icon-badge" [title]="currentLanguage === 'es' ? getCategoryOption(item.category).labelEs : getCategoryOption(item.category).labelEn">
-                    {{ getCategoryOption(item.category).emoji }}
+                    {{ getExpenseEmoji(item) }}
                   </span>
                   {{ item.description }}
                 </span>
