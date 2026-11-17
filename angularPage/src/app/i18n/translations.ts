@@ -67,7 +67,12 @@ export interface TranslationMap {
   sharePays: string;
   peopleWord: string;
   andWord: string;
-  sharePaymentsHeader: string;
+  shareTitle: string;
+  shareSettleHeader: string;
+  shareCollects: string;
+  shareAlias: string;
+  sharePasses: string;
+  shareSignature: string;
   shareLinkError: string;
   enterValidName: string;
   personAlreadyExists: string;
@@ -179,11 +184,16 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     shareTotal: 'Total',
     shareAllSettled: 'Todo saldado 🎉',
     shareGeneratedWith: 'Hecho con dividimos? 🤙',
-    shareLinkHint: 'Detalle completo 👇',
+    shareLinkHint: 'Mirá el detalle de cada gasto 👇',
     sharePays: 'le paga',
     peopleWord: 'personas',
     andWord: 'y',
-    sharePaymentsHeader: 'Quién paga a quién',
+    shareTitle: 'Cuentas del grupo',
+    shareSettleHeader: 'Para quedar a mano:',
+    shareCollects: 'cobra',
+    shareAlias: 'Alias',
+    sharePasses: 'le pasa',
+    shareSignature: 'dividimos? · gratis y sin registro',
     shareLinkError: 'Ese enlace no es válido o es de una versión anterior',
     enterValidName: 'Escribí un nombre',
     personAlreadyExists: 'Esa persona ya está en la lista',
@@ -292,11 +302,16 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     shareTotal: 'Total',
     shareAllSettled: 'All settled 🎉',
     shareGeneratedWith: 'Made with dividimos? 🤙',
-    shareLinkHint: 'Full breakdown 👇',
+    shareLinkHint: 'See every expense here 👇',
     sharePays: 'pays',
     peopleWord: 'people',
     andWord: 'and',
-    sharePaymentsHeader: 'Who pays whom',
+    shareTitle: 'Group expenses',
+    shareSettleHeader: 'To settle up:',
+    shareCollects: 'collects',
+    shareAlias: 'Alias',
+    sharePasses: 'sends',
+    shareSignature: 'dividimos? · free, no sign-up',
     shareLinkError: 'That link is invalid or from an older version',
     enterValidName: 'Type a name',
     personAlreadyExists: 'That person is already on the list',

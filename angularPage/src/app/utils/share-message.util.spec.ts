@@ -22,14 +22,18 @@ describe('buildShareMessage', () => {
     const message = buildShareMessage(view, t as never, money, 'https://x/share#data=abc');
 
     expect(message).toBe([
-      '🧾 *dividimos?* · shareTotal *$100*',
+      '🧾 *shareTitle* · shareTotal *$100*',
       'Cena · 2 peopleWord',
       '',
-      '*sharePaymentsHeader*',
-      '• Beto → Ana: *$50*',
+      '*shareSettleHeader*',
+      '',
+      '💸 *Ana* shareCollects *$50*',
+      '• Beto sharePasses *$50*',
       '',
       'shareLinkHint',
-      'https://x/share#data=abc'
+      'https://x/share#data=abc',
+      '',
+      '_shareSignature_'
     ].join('\n'));
   });
 
@@ -49,14 +53,25 @@ describe('buildShareMessage', () => {
     expect(message).toContain('*$ 33,33*');
   });
 
-  it('agrega el alias de quien cobra, una sola vez aunque cobre de varios', () => {
-    const many = { ...view, aliases: { Ana: 'ana.mp' }, results: [
+  it('agrupa por quien cobra y pone su alias en una línea aparte, una sola vez', () => {
+    const many = { ...view, aliases: { Ana: 'ana.mp', Beto: 'beto.cbu' }, results: [
       { debtor: 'Beto', creditor: 'Ana', amount: 30 }, { debtor: 'Caro', creditor: 'Ana', amount: 20 }
     ] };
     const message = buildShareMessage(many, t as never, money, 'l');
 
     expect(message.match(/ana\.mp/g)?.length).toBe(1);
-    expect(message).toContain('💳 *Ana*: ana.mp');
+    expect(message).toContain('💸 *Ana* shareCollects *$50*\n💳 shareAlias: *ana.mp*\n• Beto sharePasses *$30*\n• Caro sharePasses *$20*');
+    expect(message).not.toContain('beto.cbu');
+  });
+
+  it('con varios que cobran arma un bloque por cada uno, con alias solo si lo tienen', () => {
+    const two = { ...view, aliases: { Caro: 'caro.uala' }, results: [
+      { debtor: 'Beto', creditor: 'Ana', amount: 40 }, { debtor: 'Beto', creditor: 'Caro', amount: 10 }
+    ] };
+    const message = buildShareMessage(two, t as never, money, 'l');
+
+    expect(message).toContain('💸 *Ana* shareCollects *$40*\n• Beto sharePasses *$40*');
+    expect(message).toContain('💸 *Caro* shareCollects *$10*\n💳 shareAlias: *caro.uala*\n• Beto sharePasses *$10*');
   });
 
   it('avisa que está todo saldado cuando no hay pagos pendientes', () => {

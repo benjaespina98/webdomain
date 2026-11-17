@@ -41,11 +41,12 @@ describe('SplitComponent', () => {
     expect(openSpy).toHaveBeenCalledTimes(1);
     const message = decodeURIComponent((openSpy.calls.mostRecent().args[0] as string).split('text=')[1]);
 
-    expect(message).toContain('🧾 *dividimos?*');
+    expect(message).toContain('🧾 *Cuentas del grupo*');
     expect(message).toContain('Cena · 3 personas');
     expect(message).toContain('Total *$ 3.000*');
-    expect(message).toContain('Juan → Pepe: *$ 1.000*');
-    expect(message).toContain('Detalle completo 👇');
+    expect(message).toContain('💸 *Pepe* cobra *$ 2.000*');
+    expect(message).toContain('• Juan le pasa *$ 1.000*');
+    expect(message).toContain('Mirá el detalle de cada gasto 👇');
     expect(message).toContain('/share#data=');
   });
 
@@ -332,7 +333,7 @@ describe('SplitComponent', () => {
       component.shareWhatsApp();
 
       const message = decodeURIComponent((openSpy.calls.mostRecent().args[0] as string).split('text=')[1]);
-      expect(message).toContain('💳 *Ana*: ana.mp');
+      expect(message).toContain('💳 Alias: *ana.mp*');
     });
 
     it('valida que los montos personalizados sumen el total', () => {
