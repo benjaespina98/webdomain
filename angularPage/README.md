@@ -1,20 +1,10 @@
-# dividimos? — Angular app
+# dividimos? (Angular app)
 
-Este directorio contiene el código fuente de la aplicación Angular de **dividimos?**.
-
-Para la descripción completa del proyecto, características, instrucciones de instalación, build y roadmap, ver el [README principal](../README.md) en la raíz del repositorio.
-
-## Comandos rápidos
+This folder holds the Angular app. The project overview, screenshots and documentation are in the [main README](../README.md) (Spanish: [README.es.md](../README.es.md)).
 
 ```bash
-npm install        # instalar dependencias
-npm start          # servidor de desarrollo (http://localhost:4200)
-npm run build       # build de producción
-npm test            # tests unitarios (Karma + Jasmine)
+npm install
+npm start     # http://localhost:4200
+npm test
+npm run build
 ```
-
-Generado originalmente con [Angular CLI](https://github.com/angular/angular-cli).
-
-## Imagen de vista previa (Open Graph)
-
-La imagen que se ve al compartir el link (LinkedIn, WhatsApp, X, Slack) es `src/og-image.png` (1200×630) y se sirve en `https://dividimos.vercel.app/og-image.png`. Para regenerarla: `npm run og:image` (requiere Chrome instalado; `scripts/generate-og-image.mjs`). Las etiquetas `og:*` y `twitter:*` están escritas en `src/index.html` porque los crawlers no ejecutan JavaScript; `npm run check:seo` (sobre el build) las verifica.

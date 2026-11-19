@@ -1,6 +1,18 @@
 {
-  "name": "angular-page",
+  "name": "dividimos",
   "version": "0.0.0",
+  "description": "Split group expenses without an account or a server. Angular PWA, data stays in the browser.",
+  "author": "Benjamín Espina",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benjaespina98/webdomain.git",
+    "directory": "angularPage"
+  },
+  "homepage": "https://dividimos.vercel.app",
+  "bugs": {
+    "url": "https://github.com/benjaespina98/webdomain/issues"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

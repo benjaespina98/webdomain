@@ -1,187 +1,79 @@
+[Leer en español](README.es.md)
+
 # dividimos?
 
-> Dividí gastos grupales en segundos. Sin registro, sin servidores, 100% en tu navegador.
+Split group expenses without an account or a server. Add who paid what and the app tells everyone who owes whom, with the fewest transfers.
 
-[![Angular](https://img.shields.io/badge/Angular-21-DD0031?logo=angular\&logoColor=white)](https://angular.io/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript\&logoColor=white)](https://www.typescriptlang.org/)
-[![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8?logo=pwa\&logoColor=white)](https://web.dev/progressive-web-apps/)
-[![Deploy](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel\&logoColor=white)](https://dividimos.vercel.app/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/benjaespina98/webdomain/actions/workflows/ci.yml/badge.svg)](https://github.com/benjaespina98/webdomain/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
+[![Angular 21](https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white)](https://angular.dev)
 
-🔗 **Demo:** https://dividimos.vercel.app/
+**Live demo:** https://dividimos.vercel.app
 
----
+![Results screen with demo data](docs/screenshots/app.png)
 
-## ¿Qué es dividimos?
+![Landing page](docs/screenshots/landing.png)
 
-**dividimos?** resuelve un problema muy concreto: después de un asado, una cena, una salida o un viaje de fin de semana, alguien tiene que sentarse a hacer cuentas para saber quién le debe plata a quién.
+## Features
 
-La aplicación calcula automáticamente cuánto aportó cada persona, cuánto debería haber pagado y cuáles son las transferencias mínimas necesarias para saldar todas las deudas.
+- Split an expense equally, among some people, or by exact amounts per person.
+- Fewest transfers to settle everyone (exact search up to 16 people), computed in integer cents.
+- Optional alias or CBU per person, shown to whoever has to receive money.
+- Share a link (the data lives in the URL fragment, never sent to a server) or a short WhatsApp message.
+- Download the summary as a PNG image.
+- Dictate an expense by voice where the browser supports it.
+- Works offline as an installable PWA. Data stays in the browser, no sign up.
+- Spanish and English.
 
-A diferencia de otras aplicaciones de gastos compartidos, **dividimos?** está pensada para resolver **gastos puntuales**, sin obligarte a crear una cuenta ni depender de un servidor.
+## Stack
 
-### Características
+| Area | Technology |
+| --- | --- |
+| Frontend | Angular 21.2, TypeScript 5.9, RxJS 7.8, SCSS, PWA with Angular Service Worker |
+| Backend | None (static app) |
+| Data | Browser localStorage, share links compressed with lz-string |
+| Testing | Karma and Jasmine, ESLint with angular-eslint |
+| Deploy | Vercel, CI on GitHub Actions (Node 22) |
 
-* Sin registro.
-* Sin backend.
-* Todo funciona en el navegador.
-* Los datos permanecen en tu dispositivo (localStorage).
-* Contador de uso anónimo (PostHog): solo eventos con nombre, sin gastos ni nombres de personas, sin grabación de sesiones y con las URL recortadas (nunca se envía el contenido de un enlace compartido).
-* Compartir resultados mediante un único enlace.
-* Compatible con WhatsApp y cualquier otra aplicación de mensajería.
-* Español e Inglés.
-* Instalable como PWA.
-
----
-
-## Funcionalidades
-
-* Alta y baja de participantes.
-* Registro de gastos con:
-
-  * descripción,
-  * monto,
-  * persona que pagó,
-  * participantes incluidos.
-* División de gastos entre todos, entre participantes específicos o por montos exactos por persona.
-* Edición de nombres y alias/CBU opcional (se muestra en los resultados y en el mensaje de WhatsApp, no viaja en el enlace).
-* Cálculo automático de:
-
-  * gasto total,
-  * promedio por persona,
-  * balances individuales,
-  * transferencias sugeridas.
-* Compartir resumen mediante un enlace o WhatsApp.
-* Persistencia local de la sesión.
-* Restauración automática al abrir un enlace compartido.
-* Diseño responsive.
-* Funcionamiento offline como PWA.
-
----
-
-## Tecnologías
-
-* Angular 21
-* TypeScript
-* Bootstrap 5
-* SCSS
-* RxJS
-* Angular Service Worker (PWA)
-* lz-string
-* PostHog (opcional)
-* Vercel
-
----
-
-## Capturas
-
-> Pendiente de agregar imágenes reales.
-
-| Landing                        | Aplicación                 |
-| ------------------------------ | -------------------------- |
-| `docs/screenshots/landing.png` | `docs/screenshots/app.png` |
-
----
-
-## Ejecutar localmente
+## Run locally
 
 ```bash
 git clone https://github.com/benjaespina98/webdomain.git
-
 cd webdomain/angularPage
-
 npm install
-
 npm start
 ```
 
-Abrir:
+Open http://localhost:4200. There is no `.env` file; settings live in `angularPage/src/environments/`.
 
-```
-http://localhost:4200
-```
-
----
-
-## Build de producción
-
-```bash
-npm run build
-```
-
-Los archivos generados quedan en:
-
-```
-angularPage/dist/angular-page
-```
-
----
+| Setting | Purpose |
+| --- | --- |
+| `posthogApiKey` | Optional anonymous usage counting. Empty disables it. |
+| `posthogHost` | PostHog host. |
+| `coffeeUrl` | Support link. Empty hides it. |
 
 ## Tests
 
-```bash
-npm test
+`npm test` runs the unit tests (13 spec files). They cover the settlement algorithm, share links, persistence and migrations, the WhatsApp message and component behavior. `npm run lint` runs ESLint.
 
-npx tsc --noEmit
-```
-
----
-
-## Variables de entorno
-
-PostHog es completamente opcional.
-
-```ts
-export const environment = {
-  production: true,
-  posthogApiKey: '',
-  posthogHost: 'https://us.i.posthog.com'
-};
-```
-
-Si la API Key queda vacía, la aplicación funciona normalmente.
-
----
-
-## Estructura del proyecto
+## Project structure
 
 ```text
-webdomain/
-├── README.md
-├── LICENSE
-└── angularPage/
-    ├── src/
-    │   ├── app/
-    │   ├── assets/
-    │   ├── environments/
-    │   ├── manifest.webmanifest
-    │   └── styles.scss
-    ├── angular.json
-    ├── ngsw-config.json
-    ├── package.json
-    └── vercel.json
+.github/       CI and Dependabot
+angularPage/   Angular app (src/app, scripts, config)
+docs/          Documentation and screenshots
 ```
 
----
+## More documentation
 
-## Roadmap
+- [Architecture](docs/architecture.md): state, settlement algorithm, share links, privacy.
+- [Deployment and checks](docs/deployment.md): Vercel, CI, configuration, social preview.
+- [Roadmap](docs/roadmap.md): ideas not implemented yet.
 
-* [ ] Historial de divisiones.
-* [ ] Exportar resultados a PDF.
-* [ ] Exportar a Excel.
-* [ ] Soporte multi-moneda.
-* [ ] Más idiomas.
-* [ ] Tema claro.
-* [ ] Donaciones para sostener el proyecto.
+## Author
 
----
+Benjamín Espina: [LinkedIn](https://linkedin.com/in/benjamin-espina) | [GitHub](https://github.com/benjaespina98) | [Portfolio](https://benjaminespina.com)
 
-## Créditos
+## License
 
-Desarrollado por **Benjamín Espina**.
-
----
-
-## Licencia
-
-Distribuido bajo licencia **MIT**. Ver el archivo `LICENSE`.
+MIT. See [LICENSE](LICENSE).

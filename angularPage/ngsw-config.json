@@ -24,7 +24,6 @@
       "resources": {
         "files": [
           "/assets/icons/**",
-          "/assets/og/**",
           "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)",
           "!/og-image.png"
         ]
