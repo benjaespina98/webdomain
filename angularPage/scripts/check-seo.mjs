@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Chequeo del SEO básico sobre el build: falla si algo que ayuda a aparecer en buscadores se rompe.
-import { readFileSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const dist = process.argv[2] ?? 'dist/angular-page';
@@ -13,10 +13,28 @@ if (title.length < 20 || title.length > 62) errors.push(`El <title> mide ${title
 const description = html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? '';
 if (description.length < 70 || description.length > 160) errors.push(`La meta description mide ${description.length} caracteres (ideal: 70–160)`);
 
-if (!/<link rel="canonical" href="https:\/\/dividimos\.vercel\.app\/"/.test(html)) errors.push('Falta el canonical de la raíz');
+if (!/<link rel="canonical" href="https:\/\/dividimos\.vercel\.app\/app"/.test(html)) errors.push('Falta el canonical (https://dividimos.vercel.app/app)');
 if (!/<meta name="robots" content="index, follow"/.test(html)) errors.push('La raíz debería poder indexarse');
 if (/<meta name="robots" content="[^"]*noindex/.test(html)) errors.push('La raíz no debe tener noindex');
 if (!/<noscript>[\s\S]*<h1>/.test(html)) errors.push('Falta el contenido <noscript> con h1 para buscadores sin JavaScript');
+
+// Open Graph / Twitter Cards: los crawlers de LinkedIn, WhatsApp, X y Slack no ejecutan JavaScript,
+// así que todo tiene que estar escrito en el HTML estático, con URLs absolutas y una imagen que exista.
+const metaContent = (attr, name) => html.match(new RegExp(`<meta ${attr}="${name}" content="([^"]*)"`))?.[1] ?? '';
+for (const [attr, name] of [['property', 'og:title'], ['property', 'og:description'], ['property', 'og:url'], ['property', 'og:image'], ['property', 'og:image:secure_url'],
+  ['property', 'og:image:alt'], ['name', 'twitter:title'], ['name', 'twitter:description'], ['name', 'twitter:image'], ['name', 'twitter:image:alt']]) {
+  if (!metaContent(attr, name)) errors.push(`Falta <meta ${attr}="${name}">`);
+}
+if (metaContent('name', 'twitter:card') !== 'summary_large_image') errors.push('twitter:card debería ser summary_large_image');
+if (metaContent('property', 'og:image:width') !== '1200' || metaContent('property', 'og:image:height') !== '630') errors.push('og:image debería declarar 1200x630');
+const ogImage = metaContent('property', 'og:image');
+if (!/^https:\/\/dividimos\.vercel\.app\/og-image\.png$/.test(ogImage)) errors.push(`og:image debe ser una URL absoluta a /og-image.png (hoy: "${ogImage}")`);
+try {
+  const bytes = statSync(join(dist, 'og-image.png')).size;
+  if (bytes > 300 * 1024) errors.push(`og-image.png pesa ${(bytes / 1024).toFixed(0)} KB (máximo 300 KB)`);
+} catch {
+  errors.push('Falta og-image.png en el build (se sirve en la raíz del sitio)');
+}
 
 const ld = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1];
 try {

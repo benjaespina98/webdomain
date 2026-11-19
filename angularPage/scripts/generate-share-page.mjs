@@ -19,11 +19,14 @@ const meta = {
   'property:og:image': `${site}/assets/icons/icon-192x192.png`,
   'property:og:image:width': '192',
   'property:og:image:height': '192',
+  'property:og:image:secure_url': `${site}/assets/icons/icon-192x192.png`,
+  'property:og:image:type': 'image/png',
   'property:og:image:alt': 'dividimos?',
   'name:twitter:card': 'summary',
   'name:twitter:title': 'Resumen de gastos · dividimos?',
   'name:twitter:description': 'Tocá para ver quién le paga a quién.',
   'name:twitter:image': `${site}/assets/icons/icon-192x192.png`,
+  'name:twitter:image:alt': 'dividimos?',
   'name:robots': 'noindex, nofollow'
 };
 

@@ -14,3 +14,7 @@ npm test            # tests unitarios (Karma + Jasmine)
 ```
 
 Generado originalmente con [Angular CLI](https://github.com/angular/angular-cli).
+
+## Imagen de vista previa (Open Graph)
+
+La imagen que se ve al compartir el link (LinkedIn, WhatsApp, X, Slack) es `src/og-image.png` (1200×630) y se sirve en `https://dividimos.vercel.app/og-image.png`. Para regenerarla: `npm run og:image` (requiere Chrome instalado; `scripts/generate-og-image.mjs`). Las etiquetas `og:*` y `twitter:*` están escritas en `src/index.html` porque los crawlers no ejecutan JavaScript; `npm run check:seo` (sobre el build) las verifica.
