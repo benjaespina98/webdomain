@@ -39,6 +39,15 @@
     </div>
   }
 
+  @if (!isSharedView && canRestoreOwnSession) {
+    <div class="banner banner-shared">
+      <span><i class="fas fa-eye" aria-hidden="true"></i>{{ t('savedSessionBanner') }}</span>
+      <span class="banner-actions">
+        <button type="button" class="banner-btn" (click)="restoreOwnSession()">{{ t('backToMySession') }}</button>
+      </span>
+    </div>
+  }
+
   @if (showStaleSessionBanner) {
     <div class="banner banner-stale" role="alert">
       <span><i class="fas fa-clock-rotate-left" aria-hidden="true"></i>{{ getStaleSessionText() }}</span>

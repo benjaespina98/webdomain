@@ -35,6 +35,19 @@ describe('ShareService', () => {
     expect(state.expenseItems[1].category).toBeUndefined();
   });
 
+  it('rechaza sin romperse un gasto nulo y los nombres repetidos, en v3 y v4', () => {
+    const invalid = [
+      { p: ['Ana'], e: [null] },
+      { p: ['Ana', 'ana'], e: [] }
+    ];
+
+    for (const payload of invalid) {
+      for (const version of [3, 4]) {
+        expect(service.parseShareLink(service.encodeState(payload), version)).toBeNull();
+      }
+    }
+  });
+
   it('pone los datos en el fragmento y no en el query string', () => {
     const url = new URL(service.buildShareUrl({ p: ['Ana'], e: [] }));
 

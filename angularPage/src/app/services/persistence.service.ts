@@ -33,6 +33,7 @@ export class PersistenceService {
   private readonly storageKey = 'dividimos_app_state';
   private readonly backupKey = 'dividimos_app_state_backup';
   private readonly currentSchemaVersion = 2;
+  private readonly maxBackups = 5;
 
   /**
    * `savedAt` marca la última interacción real del usuario. Se puede preservar
@@ -63,14 +64,14 @@ export class PersistenceService {
 
   /**
    * Al abrir un enlace compartido en un navegador que ya tiene una sesión propia, esa sesión se guarda
-   * acá antes de mostrar la compartida, así se puede volver a ella (en vez de pisarla o de pedir una
-   * confirmación antes de mostrar lo que el enlace prometía).
+   * acá antes de mostrar la compartida, así se puede volver a ella. Los respaldos se apilan (hasta
+   * `maxBackups`) para que un segundo enlace no pise la sesión respaldada por el primero.
    */
   backupState(): void {
     try {
-      const serialized = localStorage.getItem(this.storageKey);
-      if (serialized) {
-        localStorage.setItem(this.backupKey, serialized);
+      const current = this.readKey(this.storageKey);
+      if (current) {
+        this.writeBackups([...this.readBackups(), current].slice(-this.maxBackups));
       }
     } catch (error) {
       console.error('Failed to back up state in localStorage:', error);
@@ -78,22 +79,56 @@ export class PersistenceService {
   }
 
   hasBackup(): boolean {
-    try {
-      return localStorage.getItem(this.backupKey) !== null;
-    } catch {
-      return false;
-    }
+    return this.readBackups().length > 0;
   }
 
-  /** Devuelve la sesión respaldada y borra el respaldo (`null` si no hay o está dañado). */
+  /** Devuelve el respaldo más reciente y lo saca de la pila (`null` si no hay o está dañado). */
   takeBackup(): AppState | null {
-    const backup = this.readKey(this.backupKey);
+    const backups = this.readBackups();
+    const latest = backups.pop() ?? null;
     try {
-      localStorage.removeItem(this.backupKey);
+      this.writeBackups(backups);
     } catch {
       // Sin acceso al storage no hay nada más que limpiar.
     }
-    return backup;
+    return latest;
+  }
+
+  /** Acepta también el formato anterior, que guardaba una sola sesión en vez de una lista. */
+  private readBackups(): AppState[] {
+    try {
+      const serialized = localStorage.getItem(this.backupKey);
+      if (!serialized) {
+        return [];
+      }
+
+      const parsed: unknown = JSON.parse(serialized);
+      return (Array.isArray(parsed) ? parsed : [parsed])
+        .map((entry) => this.normalizeSaved(entry))
+        .filter((entry): entry is AppState => entry !== null);
+    } catch (error) {
+      console.error('Failed to read backups from localStorage:', error);
+      return [];
+    }
+  }
+
+  private writeBackups(backups: AppState[]): void {
+    if (backups.length === 0) {
+      localStorage.removeItem(this.backupKey);
+    } else {
+      localStorage.setItem(this.backupKey, JSON.stringify(backups));
+    }
+  }
+
+  /** `null` si no tiene forma de sesión o es de una versión más nueva que la que entendemos. */
+  private normalizeSaved(value: unknown): AppState | null {
+    const parsed = value as Partial<AppState> | null;
+    if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.people)) {
+      return null;
+    }
+
+    const version = typeof parsed.schemaVersion === 'number' ? parsed.schemaVersion : 0;
+    return version > this.currentSchemaVersion ? null : this.migrate(parsed);
   }
 
   private readKey(key: string): AppState | null {
@@ -110,12 +145,7 @@ export class PersistenceService {
         return null;
       }
 
-      const version = typeof parsed.schemaVersion === 'number' ? parsed.schemaVersion : 0;
-      if (version > this.currentSchemaVersion) {
-        return null;
-      }
-
-      return this.migrate(parsed);
+      return this.normalizeSaved(parsed);
     } catch (error) {
       console.error('Failed to read state from localStorage:', error);
       try {

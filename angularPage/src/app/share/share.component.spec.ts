@@ -46,6 +46,25 @@ describe('ShareComponent', () => {
     expect(navigate).toHaveBeenCalledWith(['/app']);
   });
 
+  it('un segundo respaldo no pisa al primero', () => {
+    persistence.saveState(ownSession);
+    persistence.backupState();
+    persistence.saveState({ ...ownSession, people: ['Copia'] });
+
+    TestBed.createComponent(ShareComponent).detectChanges();
+
+    expect(persistence.takeBackup()?.people).toEqual(['Copia']);
+    expect(persistence.takeBackup()?.people).toEqual(['Ana', 'Beto']);
+    expect(persistence.hasBackup()).toBeFalse();
+  });
+
+  it('lee un respaldo guardado con el formato anterior (una sola sesión)', () => {
+    localStorage.setItem('dividimos_app_state_backup', JSON.stringify({ ...ownSession, schemaVersion: 2 }));
+
+    expect(persistence.takeBackup()?.people).toEqual(['Ana', 'Beto']);
+    expect(persistence.hasBackup()).toBeFalse();
+  });
+
   it('sin sesión previa no crea ningún respaldo', () => {
     TestBed.createComponent(ShareComponent).detectChanges();
 

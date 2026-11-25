@@ -268,6 +268,26 @@ describe('SplitComponent', () => {
     expect(message).not.toContain('caro.uala');
   });
 
+  it('tras "Editar una copia" se puede volver a la sesión propia, con confirmación', () => {
+    const persistence = TestBed.inject(PersistenceService);
+    spyOn(persistence, 'takeBackup').and.returnValue({
+      schemaVersion: 2, people: ['Original'], expenseItems: [], newPersonName: '', newExpenseDescription: '',
+      newExpenseAmount: null, newExpensePaidBy: '', splitMode: 'all', selectedParticipants: ['Original'],
+      nextExpenseId: 1, currentLanguage: 'es', isSharedView: false
+    });
+    component.canRestoreOwnSession = true;
+    component.people = ['Copia'];
+    component.isSharedView = true;
+
+    component.importAndEdit();
+
+    expect(component.canRestoreOwnSession).toBeTrue();
+    component.restoreOwnSession();
+    expect(component.people).toEqual(['Copia']);
+    component.acceptConfirm();
+    expect(component.people).toEqual(['Original']);
+  });
+
   describe('moneda según el idioma', () => {
     beforeEach(() => {
       languageService.set('es');

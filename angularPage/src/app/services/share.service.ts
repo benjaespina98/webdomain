@@ -119,11 +119,7 @@ export class ShareService {
 
   /** Convierte un payload de la v3 (nombres) al formato actual (índices), validando en el proceso. */
   private migrateLegacyPayload(payload: LegacySharePayload): SharePayload | null {
-    if (!Array.isArray(payload.p) || payload.p.length === 0) {
-      return null;
-    }
-
-    if (!payload.p.every((person) => typeof person === 'string' && person.trim().length > 0)) {
+    if (!this.isValidPeople(payload.p)) {
       return null;
     }
 
@@ -136,6 +132,10 @@ export class ShareService {
 
     const migratedExpenses: ShareExpenseDto[] = [];
     for (const item of payload.e) {
+      if (!item || typeof item !== 'object') {
+        return null;
+      }
+
       const payerIndex = typeof item.b === 'string' ? nameToIndex(item.b) : -1;
       if (typeof item.d !== 'string' || !item.d.trim() || typeof item.a !== 'number' || !Number.isFinite(item.a) || item.a <= 0 || payerIndex < 0) {
         return null;
@@ -193,6 +193,14 @@ export class ShareService {
     };
   }
 
+  /** Al menos una persona, sin nombres vacíos ni repetidos (la app tampoco deja cargarlos). */
+  private isValidPeople(people: unknown): boolean {
+    return Array.isArray(people)
+      && people.length > 0
+      && people.every((person) => typeof person === 'string' && person.trim().length > 0)
+      && new Set(people.map((person: string) => person.toLocaleLowerCase())).size === people.length;
+  }
+
   /** Los montos deben ser uno por persona, no negativos, con al menos uno > 0, y sumar el total del gasto. */
   private isValidShares(amounts: unknown, total: number, peopleCount: number): boolean {
     if (!Array.isArray(amounts) || amounts.length !== peopleCount) {
@@ -218,11 +226,7 @@ export class ShareService {
   }
 
   private isValidPayload(payload: SharePayload): payload is SharePayload {
-    if (!Array.isArray(payload.p) || payload.p.length === 0) {
-      return false;
-    }
-
-    if (!payload.p.every((person) => typeof person === 'string' && person.trim().length > 0)) {
+    if (!this.isValidPeople(payload.p)) {
       return false;
     }
 
@@ -234,7 +238,8 @@ export class ShareService {
     const isValidIndex = (index: number): boolean => Number.isInteger(index) && index >= 0 && index < peopleCount;
 
     return payload.e.every((item) =>
-      typeof item.d === 'string' && item.d.trim().length > 0
+      !!item && typeof item === 'object'
+      && typeof item.d === 'string' && item.d.trim().length > 0
       && typeof item.a === 'number' && Number.isFinite(item.a) && item.a > 0
       && isValidIndex(item.b)
       && (item.r === undefined || (Array.isArray(item.r) && item.r.length > 0 && item.r.every(isValidIndex)))

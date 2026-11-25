@@ -9,7 +9,7 @@ The app is deployed on Vercel at https://dividimos.vercel.app. It is a static si
   - A rewrite of `/share` to `share.html`.
   - A rewrite of every other path without a file extension and outside `/assets/` to `index.html` (single page app fallback). Real files, such as `og-image.png`, are served as they are.
   - Security headers: `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options: DENY`, `Permissions-Policy` (only the microphone is allowed, for voice input) and a Content Security Policy that only allows the app's own origin plus PostHog.
-  - Cache rules: `index.html`, the manifest and the service worker files are never cached, and hashed `.js` and `.css` files are cached for a year.
+  - Cache rules: `index.html`, the manifest and the service worker files are never cached, and hashed `.js` and `.css` files are cached for a year. When two header rules match, the later one wins, so the generic `.js` rule must stay above the service worker rules.
 
 ## The share page
 

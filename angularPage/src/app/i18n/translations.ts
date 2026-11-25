@@ -90,6 +90,8 @@ export interface TranslationMap {
   confirmClear: string;
   backToMySession: string;
   ownSessionRestored: string;
+  savedSessionBanner: string;
+  confirmRestoreSession: string;
   shareImported: string;
   languageAria: string;
   homeAria: string;
@@ -207,6 +209,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     confirmClear: 'Sí, empezar de cero',
     backToMySession: 'Volver a mi sesión',
     ownSessionRestored: 'Volviste a tu sesión',
+    savedSessionBanner: 'Tu sesión anterior sigue guardada.',
+    confirmRestoreSession: 'Volver a tu sesión reemplaza la división que estás viendo.',
     shareImported: 'Sesión compartida importada',
     languageAria: 'Cambiar idioma',
     homeAria: 'Ir al inicio',
@@ -321,6 +325,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationMap> = {
     confirmClear: 'Yes, start over',
     backToMySession: 'Back to my session',
     ownSessionRestored: 'Back to your session',
+    savedSessionBanner: 'Your previous session is still saved.',
+    confirmRestoreSession: 'Going back to your session replaces the split you are viewing.',
     shareImported: 'Shared session imported',
     languageAria: 'Change language',
     homeAria: 'Go to home',

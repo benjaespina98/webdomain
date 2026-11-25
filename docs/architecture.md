@@ -41,7 +41,7 @@ dividimos? is a static single page application. There is no backend and no datab
 - The payload is a compact JSON (`p` people, `e` expenses with the payer as an index, `c` currency symbol) compressed with `lz-string` and URL safe.
 - The data is in the fragment (`#`), which browsers never send to the server, so names and amounts do not appear in hosting logs.
 - Versions 3 and 4 are accepted. A link that is invalid, corrupt or newer than the app is rejected and the local session is not touched.
-- When someone opens a link while having a session of their own, that session is backed up under a separate key and the shared one is shown read only. A banner offers "Back to my session" and "Edit a copy".
+- When someone opens a link while having a session of their own, that session is backed up under a separate key (up to 5 are kept, so a later link does not overwrite an earlier one) and the shared one is shown read only. A banner offers "Back to my session" and "Edit a copy", and "Back to my session" stays available after editing a copy.
 
 ## WhatsApp message and PNG summary
 

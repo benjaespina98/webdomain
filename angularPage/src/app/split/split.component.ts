@@ -213,7 +213,7 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.restorePersistedState();
-    this.canRestoreOwnSession = this.isSharedView && this.persistenceService.hasBackup();
+    this.canRestoreOwnSession = this.persistenceService.hasBackup();
     this.handleIncomingShareQueryParams();
   }
 
@@ -304,14 +304,31 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Vuelve a la sesión propia que se respaldó al abrir un enlace compartido. */
   restoreOwnSession(): void {
+    // La vista compartida se puede volver a abrir desde el enlace; una copia editada no, así que se avisa.
+    if (!this.isSharedView && this.hasData) {
+      this.showConfirm(this.t('confirmRestoreSession'), () => this.applyBackup(), {
+        title: this.t('backToMySession'),
+        acceptLabel: this.t('backToMySession')
+      });
+      return;
+    }
+
+    this.applyBackup();
+  }
+
+  private applyBackup(): void {
     const backup = this.persistenceService.takeBackup();
-    this.canRestoreOwnSession = false;
+    this.canRestoreOwnSession = this.persistenceService.hasBackup();
 
     if (!backup) {
       return;
     }
 
     this.stateService.applyState({ ...backup, isSharedView: false });
+    // El deshacer y los editores abiertos pertenecían a la sesión que se reemplaza.
+    this.lastSnapshot = null;
+    this.editingExpenseId = null;
+    this.editingPerson = null;
     this.showNotice(this.t('ownSessionRestored'), 'success');
   }
 
@@ -1077,7 +1094,6 @@ export class SplitComponent implements OnInit, AfterViewInit, OnDestroy {
 
   importAndEdit(): void {
     this.isSharedView = false;
-    this.canRestoreOwnSession = false;
   }
 
   dismissStaleBanner(): void {
